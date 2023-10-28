@@ -123,8 +123,8 @@ __pypackages__/
 celerybeat-schedule
 celerybeat.pid
 
-# SageMath parsed files
-*.sage.py
+# businessCentralMath parsed files
+*.businessCentral.py
 
 # Environments
 .env

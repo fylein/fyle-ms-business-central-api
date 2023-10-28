@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.workspaces',
     'apps.fyle',
-    'apps.sage300',
+    'apps.ms_business_central',
     'apps.accounting_exports',
     'apps.mappings'
 ]
