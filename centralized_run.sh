@@ -7,4 +7,4 @@ python manage.py migrate
 python manage.py createcachetable --database cache_db
 
 # Running development server
-gunicorn -c gunicorn_config.py sage_desktop_api.wsgi -b 0.0.0.0:8009
+gunicorn -c gunicorn_config.py ms_business_central_api.wsgi -b 0.0.0.0:8009

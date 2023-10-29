@@ -1,1 +1,1 @@
-CREATE DATABASE sage_desktop_db;
+CREATE DATABASE ms_business_central_db;

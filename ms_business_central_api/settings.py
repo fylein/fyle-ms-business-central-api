@@ -60,6 +60,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'request_logging.middleware.LoggingMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -73,7 +75,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = "ms_business_central_api.urls"
 APPEND_SLASH = False
 
-#AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = 'users.User'
 
 TEMPLATES = [
     {
@@ -91,15 +93,13 @@ TEMPLATES = [
     },
 ]
 
-# Will uncomment this in the next pr, after setting up users and permissions
+FYLE_REST_AUTH_SERIALIZERS = {
+    'USER_DETAILS_SERIALIZER': 'apps.users.serializers.UserSerializer'
+}
 
-# FYLE_REST_AUTH_SERIALIZERS = {
-#     'USER_DETAILS_SERIALIZER': 'apps.users.serializers.UserSerializer'
-# }
-
-# FYLE_REST_AUTH_SETTINGS = {
-#     'async_update_user': True
-# }
+FYLE_REST_AUTH_SETTINGS = {
+    'async_update_user': True
+}
 
 # REST_FRAMEWORK = {
 #     'DEFAULT_PERMISSION_CLASSES': (
