@@ -54,7 +54,6 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'request_logging.middleware.LoggingMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'corsheaders.middleware.CorsPostCsrfMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -95,25 +94,25 @@ FYLE_REST_AUTH_SETTINGS = {
     'async_update_user': True
 }
 
-# REST_FRAMEWORK = {
-#     'DEFAULT_PERMISSION_CLASSES': (
-#         'rest_framework.permissions.IsAuthenticated',
-#         'apps.workspaces.permissions.WorkspacePermissions'
-#     ),
-#     'DEFAULT_AUTHENTICATION_CLASSES': (
-#         'fyle_rest_auth.authentication.FyleJWTAuthentication',
-#     ),
-#     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
-#     'PAGE_SIZE': 100
-# }
-
-
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
-        'LOCATION': 'auth_cache',
-    }
+REST_FRAMEWORK = {
+    # 'DEFAULT_PERMISSION_CLASSES': (
+    #     'rest_framework.permissions.IsAuthenticated',
+    #     'apps.workspaces.permissions.WorkspacePermissions'
+    # ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'fyle_rest_auth.authentication.FyleJWTAuthentication',
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 100
 }
+
+
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+#         'LOCATION': 'auth_cache',
+#     }
+# }
 
 Q_CLUSTER = {
     'name': 'ms_business_central_api',
@@ -159,7 +158,7 @@ DATABASES = {
     }
 }
 
-DATABASE_ROUTERS = ['ms_business_central_api.cache_router.CacheRouter']
+# DATABASE_ROUTERS = ['ms_business_central_api.cache_router.CacheRouter']
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
