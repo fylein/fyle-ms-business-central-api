@@ -6,9 +6,11 @@ from rest_framework import serializers
 from fyle_rest_auth.helpers import get_fyle_admin
 from fyle_rest_auth.models import AuthToken
 
+from ms_business_central_api.utils import assert_valid
 from apps.workspaces.models import (
     Workspace,
-    FyleCredential
+    FyleCredential,
+    ExportSetting
 )
 from apps.users.models import User
 from apps.fyle.helpers import get_cluster_domain
@@ -63,3 +65,34 @@ class WorkspaceSerializer(serializers.ModelSerializer):
             )
 
         return workspace
+
+
+class ExportSettingsSerializer(serializers.ModelSerializer):
+    """
+    Export Settings serializer
+    """
+    class Meta:
+        model = ExportSetting
+        fields = '__all__'
+        read_only_fields = ('id', 'workspace', 'created_at', 'updated_at')
+
+    def create(self, validated_data):
+        """
+        Create Export Settings
+        """
+        assert_valid(validated_data, 'Body cannot be null')
+        workspace_id = self.context['request'].parser_context.get('kwargs').get('workspace_id')
+
+        export_settings, _ = ExportSetting.objects.update_or_create(
+            workspace_id=workspace_id,
+            defaults=validated_data
+        )
+
+        # Update workspace onboarding state
+        workspace = export_settings.workspace
+
+        if workspace.onboarding_state == 'EXPORT_SETTINGS':
+            workspace.onboarding_state = 'IMPORT_SETTINGS'
+            workspace.save()
+
+        return export_settings

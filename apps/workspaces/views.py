@@ -9,10 +9,12 @@ from fyle_rest_auth.utils import AuthUtils
 
 from ms_business_central_api.utils import assert_valid
 from apps.workspaces.models import (
-    Workspace
+    Workspace,
+    ExportSetting
 )
 from apps.workspaces.serializers import (
-    WorkspaceSerializer
+    WorkspaceSerializer,
+    ExportSettingsSerializer
 )
 
 
@@ -68,3 +70,13 @@ class ReadyView(generics.RetrieveAPIView):
             },
             status=status.HTTP_200_OK
         )
+
+
+class ExportSettingView(generics.CreateAPIView, generics.RetrieveAPIView):
+    """
+    Retrieve or Create Export Settings
+    """
+    serializer_class = ExportSettingsSerializer
+    lookup_field = 'workspace_id'
+
+    queryset = ExportSetting.objects.all()
