@@ -23,7 +23,7 @@ TYPE_CHOICES = (
     ('FETCHING_CREDIT_CARD_EXPENENSES', 'FETCHING_CREDIT_CARD_EXPENENSES')
 )
 
-ERROR_TYPE_CHOICES = (('EMPLOYEE_MAPPING', 'EMPLOYEE_MAPPING'), ('CATEGORY_MAPPING', 'CATEGORY_MAPPING'), ('SAGE300_ERROR', 'SAGE300_ERROR'))
+ERROR_TYPE_CHOICES = (('EMPLOYEE_MAPPING', 'EMPLOYEE_MAPPING'), ('CATEGORY_MAPPING', 'CATEGORY_MAPPING'), ('BUSINESS_CENTRAL_ERROR', 'BUSINESS_CENTRAL_ERROR'))
 
 EXPORT_MODE_CHOICES = (
     ('MANUAL', 'MANUAL'),
@@ -44,7 +44,7 @@ class AccountingExport(BaseForeignWorkspaceModel):
     description = CustomJsonField(help_text='Description')
     status = StringNotNullField(help_text='Task Status')
     detail = CustomJsonField(help_text='Task Response')
-    sage_300_errors = CustomJsonField(help_text='Sage 300 Errors')
+    business_central_errors = CustomJsonField(help_text='Business Central Errors')
     exported_at = CustomDateTimeField(help_text='time of export')
 
     class Meta:

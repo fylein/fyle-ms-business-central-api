@@ -216,10 +216,10 @@ def add_errors():
             workspace_id=workspace_id
         )
         Error.objects.create(
-            type='SAGE300_ERROR',
+            type='BUSINESS_CENTRAL_ERROR',
             is_resolved=False,
-            error_title='Sage Error',
-            error_detail='Sage Error',
+            error_title='Business Central Error',
+            error_detail='Business Central Error',
             workspace_id=workspace_id
         )
 

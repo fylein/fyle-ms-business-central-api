@@ -40,7 +40,7 @@ fixtures = {
                 "description":[],
                 "status":"IN_PROGRESS",
                 "detail":[],
-                "sage_300_errors":[],
+                "business_central_errors":[],
                 "exported_at":"None",
                 "workspace":1,
                 "expenses":[]
@@ -56,7 +56,7 @@ fixtures = {
                 "description":[],
                 "status":"IN_PROGRESS",
                 "detail":[],
-                "sage_300_errors":[],
+                "business_central_errors":[],
                 "exported_at":"None",
                 "workspace":1,
                 "expenses":[]
@@ -108,10 +108,10 @@ fixtures = {
                 "id":3,
                 "created_at":"2023-10-26T03:47:16.865303Z",
                 "updated_at":"2023-10-26T03:47:16.865307Z",
-                "type":"SAGE300_ERROR",
+                "type":"BUSINESS_CENTRAL_ERROR",
                 "is_resolved": "false",
-                "error_title":"Sage Error",
-                "error_detail":"Sage Error",
+                "error_title":"Business Central Error",
+                "error_detail":"Busienss Central Error",
                 "workspace":1,
                 "accounting_export":"None",
                 "expense_attribute":"None"
