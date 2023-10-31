@@ -10,7 +10,8 @@ from ms_business_central_api.utils import assert_valid
 from apps.workspaces.models import (
     Workspace,
     FyleCredential,
-    ExportSetting
+    ExportSetting,
+    ImportSetting
 )
 from apps.users.models import User
 from apps.fyle.helpers import get_cluster_domain
@@ -96,3 +97,32 @@ class ExportSettingsSerializer(serializers.ModelSerializer):
             workspace.save()
 
         return export_settings
+
+
+class ImportSettingsSerializer(serializers.ModelSerializer):
+    """
+    Import Settings serializer
+    """
+    class Meta:
+        model = ImportSetting
+        fields = '__all__'
+        read_only_fields = ('id', 'workspace', 'created_at', 'updated_at')
+
+    def create(self, validated_data):
+        """
+        Create Import Settings
+        """
+
+        workspace_id = self.context['request'].parser_context.get('kwargs').get('workspace_id')
+        import_settings, _ = ImportSetting.objects.update_or_create(
+            workspace_id=workspace_id,
+            defaults=validated_data
+        )
+
+        # Update workspace onboarding state
+        workspace = import_settings.workspace
+        if workspace.onboarding_state == 'IMPORT_SETTINGS':
+            workspace.onboarding_state = 'ADVANCED_SETTINGS'
+            workspace.save()
+
+        return import_settings

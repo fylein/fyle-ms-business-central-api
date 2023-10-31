@@ -3,7 +3,8 @@ import pytest  # noqa
 from django.urls import reverse
 from apps.workspaces.models import (
     Workspace,
-    ExportSetting
+    ExportSetting,
+    ImportSetting
 )
 
 
@@ -129,3 +130,34 @@ def test_export_settings(api_client, test_connection):
     assert export_settings.default_reimbursable_credit_card_account_id == '342'
     assert export_settings.default_vendor_name == 'Nilesh'
     assert export_settings.default_vendor_id == '123'
+
+
+def test_import_settings(api_client, test_connection):
+    '''
+    Test import settings
+    '''
+    url = reverse('workspaces')
+    api_client.credentials(HTTP_AUTHORIZATION='Bearer {}'.format(test_connection.access_token))
+    response = api_client.post(url)
+    workspace_id = response.data['id']
+    url = reverse(
+        'import-settings',
+        kwargs={'workspace_id': workspace_id}
+    )
+
+    payload = {
+        'import_categories': True,
+        'import_vendors_as_merchants': True
+    }
+    response = api_client.post(url, payload)
+
+    import_settings = ImportSetting.objects.filter(workspace_id=workspace_id).first()
+
+    assert response.status_code == 201
+    assert import_settings.import_categories is True
+    assert import_settings.import_vendors_as_merchants is True
+
+    response = api_client.get(url)
+    assert response.status_code == 200
+    assert import_settings.import_categories is True
+    assert import_settings.import_vendors_as_merchants is True
