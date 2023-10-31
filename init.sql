@@ -1,0 +1,1 @@
+CREATE DATABASE ms_business_central_db;
