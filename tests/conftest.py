@@ -15,7 +15,7 @@ from apps.workspaces.models import (
     Workspace,
     FyleCredential,
 )
-from apps.accounting_exports.models import AccountingExport
+from apps.accounting_exports.models import AccountingExport, AccountingExportSummary
 from ms_business_central_api.tests import settings
 
 from .test_fyle.fixtures import fixtures as fyle_fixtures
@@ -166,4 +166,25 @@ def add_accounting_export_expenses():
             defaults={
                 'status': 'IN_PROGRESS'
             }
+        )
+
+
+@pytest.fixture()
+@pytest.mark.django_db(databases=['default'])
+def add_accounting_export_summary():
+    """
+    Pytest fixture to add accounting export summary to a workspace
+    """
+    workspace_ids = [
+        1, 2, 3
+    ]
+    for workspace_id in workspace_ids:
+        AccountingExportSummary.objects.create(
+            workspace_id=workspace_id,
+            last_exported_at = datetime.now(tz=timezone.utc),
+            next_export_at = datetime.now(tz=timezone.utc),
+            export_mode = 'AUTO',
+            total_accounting_export_count = 10,
+            successful_accounting_export_count = 5,
+            failed_accounting_export_count = 5
         )

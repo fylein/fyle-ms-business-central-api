@@ -5,8 +5,8 @@ from rest_framework import generics
 from rest_framework.response import Response
 
 from ms_business_central_api.utils import LookupFieldMixin
-from apps.accounting_exports.serializers import AccountingExportSerializer
-from apps.accounting_exports.models import AccountingExport
+from apps.accounting_exports.serializers import AccountingExportSerializer, AccountingExportSummarySerializer
+from apps.accounting_exports.models import AccountingExport, AccountingExportSummary
 
 
 logger = logging.getLogger(__name__)
@@ -35,3 +35,14 @@ class AccountingExportCountView(generics.RetrieveAPIView):
             params["status__in"] = request.query_params.get("status__in").split(",")
 
         return Response({"count": AccountingExport.objects.filter(**params).count()})
+
+
+class AccountingExportSummaryView(generics.RetrieveAPIView):
+    """
+    Retrieve Accounting Export Summary
+    """
+    lookup_field = 'workspace_id'
+    lookup_url_kwarg = 'workspace_id'
+
+    queryset = AccountingExportSummary.objects.filter(last_exported_at__isnull=False, total_accounting_export_count__gt=0)
+    serializer_class = AccountingExportSummarySerializer
