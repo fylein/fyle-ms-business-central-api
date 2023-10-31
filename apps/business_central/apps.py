@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class MsBusinessCentralConfig(AppConfig):
+class BusinessCentralConfig(AppConfig):
     default_auto_field = "django.db.models.BigAutoField"
-    name = "apps.ms_business_central"
+    name = "apps.business_central"
