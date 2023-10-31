@@ -13,8 +13,9 @@ from fyle_rest_auth.models import User, AuthToken
 from apps.fyle.helpers import get_access_token
 from apps.workspaces.models import (
     Workspace,
-    FyleCredential
+    FyleCredential,
 )
+from apps.accounting_exports.models import AccountingExport
 from ms_business_central_api.tests import settings
 
 from .test_fyle.fixtures import fixtures as fyle_fixtures
@@ -138,4 +139,31 @@ def add_fyle_credentials():
             refresh_token='dummy_refresh_token',
             workspace_id=workspace_id,
             cluster_domain='https://dummy_cluster_domain.com',
+        )
+
+
+@pytest.fixture()
+@pytest.mark.django_db(databases=['default'])
+def add_accounting_export_expenses():
+    """
+    Pytest fixture to add accounting export to a workspace
+    """
+    workspace_ids = [
+        1, 2, 3
+    ]
+    for workspace_id in workspace_ids:
+        AccountingExport.objects.update_or_create(
+            workspace_id=workspace_id,
+            type='FETCHING_REIMBURSABLE_EXPENSES',
+            defaults={
+                'status': 'IN_PROGRESS'
+            }
+        )
+
+        AccountingExport.objects.update_or_create(
+            workspace_id=workspace_id,
+            type='FETCHING_CREDIT_CARD_EXPENENSES',
+            defaults={
+                'status': 'IN_PROGRESS'
+            }
         )

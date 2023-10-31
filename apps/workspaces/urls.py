@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 
 from apps.workspaces.views import (
     ReadyView,
@@ -19,7 +19,9 @@ workspace_app_paths = [
     path('<int:workspace_id>/admins/', WorkspaceAdminsView.as_view(), name='admin'),
 ]
 
-other_app_paths = []
+other_app_paths = [
+    path('<int:workspace_id>/accounting_exports/', include('apps.accounting_exports.urls')),
+]
 
 urlpatterns = []
 urlpatterns.extend(workspace_app_paths)
