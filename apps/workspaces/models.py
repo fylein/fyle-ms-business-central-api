@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.contrib.postgres.fields import ArrayField
 
 from ms_business_central_api.models.fields import (
     StringNotNullField,
@@ -8,7 +9,9 @@ from ms_business_central_api.models.fields import (
     TextNotNullField,
     StringNullField,
     BooleanTrueField,
-    BooleanFalseField
+    BooleanFalseField,
+    IntegerNullField,
+    CustomJsonField
 )
 
 User = get_user_model()
