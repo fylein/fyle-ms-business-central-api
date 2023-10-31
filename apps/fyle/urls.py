@@ -19,6 +19,6 @@ from apps.fyle.views import ExpenseFilterView, ExpenseFilterDeleteView
 
 
 urlpatterns = [
-    path('expense_filters/', ExpenseFilterView.as_view(), name='expense-filters'),
     path('expense_filters/<int:pk>/', ExpenseFilterDeleteView.as_view(), name='expense-filters'),
+    path('expense_filters/', ExpenseFilterView.as_view(), name='expense-filters'),
 ]
