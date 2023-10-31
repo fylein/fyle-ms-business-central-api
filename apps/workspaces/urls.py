@@ -4,7 +4,8 @@ from apps.workspaces.views import (
     ReadyView,
     WorkspaceView,
     ExportSettingView,
-    ImportSettingView
+    ImportSettingView,
+    AdvancedSettingView
 )
 
 
@@ -13,7 +14,7 @@ workspace_app_paths = [
     path('ready/', ReadyView.as_view(), name='ready'),
     path('<int:workspace_id>/export_settings/', ExportSettingView.as_view(), name='export-settings'),
     path('<int:workspace_id>/import_settings/', ImportSettingView.as_view(), name='import-settings'),
-
+    path('<int:workspace_id>/advanced_settings/', AdvancedSettingView.as_view(), name='advanced-settings'),
 ]
 
 other_app_paths = []

@@ -182,3 +182,23 @@ class ImportSetting(BaseModel):
 
     class Meta:
         db_table = 'import_settings'
+
+
+class AdvancedSetting(BaseModel):
+    """
+    Table to store advanced setting
+    """
+    id = models.AutoField(auto_created=True, primary_key=True, verbose_name='ID', serialize=False)
+    expense_memo_structure = ArrayField(
+        models.CharField(max_length=255), help_text='Array of fields in memo', null=True
+    )
+    schedule_is_enabled = BooleanFalseField(help_text='Boolean to check if schedule is enabled')
+    schedule_start_datetime = CustomDateTimeField(help_text='Schedule start date and time')
+    schedule_id = StringNullField(help_text='Schedule id')
+    interval_hours = IntegerNullField(help_text='Interval in hours')
+    emails_selected = CustomJsonField(help_text='Emails Selected For Email Notification')
+    emails_added = CustomJsonField(help_text='Emails Selected For Email Notification')
+    auto_create_vendor = BooleanFalseField(help_text='Auto create vendor')
+
+    class Meta:
+        db_table = 'advanced_settings'

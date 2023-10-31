@@ -4,7 +4,8 @@ from django.urls import reverse
 from apps.workspaces.models import (
     Workspace,
     ExportSetting,
-    ImportSetting
+    ImportSetting,
+    AdvancedSetting
 )
 
 
@@ -161,3 +162,115 @@ def test_import_settings(api_client, test_connection):
     assert response.status_code == 200
     assert import_settings.import_categories is True
     assert import_settings.import_vendors_as_merchants is True
+
+
+
+def test_advanced_settings(api_client, test_connection):
+    '''
+    Test advanced settings
+    '''
+    url = reverse('workspaces')
+    api_client.credentials(HTTP_AUTHORIZATION='Bearer {}'.format(test_connection.access_token))
+    response = api_client.post(url)
+
+    workspace_id = response.data['id']
+
+    url = reverse('advanced-settings', kwargs={'workspace_id': workspace_id})
+
+    api_client.credentials(HTTP_AUTHORIZATION='Bearer {}'.format(test_connection.access_token))
+
+    payload = {
+        'expense_memo_structure': [
+            'employee_email',
+            'merchant',
+            'purpose',
+            'report_number',
+            'expense_link'
+        ],
+        'schedule_is_enabled': False,
+        'interval_hours': 12,
+        'emails_selected': json.dumps([
+            {
+                'name': 'Shwetabh Kumar',
+                'email': 'shwetabh.kumar@fylehq.com'
+            },
+            {
+                'name': 'Netra Ballabh',
+                'email': 'nilesh.p@fylehq.com'
+            },
+        ]),
+        'auto_create_vendor': True
+    }
+
+    response = api_client.post(url, payload)
+
+    assert response.status_code == 201
+    assert response.data['expense_memo_structure'] == [
+        'employee_email',
+        'merchant',
+        'purpose',
+        'report_number',
+        'expense_link'
+    ]
+    assert response.data['schedule_is_enabled'] is False
+    assert response.data['schedule_id'] is None
+    assert response.data['emails_selected'] == [
+        {
+            'name': 'Shwetabh Kumar',
+            'email': 'shwetabh.kumar@fylehq.com'
+        },
+        {
+            'name': 'Netra Ballabh',
+            'email': 'nilesh.p@fylehq.com'
+        },
+    ]
+    assert response.data['auto_create_vendor'] == True
+
+    response = api_client.get(url)
+
+    assert response.status_code == 200
+    assert response.data['expense_memo_structure'] == [
+        'employee_email',
+        'merchant',
+        'purpose',
+        'report_number',
+        'expense_link'
+    ]
+    assert response.data['schedule_is_enabled'] is False
+    assert response.data['schedule_id'] is None
+    assert response.data['emails_selected'] == [
+        {
+            'name': 'Shwetabh Kumar',
+            'email': 'shwetabh.kumar@fylehq.com'
+        },
+        {
+            'name': 'Netra Ballabh',
+            'email': 'nilesh.p@fylehq.com'
+        },
+    ]
+
+    del payload['expense_memo_structure']
+
+    AdvancedSetting.objects.filter(workspace_id=workspace_id).first().delete()
+
+    response = api_client.post(url, payload)
+
+    assert response.status_code == 201
+    assert response.data['expense_memo_structure'] == [
+        'employee_email',
+        'merchant',
+        'purpose',
+        'report_number'
+    ]
+    assert response.data['schedule_is_enabled'] is False
+    assert response.data['schedule_id'] is None
+    assert response.data['emails_selected'] == [
+        {
+            'name': 'Shwetabh Kumar',
+            'email': 'shwetabh.kumar@fylehq.com'
+        },
+        {
+            'name': 'Netra Ballabh',
+            'email': 'nilesh.p@fylehq.com'
+        },
+    ]
