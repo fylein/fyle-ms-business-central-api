@@ -164,7 +164,6 @@ def test_import_settings(api_client, test_connection):
     assert import_settings.import_vendors_as_merchants is True
 
 
-
 def test_advanced_settings(api_client, test_connection):
     '''
     Test advanced settings
