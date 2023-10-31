@@ -11,7 +11,8 @@ from apps.workspaces.models import (
     Workspace,
     FyleCredential,
     ExportSetting,
-    ImportSetting
+    ImportSetting,
+    AdvancedSetting
 )
 from apps.users.models import User
 from apps.fyle.helpers import get_cluster_domain
