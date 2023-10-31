@@ -14,9 +14,10 @@ Including another URLconf
 """
 from django.urls import path
 
-from apps.accounting_exports.views import AccountingExportView
+from apps.accounting_exports.views import AccountingExportView, AccountingExportCountView
 
 
 urlpatterns = [
     path('', AccountingExportView.as_view(), name='accounting-exports'),
+    path('count/', AccountingExportCountView.as_view(), name='accounting-exports-count'),
 ]

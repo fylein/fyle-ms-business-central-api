@@ -17,3 +17,11 @@ def test_get_accounting_exports(api_client, test_connection, create_temp_workspa
     response = json.loads(response.content)
 
     assert dict_compare_keys(response, data['accounting_export_response']) == [], 'accounting export api return diffs in keys'
+
+    url = reverse('accounting-exports-count', kwargs={'workspace_id': 1})
+
+    response = api_client.get(url, {'status__in': 'IN_PROGRESS'})
+    assert response.status_code == 200
+    response = json.loads(response.content)
+
+    assert response['count'] == 2, 'accounting export count api return diffs in keys'
