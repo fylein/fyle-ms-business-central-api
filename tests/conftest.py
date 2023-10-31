@@ -16,6 +16,7 @@ from apps.workspaces.models import (
     FyleCredential,
 )
 from apps.accounting_exports.models import AccountingExport, AccountingExportSummary, Error
+from apps.fyle.models import ExpenseFilter
 from ms_business_central_api.tests import settings
 
 from .test_fyle.fixtures import fixtures as fyle_fixtures
@@ -219,5 +220,37 @@ def add_errors():
             is_resolved=False,
             error_title='Sage Error',
             error_detail='Sage Error',
+            workspace_id=workspace_id
+        )
+
+
+@pytest.fixture()
+@pytest.mark.django_db(databases=['default'])
+def add_expense_filters():
+    """
+    Pytest fixture to add expense filters to a workspace
+    """
+    workspace_ids = [
+        1, 2, 3
+    ]
+    for workspace_id in workspace_ids:
+        ExpenseFilter.objects.create(
+            condition='employee_email',
+            operator='in',
+            values=['ashwinnnnn.t@fyle.in', 'admin1@fyleforleaf.in'],
+            rank="1",
+            join_by='AND',
+            is_custom=False,
+            custom_field_type='SELECT',
+            workspace_id=workspace_id
+        )
+        ExpenseFilter.objects.create(
+            condition='last_spent_at',
+            operator='lt',
+            values=['2020-04-20 23:59:59+00'],
+            rank="2",
+            join_by=None,
+            is_custom=False,
+            custom_field_type='SELECT',
             workspace_id=workspace_id
         )
