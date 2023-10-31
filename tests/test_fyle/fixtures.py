@@ -74,5 +74,48 @@ fixtures = {
         "successful_accounting_export_count":5,
         "failed_accounting_export_count":5,
         "workspace":1
-    }
+    },
+    "errors_response": {
+        "count":3,
+        "next":"None",
+        "previous":"None",
+        "results":[
+            {
+                "id":1,
+                "created_at":"2023-10-26T03:47:16.864421Z",
+                "updated_at":"2023-10-26T03:47:16.864428Z",
+                "type":"EMPLOYEE_MAPPING",
+                "is_resolved": "false",
+                "error_title":"Employee Mapping Error",
+                "error_detail":"Employee Mapping Error",
+                "workspace":1,
+                "accounting_export":"None",
+                "expense_attribute":"None"
+            },
+            {
+                "id":2,
+                "created_at":"2023-10-26T03:47:16.865103Z",
+                "updated_at":"2023-10-26T03:47:16.865108Z",
+                "type":"CATEGORY_MAPPING",
+                "is_resolved": "false",
+                "error_title":"Category Mapping Error",
+                "error_detail":"Category Mapping Error",
+                "workspace":1,
+                "accounting_export":"None",
+                "expense_attribute":"None"
+            },
+            {
+                "id":3,
+                "created_at":"2023-10-26T03:47:16.865303Z",
+                "updated_at":"2023-10-26T03:47:16.865307Z",
+                "type":"SAGE300_ERROR",
+                "is_resolved": "false",
+                "error_title":"Sage Error",
+                "error_detail":"Sage Error",
+                "workspace":1,
+                "accounting_export":"None",
+                "expense_attribute":"None"
+            }
+        ]
+    },
 }
