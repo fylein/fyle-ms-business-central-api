@@ -50,3 +50,27 @@ def get_cluster_domain(refresh_token: str) -> str:
     cluster_api_url = '{0}/oauth/cluster/'.format(settings.FYLE_BASE_URL)
 
     return post_request(cluster_api_url, {}, refresh_token)['cluster_domain']
+
+
+def get_expense_fields(workspace_id: int):
+    """
+    Get expense custom fields from fyle
+    :param workspace_id: (int)
+    :return: list of custom expense fields
+    """
+
+    fyle_credentails = FyleCredential.objects.get(workspace_id=workspace_id)
+    platform = PlatformConnector(fyle_credentails)
+    custom_fields = platform.expense_custom_fields.list_all()
+
+    response = []
+    response.extend(DEFAULT_FYLE_CONDITIONS)
+    for custom_field in custom_fields:
+        if custom_field['type'] in ('SELECT', 'NUMBER', 'TEXT', 'BOOLEAN'):
+            response.append({
+                'field_name': custom_field['field_name'],
+                'type': custom_field['type'],
+                'is_custom': custom_field['is_custom']
+            })
+
+    return response
