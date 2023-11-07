@@ -1,4 +1,4 @@
-"""sage_desktop_api URL Configuration
+"""ms_business_central_api URL Configuration
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/3.0/topics/http/urls/
 Examples:
@@ -14,10 +14,12 @@ Including another URLconf
 """
 from django.urls import path
 
-from apps.accounting_exports.views import AccountingExportView, AccountingExportCountView
+from apps.accounting_exports.views import AccountingExportView, AccountingExportCountView, AccountingExportSummaryView, ErrorsView
 
 
 urlpatterns = [
     path('', AccountingExportView.as_view(), name='accounting-exports'),
     path('count/', AccountingExportCountView.as_view(), name='accounting-exports-count'),
+    path('summary/', AccountingExportSummaryView.as_view(), name='accounting-exports-summary'),
+    path('errors/', ErrorsView.as_view(), name='errors'),
 ]
