@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.contrib.postgres.fields import ArrayField
 
 from ms_business_central_api.models.fields import (
     StringNotNullField,
@@ -7,7 +8,10 @@ from ms_business_central_api.models.fields import (
     StringOptionsField,
     TextNotNullField,
     StringNullField,
-    BooleanTrueField
+    BooleanTrueField,
+    BooleanFalseField,
+    IntegerNullField,
+    CustomJsonField
 )
 
 User = get_user_model()
@@ -87,7 +91,7 @@ REIMBURSABLE_EXPENSE_EXPORT_TYPE_CHOICES = (
 
 REIMBURSABLE_EXPENSE_STATE_CHOICES = (
     ('PAYMENT_PROCESSING', 'PAYMENT_PROCESSING'),
-    ('CLOSED', 'CLOSED')
+    ('PAID', 'PAID')
 )
 
 REIMBURSABLE_EXPENSES_GROUPED_BY_CHOICES = (
@@ -169,3 +173,35 @@ class ExportSetting(BaseModel):
 
     class Meta:
         db_table = 'export_settings'
+
+
+class ImportSetting(BaseModel):
+    """
+    Table to store Import setting
+    """
+    id = models.AutoField(auto_created=True, primary_key=True, verbose_name='ID', serialize=False)
+    import_categories = BooleanFalseField(help_text='toggle for import of chart of accounts from Business Central')
+    import_vendors_as_merchants = BooleanFalseField(help_text='toggle for import of vendors as merchant from Business Central')
+
+    class Meta:
+        db_table = 'import_settings'
+
+
+class AdvancedSetting(BaseModel):
+    """
+    Table to store advanced setting
+    """
+    id = models.AutoField(auto_created=True, primary_key=True, verbose_name='ID', serialize=False)
+    expense_memo_structure = ArrayField(
+        models.CharField(max_length=255), help_text='Array of fields in memo', null=True
+    )
+    schedule_is_enabled = BooleanFalseField(help_text='Boolean to check if schedule is enabled')
+    schedule_start_datetime = CustomDateTimeField(help_text='Schedule start date and time')
+    schedule_id = StringNullField(help_text='Schedule id')
+    interval_hours = IntegerNullField(help_text='Interval in hours')
+    emails_selected = CustomJsonField(help_text='Emails Selected For Email Notification')
+    emails_added = CustomJsonField(help_text='Emails Selected For Email Notification')
+    auto_create_vendor = BooleanFalseField(help_text='Auto create vendor')
+
+    class Meta:
+        db_table = 'advanced_settings'
