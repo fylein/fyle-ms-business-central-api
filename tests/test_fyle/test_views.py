@@ -80,7 +80,7 @@ def test_fyle_fields(api_client, test_connection, create_temp_workspace, add_fyl
     assert response['results'] == data['fyle_fields_response']
 
 
-def test_fyle_expense_fields(api_client, test_connection, create_temp_workspace, add_fyle_credentials, add_sage300_creds, mocker):
+def test_fyle_expense_fields(api_client, test_connection, create_temp_workspace, add_fyle_credentials, mocker):
     workspace_id = 1
 
     access_token = test_connection.access_token
