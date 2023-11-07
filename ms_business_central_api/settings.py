@@ -48,13 +48,13 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_q',
     'fyle_rest_auth',
-    # 'fyle_accounting_mappings',
+    'fyle_accounting_mappings',
 
     # User Created Apps
     'apps.users',
     'apps.workspaces',
     'apps.fyle',
-    'apps.ms_business_central',
+    'apps.business_central',
     'apps.accounting_exports',
     'apps.mappings'
 ]
