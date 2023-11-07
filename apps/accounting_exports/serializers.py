@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from apps.accounting_exports.models import AccountingExport, AccountingExportSummary
+from apps.accounting_exports.models import AccountingExport, AccountingExportSummary, Error
 
 
 class AccountingExportSerializer(serializers.ModelSerializer):
@@ -20,4 +20,14 @@ class AccountingExportSummarySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = AccountingExportSummary
+        fields = '__all__'
+
+
+class ErrorSerializer(serializers.ModelSerializer):
+    """
+    Serializer for the Errors
+    """
+
+    class Meta:
+        model = Error
         fields = '__all__'

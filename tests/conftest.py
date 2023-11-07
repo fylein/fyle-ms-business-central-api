@@ -15,7 +15,8 @@ from apps.workspaces.models import (
     Workspace,
     FyleCredential,
 )
-from apps.accounting_exports.models import AccountingExport, AccountingExportSummary
+from apps.accounting_exports.models import AccountingExport, AccountingExportSummary, Error
+from apps.fyle.models import ExpenseFilter
 from ms_business_central_api.tests import settings
 
 from .test_fyle.fixtures import fixtures as fyle_fixtures
@@ -187,4 +188,69 @@ def add_accounting_export_summary():
             total_accounting_export_count = 10,
             successful_accounting_export_count = 5,
             failed_accounting_export_count = 5
+        )
+
+
+@pytest.fixture()
+@pytest.mark.django_db(databases=['default'])
+def add_errors():
+    """
+    Pytest fixture to add errors to a workspace
+    """
+    workspace_ids = [
+        1, 2, 3
+    ]
+    for workspace_id in workspace_ids:
+        Error.objects.create(
+            type='EMPLOYEE_MAPPING',
+            is_resolved=False,
+            error_title='Employee Mapping Error',
+            error_detail='Employee Mapping Error',
+            workspace_id=workspace_id
+        )
+        Error.objects.create(
+            type='CATEGORY_MAPPING',
+            is_resolved=False,
+            error_title='Category Mapping Error',
+            error_detail='Category Mapping Error',
+            workspace_id=workspace_id
+        )
+        Error.objects.create(
+            type='BUSINESS_CENTRAL_ERROR',
+            is_resolved=False,
+            error_title='Business Central Error',
+            error_detail='Business Central Error',
+            workspace_id=workspace_id
+        )
+
+
+@pytest.fixture()
+@pytest.mark.django_db(databases=['default'])
+def add_expense_filters():
+    """
+    Pytest fixture to add expense filters to a workspace
+    """
+    workspace_ids = [
+        1, 2, 3
+    ]
+    for workspace_id in workspace_ids:
+        ExpenseFilter.objects.create(
+            condition='employee_email',
+            operator='in',
+            values=['ashwinnnnn.t@fyle.in', 'admin1@fyleforleaf.in'],
+            rank="1",
+            join_by='AND',
+            is_custom=False,
+            custom_field_type='SELECT',
+            workspace_id=workspace_id
+        )
+        ExpenseFilter.objects.create(
+            condition='last_spent_at',
+            operator='lt',
+            values=['2020-04-20 23:59:59+00'],
+            rank="2",
+            join_by=None,
+            is_custom=False,
+            custom_field_type='SELECT',
+            workspace_id=workspace_id
         )
