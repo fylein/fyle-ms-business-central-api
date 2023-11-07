@@ -91,7 +91,7 @@ REIMBURSABLE_EXPENSE_EXPORT_TYPE_CHOICES = (
 
 REIMBURSABLE_EXPENSE_STATE_CHOICES = (
     ('PAYMENT_PROCESSING', 'PAYMENT_PROCESSING'),
-    ('CLOSED', 'CLOSED')
+    ('PAID', 'PAID')
 )
 
 REIMBURSABLE_EXPENSES_GROUPED_BY_CHOICES = (
@@ -180,8 +180,8 @@ class ImportSetting(BaseModel):
     Table to store Import setting
     """
     id = models.AutoField(auto_created=True, primary_key=True, verbose_name='ID', serialize=False)
-    import_categories = BooleanFalseField(help_text='toggle for import of chart of accounts from sage300')
-    import_vendors_as_merchants = BooleanFalseField(help_text='toggle for import of vendors as merchant from sage300')
+    import_categories = BooleanFalseField(help_text='toggle for import of chart of accounts from Business Central')
+    import_vendors_as_merchants = BooleanFalseField(help_text='toggle for import of vendors as merchant from Business Central')
 
     class Meta:
         db_table = 'import_settings'

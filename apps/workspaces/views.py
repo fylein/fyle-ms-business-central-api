@@ -18,7 +18,8 @@ from apps.workspaces.serializers import (
     WorkspaceSerializer,
     ExportSettingsSerializer,
     ImportSettingsSerializer,
-    AdvancedSettingSerializer
+    AdvancedSettingSerializer,
+    WorkspaceAdminSerializer
 )
 
 
@@ -105,3 +106,11 @@ class AdvancedSettingView(generics.CreateAPIView, generics.RetrieveAPIView):
     lookup_url_kwarg = 'workspace_id'
 
     queryset = AdvancedSetting.objects.all()
+
+
+class WorkspaceAdminsView(generics.ListAPIView):
+    """
+    Retrieve Workspace Admins
+    """
+    serializer_class = WorkspaceAdminSerializer
+    queryset = Workspace.objects.all()
