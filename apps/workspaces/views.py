@@ -11,12 +11,15 @@ from ms_business_central_api.utils import assert_valid
 from apps.workspaces.models import (
     Workspace,
     ExportSetting,
-    ImportSetting
+    ImportSetting,
+    AdvancedSetting
 )
 from apps.workspaces.serializers import (
     WorkspaceSerializer,
     ExportSettingsSerializer,
-    ImportSettingsSerializer
+    ImportSettingsSerializer,
+    AdvancedSettingSerializer,
+    WorkspaceAdminSerializer
 )
 
 
@@ -92,3 +95,22 @@ class ImportSettingView(generics.CreateAPIView, generics.RetrieveAPIView):
     lookup_field = 'workspace_id'
 
     queryset = ImportSetting.objects.all()
+
+
+class AdvancedSettingView(generics.CreateAPIView, generics.RetrieveAPIView):
+    """
+    Retrieve or Create Advanced Settings
+    """
+    serializer_class = AdvancedSettingSerializer
+    lookup_field = 'workspace_id'
+    lookup_url_kwarg = 'workspace_id'
+
+    queryset = AdvancedSetting.objects.all()
+
+
+class WorkspaceAdminsView(generics.ListAPIView):
+    """
+    Retrieve Workspace Admins
+    """
+    serializer_class = WorkspaceAdminSerializer
+    queryset = Workspace.objects.all()
