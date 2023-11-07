@@ -4,8 +4,7 @@ from django.conf import settings
 
 from fyle_integrations_platform_connector import PlatformConnector
 
-from apps.workspaces.models import FyleCredential, ExportSetting
-from apps.accounting_exports.models import AccountingExport
+from apps.workspaces.models import FyleCredential
 from apps.fyle.constants import DEFAULT_FYLE_CONDITIONS
 
 
