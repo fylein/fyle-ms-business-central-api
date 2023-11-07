@@ -1,7 +1,7 @@
 import logging
 from rest_framework import generics
 from ms_business_central_api.utils import LookupFieldMixin
-from apps.fyle.serializers import ExpenseFilterSerializer, ImportFyleAttributesSerializer
+from apps.fyle.serializers import ExpenseFilterSerializer, ImportFyleAttributesSerializer, FyleFieldsSerializer
 from apps.fyle.models import ExpenseFilter
 
 logger = logging.getLogger(__name__)
@@ -31,3 +31,14 @@ class ImportFyleAttributesView(generics.CreateAPIView):
     Import Fyle Attributes View
     """
     serializer_class = ImportFyleAttributesSerializer
+
+
+class FyleFieldsView(generics.ListAPIView):
+    """
+    Fyle Fields view
+    """
+
+    serializer_class = FyleFieldsSerializer
+
+    def get_queryset(self):
+        return FyleFieldsSerializer().format_fyle_fields(self.kwargs["workspace_id"])

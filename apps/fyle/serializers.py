@@ -3,11 +3,14 @@ Fyle Serializers
 """
 import logging
 from datetime import datetime, timezone
+from django.db.models import Q
 from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.exceptions import APIException
 from rest_framework.views import status
 from fyle_integrations_platform_connector import PlatformConnector
+
+from fyle_accounting_mappings.models import ExpenseAttribute
 
 from apps.fyle.models import ExpenseFilter
 from apps.workspaces.models import Workspace, FyleCredential
@@ -66,3 +69,39 @@ class ImportFyleAttributesSerializer(serializers.Serializer):
         except Exception as exception:
             logger.error('Something unexpected happened workspace_id: %s %s', workspace_id, exception)
             raise APIException("Internal Server Error", code='server_error')
+
+
+class FyleFieldsSerializer(serializers.Serializer):
+    """
+    Fyle Fields Serializer
+    """
+
+    attribute_type = serializers.CharField()
+    display_name = serializers.CharField()
+    is_dependant = serializers.BooleanField()
+
+    def format_fyle_fields(self, workspace_id):
+        """
+        Get Fyle Fields
+        """
+
+        attribute_types = ['EMPLOYEE', 'CATEGORY', 'PROJECT', 'COST_CENTER', 'TAX_GROUP', 'CORPORATE_CARD', 'MERCHANT']
+
+        attributes = ExpenseAttribute.objects.filter(
+            ~Q(attribute_type__in=attribute_types),
+            workspace_id=workspace_id
+        ).values('attribute_type', 'display_name', 'detail__is_dependent').distinct()
+
+        attributes_list = [
+            {'attribute_type': 'COST_CENTER', 'display_name': 'Cost Center', 'is_dependant': False},
+            {'attribute_type': 'PROJECT', 'display_name': 'Project', 'is_dependant': False}
+        ]
+
+        for attr in attributes:
+            attributes_list.append({
+                'attribute_type': attr['attribute_type'],
+                'display_name': attr['display_name'],
+                'is_dependant': attr['detail__is_dependent']
+            })
+
+        return attributes_list
