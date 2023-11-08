@@ -93,7 +93,7 @@ class BusinessCentralConnector:
         accounts = self.connection.accounts.get_all()
         self._sync_data(accounts, 'ACCOUNT', 'accounts', self.workspace_id)
         return []
-    
+
     def sync_vendors(self):
         """
         Synchronize vendors from MS Dynamics SDK to your application
@@ -104,7 +104,7 @@ class BusinessCentralConnector:
         vendors = self.connection.vendors.get_all()
         self._sync_data(vendors, 'VENDOR', 'vendor', self.workspace_id)
         return []
-    
+
     def sync_employees(self):
         """
         Synchronize employees from MS Dynamics SDK to your application
@@ -115,7 +115,7 @@ class BusinessCentralConnector:
         employees = self.connection.employees.get_all()
         self._sync_data(employees, 'EMPLOYEE', 'employee', self.workspace_id)
         return []
-    
+
     def sync_locations(self):
         """
         Synchronize locations from MS Dynamics SDK to your application
