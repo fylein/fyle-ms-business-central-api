@@ -7,6 +7,7 @@ from fyle_rest_auth.helpers import get_fyle_admin
 from fyle_rest_auth.models import AuthToken
 from fyle_accounting_mappings.models import ExpenseAttribute
 
+from apps.workspaces.helpers import connect_business_central
 from ms_business_central_api.utils import assert_valid
 from apps.workspaces.models import (
     Workspace,
@@ -79,6 +80,32 @@ class BusinessCentralCredentialSerializer(serializers.ModelSerializer):
     class Meta:
         model = BusinessCentralCredentials
         fields = "__all__"
+
+    def create(self, validated_data):
+        """
+        Create Business Central Credentials
+        """
+        try:
+            workspace_id = self.context['request'].parser_context.get('kwargs').get('workspace_id')
+            authorization_code = self.context['request'].data.get('code')
+            redirect_uri = self.context['request'].data.get('redirect_uri')
+
+            business_central_credentials = connect_business_central(
+                authorization_code=authorization_code,
+                redirect_uri=redirect_uri,
+                workspace_id=workspace_id,
+            )
+
+            # Update workspace onboarding state
+            workspace = Workspace.objects.get(id=workspace_id)
+
+            if workspace.onboarding_state == 'EXPORT_SETTINGS':
+                workspace.onboarding_state = 'IMPORT_SETTINGS'
+                workspace.save()
+
+            return business_central_credentials
+        except Exception as exception:
+            raise serializers.ValidationError(exception)
 
 
 class ExportSettingsSerializer(serializers.ModelSerializer):

@@ -5,7 +5,8 @@ from apps.workspaces.models import (
     Workspace,
     ExportSetting,
     ImportSetting,
-    AdvancedSetting
+    AdvancedSetting,
+    BusinessCentralCredentials
 )
 
 
@@ -51,6 +52,30 @@ def test_get_of_workspace(api_client, test_connection):
     assert response.status_code == 200
     assert response.data['name'] == 'Fyle For MS Dynamics Demo'
     assert response.data['org_id'] == 'orNoatdUnm1w'
+
+
+def test_get_of_business_central_creds(api_client, test_connection):
+    '''
+    Test get of workspace
+    '''
+    url = reverse('workspaces')
+    api_client.credentials(HTTP_AUTHORIZATION='Bearer {}'.format(test_connection.access_token))
+    response = api_client.post(url)
+
+    url = reverse('business-central-credentials', kwargs={'workspace_id': response.data['id']})
+
+    BusinessCentralCredentials.objects.create(
+        refresh_token='dummy_refresh_token',
+        workspace_id=response.data['id'],
+        is_expired=False
+    )
+
+    api_client.credentials(HTTP_AUTHORIZATION='Bearer {}'.format(test_connection.access_token))
+    response = api_client.get(url)
+
+    assert response.status_code == 200
+    assert response.data['refresh_token'] == 'dummy_refresh_token'
+    assert response.data['is_expired'] == False
 
 
 def test_export_settings(api_client, test_connection):

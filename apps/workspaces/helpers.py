@@ -5,7 +5,7 @@ import json
 
 from django.conf import settings
 from future.moves.urllib.parse import urlencode
-from ms_dynamics_business_central_sdk import InternalServerError, InvalidTokenError
+from dynamics.exceptions.dynamics_exceptions import InternalServerError, InvalidTokenError
 
 from apps.workspaces.models import BusinessCentralCredentials, Workspace
 from apps.business_central.utils import BusinessCentralConnector
