@@ -96,13 +96,6 @@ class BusinessCentralCredentialSerializer(serializers.ModelSerializer):
                 workspace_id=workspace_id,
             )
 
-            # Update workspace onboarding state
-            workspace = Workspace.objects.get(id=workspace_id)
-
-            if workspace.onboarding_state == 'EXPORT_SETTINGS':
-                workspace.onboarding_state = 'IMPORT_SETTINGS'
-                workspace.save()
-
             return business_central_credentials
         except Exception as exception:
             raise serializers.ValidationError(exception)
