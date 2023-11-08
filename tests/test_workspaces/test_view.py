@@ -56,7 +56,7 @@ def test_get_of_workspace(api_client, test_connection):
 
 def test_get_of_business_central_creds(api_client, test_connection):
     '''
-    Test get of workspace
+    Test get of Business Central Credentials
     '''
     url = reverse('workspaces')
     api_client.credentials(HTTP_AUTHORIZATION='Bearer {}'.format(test_connection.access_token))
