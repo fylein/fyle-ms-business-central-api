@@ -8,14 +8,17 @@ from fyle_rest_auth.utils import AuthUtils
 
 
 from ms_business_central_api.utils import assert_valid
+from apps.workspaces.helpers import connect_business_central
 from apps.workspaces.models import (
     Workspace,
     ExportSetting,
     ImportSetting,
-    AdvancedSetting
+    AdvancedSetting,
+    BusinessCentralCredentials
 )
 from apps.workspaces.serializers import (
     WorkspaceSerializer,
+    BusinessCentralCredentialSerializer,
     ExportSettingsSerializer,
     ImportSettingsSerializer,
     AdvancedSettingSerializer,
@@ -74,6 +77,47 @@ class ReadyView(generics.RetrieveAPIView):
                 'message': 'Ready'
             },
             status=status.HTTP_200_OK
+        )
+
+
+class ConnectBusinessCentralView(generics.CreateAPIView, generics.RetrieveAPIView):
+    """
+    Business Central Connect Oauth View
+    """
+
+    def post(self, request, **kwargs):
+        """
+        Post of Business Central Credentials
+        """
+
+        authorization_code = request.data.get("code")
+        redirect_uri = request.data.get("redirect_uri")
+
+        business_central_credentials = connect_business_central(
+            authorization_code=authorization_code,
+            redirect_uri=redirect_uri,
+            workspace_id=kwargs["workspace_id"],
+        )
+
+        return Response(
+            data=BusinessCentralCredentialSerializer(business_central_credentials).data,
+            status=status.HTTP_200_OK,
+        )
+
+    def get(self, request, **kwargs):
+        """
+        Get Business Central Credentials in Workspace
+        """
+
+        business_central_credentials = BusinessCentralCredentials.objects.get(
+            workspace_id=kwargs["workspace_id"],
+            is_expired=False,
+            refresh_token__isnull=False,
+        )
+
+        return Response(
+            data=BusinessCentralCredentialSerializer(business_central_credentials).data,
+            status=status.HTTP_200_OK,
         )
 
 

@@ -11,6 +11,7 @@ from ms_business_central_api.utils import assert_valid
 from apps.workspaces.models import (
     Workspace,
     FyleCredential,
+    BusinessCentralCredentials,
     ExportSetting,
     ImportSetting,
     AdvancedSetting
@@ -68,6 +69,16 @@ class WorkspaceSerializer(serializers.ModelSerializer):
             )
 
         return workspace
+
+
+class BusinessCentralCredentialSerializer(serializers.ModelSerializer):
+    """
+    Business Central credential serializer
+    """
+
+    class Meta:
+        model = BusinessCentralCredentials
+        fields = "__all__"
 
 
 class ExportSettingsSerializer(serializers.ModelSerializer):
