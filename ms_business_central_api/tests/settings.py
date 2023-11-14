@@ -190,6 +190,13 @@ FYLE_JOBS_URL = os.environ.get('FYLE_JOBS_URL')
 FYLE_APP_URL = os.environ.get('APP_URL')
 FYLE_EXPENSE_URL = os.environ.get('FYLE_APP_URL')
 
+# Business Central Settings
+BUSINESS_CENTRAL_CLIENT_ID = os.environ.get("BUSINESS_CENTRAL_CLIENT_ID")
+BUSINESS_CENTRAL_CLIENT_SECRET = os.environ.get("BUSINESS_CENTRAL_CLIENT_SECRET")
+BUSINESS_CENTRAL_REDIRECT_URI = os.environ.get("BUSINESS_CENTRAL_REDIRECT_URI")
+BUSINESS_CENTRAL_TOKEN_URI = os.environ.get("BUSINESS_CENTRAL_TOKEN_URI")
+BUSINESS_CENTRAL_ENVIRONMENT = os.environ.get("BUSINESS_CENTRAL_ENVIRONMENT")
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/

@@ -46,6 +46,8 @@ class Workspace(models.Model):
         help_text='Onboarding status of the workspace'
     )
     ms_business_central_accounts_last_synced_at = CustomDateTimeField(help_text='ms business central accounts last synced at time')
+    business_central_company_name = StringNullField(help_text='Business Central Company Name')
+    business_central_company_id = StringNullField(help_text='Business Central Company Id')
     created_at = models.DateTimeField(auto_now_add=True, help_text='Created at datetime')
     updated_at = models.DateTimeField(auto_now=True, help_text='Updated at datetime')
 
@@ -126,6 +128,25 @@ CREDIT_CARD_EXPENSES_DATE_TYPE_CHOICES = (
     ('POSTED_AT', 'posted_at'),
     ('CREATED_AT', 'created_at')
 )
+
+
+class BusinessCentralCredentials(BaseModel):
+    """
+    Table to store Business Central credentials
+    """
+
+    id = models.AutoField(primary_key=True)
+    refresh_token = models.TextField(help_text="Stores Business Central refresh token", null=True)
+    is_expired = models.BooleanField(default=False, help_text="Business Central token expiry flag")
+
+    class Meta:
+        db_table = "business_central_credentials"
+
+    @staticmethod
+    def get_active_business_central(workspace_id):
+        return BusinessCentralCredentials.objects.get(
+            workspace_id=workspace_id, is_expired=False, refresh_token__isnull=False
+        )
 
 
 class ExportSetting(BaseModel):
