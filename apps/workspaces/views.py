@@ -12,10 +12,12 @@ from apps.workspaces.models import (
     Workspace,
     ExportSetting,
     ImportSetting,
-    AdvancedSetting
+    AdvancedSetting,
+    BusinessCentralCredentials
 )
 from apps.workspaces.serializers import (
     WorkspaceSerializer,
+    BusinessCentralCredentialSerializer,
     ExportSettingsSerializer,
     ImportSettingsSerializer,
     AdvancedSettingSerializer,
@@ -75,6 +77,16 @@ class ReadyView(generics.RetrieveAPIView):
             },
             status=status.HTTP_200_OK
         )
+
+
+class ConnectBusinessCentralView(generics.CreateAPIView, generics.RetrieveAPIView):
+    """
+    Business Central Connect Oauth View
+    """
+    serializer_class = BusinessCentralCredentialSerializer
+    lookup_field = 'workspace_id'
+
+    queryset = BusinessCentralCredentials.objects.all()
 
 
 class ExportSettingView(generics.CreateAPIView, generics.RetrieveAPIView):

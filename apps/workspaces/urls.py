@@ -6,13 +6,16 @@ from apps.workspaces.views import (
     ExportSettingView,
     ImportSettingView,
     AdvancedSettingView,
-    WorkspaceAdminsView
+    WorkspaceAdminsView,
+    ConnectBusinessCentralView
 )
 
 
 workspace_app_paths = [
     path('', WorkspaceView.as_view(), name='workspaces'),
     path('ready/', ReadyView.as_view(), name='ready'),
+    path("<int:workspace_id>/connect_business_central/authorization_code/", ConnectBusinessCentralView.as_view(), name='business-central-authorization-code'),
+    path("<int:workspace_id>/credentials/business_central/", ConnectBusinessCentralView.as_view(), name='business-central-credentials'),
     path('<int:workspace_id>/export_settings/', ExportSettingView.as_view(), name='export-settings'),
     path('<int:workspace_id>/import_settings/', ImportSettingView.as_view(), name='import-settings'),
     path('<int:workspace_id>/advanced_settings/', AdvancedSettingView.as_view(), name='advanced-settings'),

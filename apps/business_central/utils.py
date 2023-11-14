@@ -1,4 +1,4 @@
-from ms_dynamics_business_central_sdk import Dynamics
+from dynamics.core.client import Dynamics
 from fyle_accounting_mappings.models import DestinationAttribute
 
 from apps.workspaces.models import BusinessCentralCredentials, Workspace
