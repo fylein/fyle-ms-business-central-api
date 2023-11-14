@@ -15,6 +15,13 @@ logger = logging.getLogger(__name__)
 
 
 def generate_token(authorization_code: str, redirect_uri: str = None) -> str:
+    """
+    Generates a token using the provided authorization code.
+
+    :param authorization_code: Authorization code obtained from Business Central.
+    :param redirect_uri: Optional redirect URI for the token request.
+    :return: Response object containing the token.
+    """
     api_data = {
         "grant_type": "authorization_code",
         "code": authorization_code,
@@ -41,7 +48,13 @@ def generate_token(authorization_code: str, redirect_uri: str = None) -> str:
 
 def generate_business_central_refresh_token(authorization_code: str, redirect_uri: str = None) -> str:
     """
-    Generate Business Central refresh token from authorization code
+    Generates a Business Central refresh token from the provided authorization code.
+
+    :param authorization_code: Authorization code obtained from Business Central.
+    :param redirect_uri: Optional redirect URI for the token request.
+    :return: Refresh token.
+    :raises InvalidTokenError: If the token request fails with a 401 status code.
+    :raises InternalServerError: If the token request fails with a 500 status code.
     """
     response = generate_token(authorization_code, redirect_uri)
 
@@ -59,24 +72,39 @@ def generate_business_central_refresh_token(authorization_code: str, redirect_ur
 
 
 def connect_business_central(authorization_code, redirect_uri, workspace_id):
+    """
+    Connects to Business Central, retrieves or generates refresh token, and updates workspace information.
+
+    :param authorization_code: Authorization code obtained from Business Central.
+    :param redirect_uri: Optional redirect URI for the token request.
+    :param workspace_id: ID of the workspace.
+    :return: BusinessCentralCredentials object.
+    """
     if redirect_uri:
+        # If redirect_uri is provided, use it in the token request
         refresh_token = generate_business_central_refresh_token(authorization_code, redirect_uri)
     else:
+        # If redirect_uri is not provided, use the default redirect_uri in the token request
         refresh_token = generate_business_central_refresh_token(authorization_code)
+
+    # Retrieve or create BusinessCentralCredentials based on workspace_id
     business_central_credentials = BusinessCentralCredentials.objects.filter(workspace_id=workspace_id).first()
 
     workspace = Workspace.objects.get(pk=workspace_id)
 
     if not business_central_credentials:
+        # If BusinessCentralCredentials does not exist, create a new one
         business_central_credentials = BusinessCentralCredentials.objects.create(
             refresh_token=refresh_token, workspace_id=workspace_id
         )
     else:
+        # If BusinessCentralCredentials exists, update refresh_token and reset expiration status
         business_central_credentials.refresh_token = refresh_token
         business_central_credentials.is_expired = False
         business_central_credentials.save()
 
     if workspace and not workspace.business_central_company_id:
+        # If workspace has no associated Business Central company ID, fetch and update it
         business_central_connector = BusinessCentralConnector(business_central_credentials, workspace_id=workspace_id)
         connections = business_central_connector.connection.connections.get_all()
         connection = list(
@@ -87,10 +115,12 @@ def connect_business_central(authorization_code, redirect_uri, workspace_id):
         )
 
         if connection:
+            # If a matching connection is found, update workspace's Business Central company ID
             workspace.business_central_company_id = connection[0]["id"]
             workspace.save()
 
     if workspace.onboarding_state == "CONNECTION":
+        # If workspace's onboarding state is "CONNECTION", update it to "EXPORT_SETTINGS"
         workspace.onboarding_state = "EXPORT_SETTINGS"
         workspace.save()
 
