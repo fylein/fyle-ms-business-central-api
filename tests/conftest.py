@@ -14,6 +14,7 @@ from apps.fyle.helpers import get_access_token
 from apps.workspaces.models import (
     Workspace,
     FyleCredential,
+    BusinessCentralCredentials
 )
 from apps.accounting_exports.models import AccountingExport, AccountingExportSummary, Error
 from apps.fyle.models import ExpenseFilter
@@ -253,4 +254,21 @@ def add_expense_filters():
             is_custom=False,
             custom_field_type='SELECT',
             workspace_id=workspace_id
+        )
+
+
+@pytest.fixture()
+@pytest.mark.django_db(databases=['default'])
+def add_business_central_creds():
+    """
+    Pytest fixture to add business central credentials to a workspace
+    """
+    workspace_ids = [
+        1, 2, 3
+    ]
+    for workspace_id in workspace_ids:
+        BusinessCentralCredentials.objects.create(
+            refresh_token = 'dummy_refresh_token',
+            is_expired = False,
+            workspace_id = workspace_id
         )

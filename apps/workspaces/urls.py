@@ -25,6 +25,7 @@ workspace_app_paths = [
 other_app_paths = [
     path('<int:workspace_id>/accounting_exports/', include('apps.accounting_exports.urls')),
     path('<int:workspace_id>/fyle/', include('apps.fyle.urls')),
+    path('<int:workspace_id>/business_central/', include('apps.business_central.urls')),
 ]
 
 urlpatterns = []
