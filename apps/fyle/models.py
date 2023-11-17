@@ -13,7 +13,7 @@ from ms_business_central_api.models.fields import (
     StringOptionsField,
     IntegerOptionsField,
 )
-from apps.workspaces.models import BaseModel, BaseForeignWorkspaceModel
+from apps.workspaces.models import BaseForeignWorkspaceModel
 
 
 EXPENSE_FILTER_RANK = (
