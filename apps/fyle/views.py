@@ -6,6 +6,7 @@ from rest_framework.views import status
 
 from apps.fyle.helpers import get_exportable_accounting_exports_ids
 from apps.fyle.models import ExpenseFilter
+from apps.fyle.queue import queue_import_expenses
 from apps.fyle.serializers import (
     ExpenseFieldSerializer,
     ExpenseFilterSerializer,
@@ -74,5 +75,20 @@ class ExportableExpenseGroupsView(generics.RetrieveAPIView):
 
         return Response(
             data={'exportable_expense_group_ids': exportable_ids},
+            status=status.HTTP_200_OK
+        )
+
+
+class AccoutingExportSyncView(generics.CreateAPIView):
+    """
+    Create expense groups
+    """
+    def post(self, request, *args, **kwargs):
+        """
+        Post expense groups creation
+        """
+        queue_import_expenses(kwargs['workspace_id'], synchronous=True)
+
+        return Response(
             status=status.HTTP_200_OK
         )
