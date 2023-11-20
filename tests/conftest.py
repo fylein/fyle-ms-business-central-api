@@ -10,6 +10,8 @@ from rest_framework.test import APIClient
 from fyle.platform.platform import Platform
 from fyle_rest_auth.models import User, AuthToken
 
+from fyle_accounting_mappings.models import DestinationAttribute
+
 from apps.fyle.helpers import get_access_token
 from apps.workspaces.models import (
     Workspace,
@@ -271,4 +273,24 @@ def add_business_central_creds():
             refresh_token = 'dummy_refresh_token',
             is_expired = False,
             workspace_id = workspace_id
+        )
+
+
+@pytest.fixture()
+@pytest.mark.django_db(databases=['default'])
+def add_destination_attributes():
+    """
+    Pytest fixture to add destination attributes to a workspace
+    """
+    workspace_ids = [
+        1, 2, 3
+    ]
+    for workspace_id in workspace_ids:
+        DestinationAttribute.objects.create(
+            attribute_type='DUMMY_ATTRIBUTE_TYPE',
+            display_name='dummy_attribute_name',
+            value='dummy_attribute_value',
+            destination_id='dummy_destination_id',
+            active=True,
+            workspace_id=workspace_id
         )
