@@ -38,4 +38,4 @@ def test_business_central_fields(api_client, test_connection, create_temp_worksp
     response = api_client.get(url)
     assert response.status_code == 200
 
-    assert response.data['results'] == [{'attribute_type': 'DUMMY_ATTRIBUTE_TYPE', 'display_name': 'dummy_attribute_name'}]
+    assert response.data == [{'attribute_type': 'DUMMY_ATTRIBUTE_TYPE', 'display_name': 'dummy_attribute_name'}]

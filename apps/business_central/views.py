@@ -15,6 +15,7 @@ class BusinessCentralFieldsView(generics.ListAPIView):
     Business Central Fields View
     """
     serializer_class = BusinessCentralFieldSerializer
+    pagination_class = None
 
     def get_queryset(self):
         return BusinessCentralFieldSerializer().format_business_central_fields(self.kwargs["workspace_id"])
