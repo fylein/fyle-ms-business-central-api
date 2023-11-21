@@ -112,3 +112,13 @@ def test_exportable_expense_group_view(api_client, test_connection, create_temp_
 
     response = api_client.get(url)
     assert response.status_code == 200
+
+
+def test_accounting_export_sync_view(api_client, test_connection, create_temp_workspace, add_fyle_credentials, add_export_settings):
+
+    access_token = test_connection.access_token
+    url = reverse('sync-accounting-exports', kwargs={'workspace_id': 1})
+    api_client.credentials(HTTP_AUTHORIZATION='Bearer {}'.format(access_token))
+
+    response = api_client.post(url)
+    assert response.status_code == 200

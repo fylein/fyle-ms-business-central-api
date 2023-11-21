@@ -6,7 +6,7 @@ from rest_framework.views import status
 
 from apps.fyle.helpers import get_exportable_accounting_exports_ids
 from apps.fyle.models import ExpenseFilter
-from apps.fyle.queue import queue_import_expenses
+from apps.fyle.queue import queue_import_credit_card_expenses, queue_import_reimbursable_expenses
 from apps.fyle.serializers import (
     ExpenseFieldSerializer,
     ExpenseFilterSerializer,
@@ -87,7 +87,9 @@ class AccoutingExportSyncView(generics.CreateAPIView):
         """
         Post expense groups creation
         """
-        queue_import_expenses(kwargs['workspace_id'], synchronous=True)
+
+        queue_import_reimbursable_expenses(kwargs['workspace_id'], synchronous=True)
+        queue_import_credit_card_expenses(kwargs['workspace_id'], synchronous=True)
 
         return Response(
             status=status.HTTP_200_OK
