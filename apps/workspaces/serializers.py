@@ -2,23 +2,23 @@
 Workspace Serializers
 """
 from django.core.cache import cache
-from rest_framework import serializers
+from fyle_accounting_mappings.models import ExpenseAttribute
 from fyle_rest_auth.helpers import get_fyle_admin
 from fyle_rest_auth.models import AuthToken
-from fyle_accounting_mappings.models import ExpenseAttribute
+from rest_framework import serializers
 
+from apps.fyle.helpers import get_cluster_domain
+from apps.users.models import User
 from apps.workspaces.helpers import connect_business_central
-from ms_business_central_api.utils import assert_valid
 from apps.workspaces.models import (
-    Workspace,
-    FyleCredential,
+    AdvancedSetting,
     BusinessCentralCredentials,
     ExportSetting,
+    FyleCredential,
     ImportSetting,
-    AdvancedSetting
+    Workspace,
 )
-from apps.users.models import User
-from apps.fyle.helpers import get_cluster_domain
+from ms_business_central_api.utils import assert_valid
 
 
 class WorkspaceSerializer(serializers.ModelSerializer):
@@ -206,13 +206,13 @@ class WorkspaceAdminSerializer(serializers.Serializer):
     """
     Workspace Admin Serializer
     """
-    admin_emails = serializers.SerializerMethodField()
+    email = serializers.CharField()
+    name = serializers.CharField()
 
-    def get_admin_emails(self, validated_data):
+    def get_admin_emails(self, workspace_id):
         """
         Get Workspace Admins
         """
-        workspace_id = self.context['request'].parser_context.get('kwargs').get('workspace_id')
         workspace = Workspace.objects.get(id=workspace_id)
         admin_emails = []
 
