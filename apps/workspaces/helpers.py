@@ -119,7 +119,7 @@ def connect_business_central(authorization_code, redirect_uri, workspace_id):
             workspace.save()
 
     if workspace.onboarding_state == "COMPANY_SELECTION":
-        # If workspace's onboarding state is "CONNECTION", update it to "EXPORT_SETTINGS"
+        # If workspace's onboarding state is "COMPANY_SELECTION", update it to "EXPORT_SETTINGS"
         workspace.onboarding_state = "EXPORT_SETTINGS"
         workspace.save()
 
