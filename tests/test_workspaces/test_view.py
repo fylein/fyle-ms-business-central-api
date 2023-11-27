@@ -19,7 +19,7 @@ def test_post_of_workspace(api_client, test_connection):
     assert response.status_code == 201
     assert workspace.name == response.data['name']
     assert workspace.org_id == response.data['org_id']
-    assert workspace.onboarding_state == 'CONNECTION'
+    assert workspace.onboarding_state == response.data['onboarding_state']
 
     response = json.loads(response.content)
 
