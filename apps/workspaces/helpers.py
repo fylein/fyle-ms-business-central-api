@@ -1,15 +1,14 @@
-import logging
 import base64
-import requests
 import json
+import logging
 
+import requests
 from django.conf import settings
-from future.moves.urllib.parse import urlencode
 from dynamics.exceptions.dynamics_exceptions import InternalServerError, InvalidTokenError
+from future.moves.urllib.parse import urlencode
 
-from apps.workspaces.models import BusinessCentralCredentials, Workspace
 from apps.business_central.utils import BusinessCentralConnector
-
+from apps.workspaces.models import BusinessCentralCredentials, Workspace
 
 logger = logging.getLogger(__name__)
 
@@ -119,7 +118,7 @@ def connect_business_central(authorization_code, redirect_uri, workspace_id):
             workspace.business_central_company_id = connection[0]["id"]
             workspace.save()
 
-    if workspace.onboarding_state == "CONNECTION":
+    if workspace.onboarding_state == "COMPANY_SELECTION":
         # If workspace's onboarding state is "CONNECTION", update it to "EXPORT_SETTINGS"
         workspace.onboarding_state = "EXPORT_SETTINGS"
         workspace.save()

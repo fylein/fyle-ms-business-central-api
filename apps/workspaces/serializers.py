@@ -69,6 +69,10 @@ class WorkspaceSerializer(serializers.ModelSerializer):
                 cluster_domain=cluster_domain
             )
 
+        if workspace.onboarding_state == 'CONNECTION':
+            workspace.onboarding_state = 'COMPANY_SELECTION'
+            workspace.save()
+
         return workspace
 
 

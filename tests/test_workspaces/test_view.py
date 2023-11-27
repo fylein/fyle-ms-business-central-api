@@ -1,13 +1,9 @@
 import json
+
 import pytest  # noqa
 from django.urls import reverse
-from apps.workspaces.models import (
-    Workspace,
-    ExportSetting,
-    ImportSetting,
-    AdvancedSetting,
-    BusinessCentralCredentials
-)
+
+from apps.workspaces.models import AdvancedSetting, BusinessCentralCredentials, ExportSetting, ImportSetting, Workspace
 
 
 def test_post_of_workspace(api_client, test_connection):
@@ -23,6 +19,7 @@ def test_post_of_workspace(api_client, test_connection):
     assert response.status_code == 201
     assert workspace.name == response.data['name']
     assert workspace.org_id == response.data['org_id']
+    assert workspace.onboarding_state == 'CONNECTION'
 
     response = json.loads(response.content)
 

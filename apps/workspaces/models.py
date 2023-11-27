@@ -1,23 +1,24 @@
-from django.db import models
 from django.contrib.auth import get_user_model
 from django.contrib.postgres.fields import ArrayField
+from django.db import models
 
 from ms_business_central_api.models.fields import (
-    StringNotNullField,
+    BooleanFalseField,
+    BooleanTrueField,
     CustomDateTimeField,
+    CustomJsonField,
+    IntegerNullField,
+    StringNotNullField,
+    StringNullField,
     StringOptionsField,
     TextNotNullField,
-    StringNullField,
-    BooleanTrueField,
-    BooleanFalseField,
-    IntegerNullField,
-    CustomJsonField
 )
 
 User = get_user_model()
 
 ONBOARDING_STATE_CHOICES = (
     ('CONNECTION', 'CONNECTION'),
+    ('COMPANY_SELECTION', 'COMPANY_SELECTION'),
     ('EXPORT_SETTINGS', 'EXPORT_SETTINGS'),
     ('IMPORT_SETTINGS', 'IMPORT_SETTINGS'),
     ('ADVANCED_CONFIGURATION', 'ADVANCED_CONFIGURATION'),
@@ -26,7 +27,7 @@ ONBOARDING_STATE_CHOICES = (
 
 
 def get_default_onboarding_state():
-    return 'EXPORT_SETTINGS'
+    return 'CONNECTION'
 
 
 class Workspace(models.Model):
