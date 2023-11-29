@@ -1,9 +1,11 @@
 from apps.mappings.imports.modules.categories import Category
 from apps.mappings.imports.modules.expense_custom_fields import ExpenseCustomField
+from apps.mappings.imports.modules.merchants import Merchant
 from apps.mappings.models import ImportLog
 
 SOURCE_FIELD_CLASS_MAP = {
     'CATEGORY': Category,
+    'MERCHANT': Merchant,
 }
 
 
