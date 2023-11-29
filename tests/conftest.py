@@ -2,25 +2,20 @@
 Fixture configuration for all the tests
 """
 from datetime import datetime, timezone
-
 from unittest import mock
+
 import pytest
-
-from rest_framework.test import APIClient
 from fyle.platform.platform import Platform
-from fyle_rest_auth.models import User, AuthToken
+from fyle_accounting_mappings.models import DestinationAttribute
+from fyle_rest_auth.models import AuthToken, User
+from rest_framework.test import APIClient
 
-from apps.fyle.helpers import get_access_token
-from apps.workspaces.models import (
-    Workspace,
-    FyleCredential,
-    BusinessCentralCredentials
-)
 from apps.accounting_exports.models import AccountingExport, AccountingExportSummary, Error
+from apps.fyle.helpers import get_access_token
 from apps.fyle.models import ExpenseFilter
+from apps.workspaces.models import BusinessCentralCredentials, ExportSetting, FyleCredential, Workspace
 from ms_business_central_api.tests import settings
-
-from .test_fyle.fixtures import fixtures as fyle_fixtures
+from tests.test_fyle.fixtures import fixtures as fyle_fixtures
 
 
 @pytest.fixture()
@@ -271,4 +266,53 @@ def add_business_central_creds():
             refresh_token = 'dummy_refresh_token',
             is_expired = False,
             workspace_id = workspace_id
+        )
+
+
+@pytest.fixture()
+@pytest.mark.django_db(databases=['default'])
+def add_destination_attributes():
+    """
+    Pytest fixture to add destination attributes to a workspace
+    """
+    workspace_ids = [
+        1, 2, 3
+    ]
+    for workspace_id in workspace_ids:
+        DestinationAttribute.objects.create(
+            attribute_type='DUMMY_ATTRIBUTE_TYPE',
+            display_name='dummy_attribute_name',
+            value='dummy_attribute_value',
+            destination_id='dummy_destination_id',
+            active=True,
+            workspace_id=workspace_id
+        )
+
+
+@pytest.fixture()
+@pytest.mark.django_db(databases=['default'])
+def add_export_settings():
+    """
+    Pytest fixtue to add export_settings to a workspace
+    """
+
+    workspace_ids = [
+        1, 2, 3
+    ]
+
+    for workspace_id in workspace_ids:
+        ExportSetting.objects.create(
+            workspace_id=workspace_id,
+            reimbursable_expenses_export_type='BILL' if workspace_id in [1, 2] else 'JOURNAL_ENTRY',
+            default_bank_account_name='Accounts Payable',
+            default_back_account_id='1',
+            reimbursable_expense_state='PAYMENT_PROCESSING',
+            reimbursable_expense_date='current_date' if workspace_id == 1 else 'last_spent_at',
+            reimbursable_expense_grouped_by='REPORT' if workspace_id == 1 else 'EXPENSE',
+            credit_card_expense_export_type='CREDIT_CARD_PURCHASE' if workspace_id in [1, 2] else 'JOURNAL_ENTRY',
+            credit_card_expense_state='PAYMENT_PROCESSING',
+            default_ccc_credit_card_account_name='Visa',
+            default_ccc_credit_card_account_id='12',
+            credit_card_expense_grouped_by='EXPENSE' if workspace_id == 3 else 'REPORT',
+            credit_card_expense_date='spent_at'
         )
