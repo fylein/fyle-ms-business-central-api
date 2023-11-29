@@ -1,15 +1,14 @@
 import logging
-from django.db.models import Q
 from datetime import datetime
+
+from django.db.models import Q
+from fyle_accounting_mappings.models import DestinationAttribute
 from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.views import status
 
-from fyle_accounting_mappings.models import DestinationAttribute
-
-from apps.workspaces.models import Workspace, BusinessCentralCredentials
-from apps.business_central.helpers import sync_dimensions, check_interval_and_sync_dimension
-
+from apps.business_central.helpers import check_interval_and_sync_dimension, sync_dimensions
+from apps.workspaces.models import BusinessCentralCredentials, Workspace
 
 logger = logging.getLogger(__name__)
 logger.level = logging.INFO

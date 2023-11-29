@@ -1,7 +1,6 @@
 from django.urls import path
 
-from apps.business_central.views import ImportBusinessCentralAttributesView, BusinessCentralFieldsView
-
+from apps.business_central.views import BusinessCentralFieldsView, ImportBusinessCentralAttributesView
 
 urlpatterns = [
     path(
