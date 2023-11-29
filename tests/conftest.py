@@ -307,7 +307,7 @@ def add_export_settings():
             default_bank_account_name='Accounts Payable',
             default_back_account_id='1',
             reimbursable_expense_state='PAYMENT_PROCESSING',
-            reimbursable_expense_date='current_date' if workspace_id == 1 else 'last_spent_at',
+            reimbursable_expense_date='spent_at' if workspace_id == 1 else 'last_spent_at',
             reimbursable_expense_grouped_by='REPORT' if workspace_id == 1 else 'EXPENSE',
             credit_card_expense_export_type='CREDIT_CARD_PURCHASE' if workspace_id in [1, 2] else 'JOURNAL_ENTRY',
             credit_card_expense_state='PAYMENT_PROCESSING',
