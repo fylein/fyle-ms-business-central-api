@@ -1,9 +1,19 @@
 import logging
+
 from rest_framework import generics
-from ms_business_central_api.utils import LookupFieldMixin
-from apps.workspaces.models import Workspace
-from apps.fyle.serializers import ExpenseFilterSerializer, ImportFyleAttributesSerializer, FyleFieldsSerializer, ExpenseFieldSerializer
+from rest_framework.response import Response
+from rest_framework.views import status
+
+from apps.fyle.helpers import get_exportable_accounting_exports_ids
 from apps.fyle.models import ExpenseFilter
+from apps.fyle.serializers import (
+    ExpenseFieldSerializer,
+    ExpenseFilterSerializer,
+    FyleFieldsSerializer,
+    ImportFyleAttributesSerializer,
+)
+from apps.workspaces.models import Workspace
+from ms_business_central_api.utils import LookupFieldMixin
 
 logger = logging.getLogger(__name__)
 logger.level = logging.INFO
@@ -52,3 +62,17 @@ class CustomFieldView(generics.ListAPIView):
 
     serializer_class = ExpenseFieldSerializer
     queryset = Workspace.objects.all()
+
+
+class ExportableExpenseGroupsView(generics.RetrieveAPIView):
+    """
+    List Exportable Expense Groups
+    """
+    def get(self, request, *args, **kwargs):
+
+        exportable_ids = get_exportable_accounting_exports_ids(workspace_id=kwargs['workspace_id'])
+
+        return Response(
+            data={'exportable_expense_group_ids': exportable_ids},
+            status=status.HTTP_200_OK
+        )

@@ -14,14 +14,32 @@ Including another URLconf
 2. Add a URL to urlpatterns: path('blog/', include('blog.urls'))
 """
 
+import itertools
+
 from django.urls import path
-from apps.fyle.views import ExpenseFilterView, ExpenseFilterDeleteView, ImportFyleAttributesView, FyleFieldsView, CustomFieldView
 
+from apps.fyle.views import (
+    CustomFieldView,
+    ExpenseFilterDeleteView,
+    ExpenseFilterView,
+    ExportableExpenseGroupsView,
+    FyleFieldsView,
+    ImportFyleAttributesView,
+)
 
-urlpatterns = [
+accounting_exports_path = [
+    path('exportable_accounting_exports/', ExportableExpenseGroupsView.as_view(), name='exportable-accounting-exports')
+]
+
+other_paths = [
     path('expense_filters/<int:pk>/', ExpenseFilterDeleteView.as_view(), name='expense-filters'),
     path('expense_filters/', ExpenseFilterView.as_view(), name='expense-filters'),
-    path('import_attributes/', ImportFyleAttributesView.as_view(), name='import-fyle-attributes'),
     path('fields/', FyleFieldsView.as_view(), name='fyle-fields'),
     path('expense_fields/', CustomFieldView.as_view(), name='fyle-expense-fields'),
 ]
+
+fyle_dimension_paths = [
+    path('import_attributes/', ImportFyleAttributesView.as_view(), name='import-fyle-attributes')
+]
+
+urlpatterns = list(itertools.chain(accounting_exports_path, fyle_dimension_paths, other_paths))

@@ -1,11 +1,12 @@
 import json
+
 import requests
 from django.conf import settings
-
 from fyle_integrations_platform_connector import PlatformConnector
 
-from apps.workspaces.models import FyleCredential
+from apps.accounting_exports.models import AccountingExport
 from apps.fyle.constants import DEFAULT_FYLE_CONDITIONS
+from apps.workspaces.models import ExportSetting, FyleCredential
 
 
 def post_request(url, body, refresh_token=None):
@@ -79,3 +80,25 @@ def get_expense_fields(workspace_id: int):
             })
 
     return response
+
+
+def get_exportable_accounting_exports_ids(workspace_id: int):
+    """
+    Get List of accounting exports ids
+    """
+
+    export_setting = ExportSetting.objects.get(workspace_id=workspace_id)
+    fund_source = []
+
+    if export_setting.reimbursable_expenses_export_type:
+        fund_source.append('PERSONAL')
+    if export_setting.credit_card_expense_export_type:
+        fund_source.append('CCC')
+
+    accounting_export_ids = AccountingExport.objects.filter(
+        workspace_id=workspace_id,
+        exported_at__isnull=True,
+        fund_source__in=fund_source
+    ).values_list('id', flat=True)
+
+    return accounting_export_ids

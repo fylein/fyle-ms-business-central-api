@@ -1,12 +1,14 @@
 import logging
 from datetime import datetime
+
+from django.db.models import Q
+from fyle_accounting_mappings.models import DestinationAttribute
 from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.views import status
 
-from apps.workspaces.models import Workspace, BusinessCentralCredentials
-from apps.business_central.helpers import sync_dimensions, check_interval_and_sync_dimension
-
+from apps.business_central.helpers import check_interval_and_sync_dimension, sync_dimensions
+from apps.workspaces.models import BusinessCentralCredentials, Workspace
 
 logger = logging.getLogger(__name__)
 logger.level = logging.INFO
@@ -60,3 +62,34 @@ class ImportBusinessCentralAttributesSerializer(serializers.Serializer):
             )
             # Raise a custom exception or re-raise the original exception
             raise
+
+
+class BusinessCentralFieldSerializer(serializers.Serializer):
+    """
+    Business Central Fields Serializer
+    """
+
+    attribute_type = serializers.CharField()
+    display_name = serializers.CharField()
+
+    def format_business_central_fields(self, workspace_id):
+        attribute_types = [
+            "VENDOR",
+            "ACCOUNT",
+            "EMPLOYEE",
+            "LOCATION",
+        ]
+        attributes = (
+            DestinationAttribute.objects.filter(
+                ~Q(attribute_type__in=attribute_types),
+                workspace_id=workspace_id,
+            )
+            .values("attribute_type", "display_name")
+            .distinct()
+        )
+
+        serialized_attributes = BusinessCentralFieldSerializer(attributes, many=True).data
+
+        attributes_list = list(serialized_attributes)
+
+        return attributes_list
