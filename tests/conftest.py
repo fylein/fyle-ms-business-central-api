@@ -2,27 +2,20 @@
 Fixture configuration for all the tests
 """
 from datetime import datetime, timezone
-
 from unittest import mock
+
 import pytest
-
-from rest_framework.test import APIClient
 from fyle.platform.platform import Platform
-from fyle_rest_auth.models import User, AuthToken
-
 from fyle_accounting_mappings.models import DestinationAttribute
+from fyle_rest_auth.models import AuthToken, User
+from rest_framework.test import APIClient
 
-from apps.fyle.helpers import get_access_token
-from apps.workspaces.models import (
-    Workspace,
-    FyleCredential,
-    BusinessCentralCredentials
-)
 from apps.accounting_exports.models import AccountingExport, AccountingExportSummary, Error
+from apps.fyle.helpers import get_access_token
 from apps.fyle.models import ExpenseFilter
+from apps.workspaces.models import BusinessCentralCredentials, FyleCredential, Workspace
 from ms_business_central_api.tests import settings
-
-from .test_fyle.fixtures import fixtures as fyle_fixtures
+from tests.test_fyle.fixtures import fixtures as fyle_fixtures
 
 
 @pytest.fixture()

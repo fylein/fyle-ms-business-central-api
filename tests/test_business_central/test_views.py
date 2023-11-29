@@ -1,4 +1,5 @@
 import json
+
 from django.urls import reverse
 
 from apps.workspaces.models import BusinessCentralCredentials
