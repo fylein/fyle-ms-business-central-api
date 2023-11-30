@@ -35,7 +35,7 @@ EXPORT_MODE_CHOICES = (
 )
 
 ALLOWED_FORM_INPUT = {
-    'export_date_type': ['current_date', 'approved_at', 'verified_at', 'last_spent_at', 'posted_at']
+    'export_date_type': ['current_date', 'approved_at', 'spent_at', 'verified_at', 'last_spent_at', 'posted_at']
 }
 
 
