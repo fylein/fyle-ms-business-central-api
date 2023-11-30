@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List
 
 from django.contrib.postgres.aggregates import ArrayAgg
@@ -32,6 +33,10 @@ EXPORT_MODE_CHOICES = (
     ('MANUAL', 'MANUAL'),
     ('AUTO', 'AUTO')
 )
+
+ALLOWED_FORM_INPUT = {
+    'export_date_type': ['current_date', 'approved_at', 'verified_at', 'last_spent_at', 'posted_at']
+}
 
 
 def _group_expenses(expenses: List[Expense], export_setting: ExportSetting, fund_source: str):
@@ -129,9 +134,15 @@ class AccountingExport(BaseForeignWorkspaceModel):
 
             # Store expense IDs and remove unnecessary keys
             expense_ids = accounting_export['expense_ids']
-            accounting_export[date_field] = accounting_export[date_field].strftime('%Y-%m-%dT%H:%M:%S')
             accounting_export.pop('total')
             accounting_export.pop('expense_ids')
+
+            for key in accounting_export:
+                if key in ALLOWED_FORM_INPUT['export_date_type']:
+                    if accounting_export[key]:
+                        accounting_export[key] = accounting_export[key].strftime('%Y-%m-%dT%H:%M:%S')
+                    else:
+                        accounting_export[key] = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
 
             # Create an AccountingExport object for the expense group
             accounting_export_instance = AccountingExport.objects.create(
