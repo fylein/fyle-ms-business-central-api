@@ -18,7 +18,7 @@ def trigger_import_via_schedule(workspace_id: int, destination_field: str, sourc
     Trigger import via schedule
     :param workspace_id: Workspace id
     :param destination_field: Destination field
-    :param source_field: Type of attribute (e.g. 'CATEGORY', 'LOCATION', 'VENDOR', 'EMPLOYEE')
+    :param source_field: Type of attribute (e.g. 'CATEGORY', 'MERCHANT', 'COST_CENTER', 'PROJECT')
     """
     import_log = ImportLog.objects.filter(workspace_id=workspace_id, attribute_type=source_field).first()
     sync_after = import_log.last_successful_run_at if import_log else None
