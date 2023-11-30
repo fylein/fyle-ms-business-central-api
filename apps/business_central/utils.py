@@ -59,18 +59,20 @@ class BusinessCentralConnector:
         """
 
         destination_attributes = []
-
         for item in data:
-            detail = {field: getattr(item, field) for field in field_names}
+            detail = {field: item[field] for field in field_names}
+            if (attribute_type == 'EMPLOYEE' and item['status'] == 'Active') or attribute_type == 'LOCATION' or item['blocked'] != True:
+                active = True
+            else:
+                active = False
             destination_attributes.append(self._create_destination_attribute(
                 attribute_type,
                 display_name,
-                item.name,
-                item.id,
-                item.is_active,
+                item['displayName'],
+                item['id'],
+                active,
                 detail
             ))
-
         DestinationAttribute.bulk_create_or_update_destination_attributes(
             destination_attributes, attribute_type, workspace_id, True)
 
@@ -89,9 +91,10 @@ class BusinessCentralConnector:
         """
         workspace = Workspace.objects.get(id=self.workspace_id)
         self.connection.company_id = workspace.business_central_company_id
+        field_names = ['category', 'subCategory', 'accountType', 'directPosting', 'lastModifiedDateTime']
 
         accounts = self.connection.accounts.get_all()
-        self._sync_data(accounts, 'ACCOUNT', 'accounts', self.workspace_id)
+        self._sync_data(accounts, 'ACCOUNT', 'accounts', self.workspace_id, field_names)
         return []
 
     def sync_vendors(self):
@@ -100,9 +103,10 @@ class BusinessCentralConnector:
         """
         workspace = Workspace.objects.get(id=self.workspace_id)
         self.connection.company_id = workspace.business_central_company_id
+        field_names = ['email', 'currencyId', 'currencyCode', 'lastModifiedDateTime']
 
         vendors = self.connection.vendors.get_all()
-        self._sync_data(vendors, 'VENDOR', 'vendor', self.workspace_id)
+        self._sync_data(vendors, 'VENDOR', 'vendor', self.workspace_id, field_names)
         return []
 
     def sync_employees(self):
@@ -111,9 +115,10 @@ class BusinessCentralConnector:
         """
         workspace = Workspace.objects.get(id=self.workspace_id)
         self.connection.company_id = workspace.business_central_company_id
+        field_names = ['email', 'email', 'personalEmail', 'lastModifiedDateTime']
 
         employees = self.connection.employees.get_all()
-        self._sync_data(employees, 'EMPLOYEE', 'employee', self.workspace_id)
+        self._sync_data(employees, 'EMPLOYEE', 'employee', self.workspace_id, field_names)
         return []
 
     def sync_locations(self):
@@ -122,7 +127,8 @@ class BusinessCentralConnector:
         """
         workspace = Workspace.objects.get(id=self.workspace_id)
         self.connection.company_id = workspace.business_central_company_id
+        field_names = ['code', 'city', 'country']
 
         locations = self.connection.locations.get_all()
-        self._sync_data(locations, 'LOCATION', 'location', self.workspace_id)
+        self._sync_data(locations, 'LOCATION', 'location', self.workspace_id, field_names)
         return []
