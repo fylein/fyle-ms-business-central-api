@@ -1,6 +1,6 @@
 from rest_framework import generics
 
-from apps.business_central.serializers import ImportBusinessCentralAttributesSerializer, BusinessCentralFieldSerializer
+from apps.business_central.serializers import BusinessCentralFieldSerializer, ImportBusinessCentralAttributesSerializer
 
 
 class ImportBusinessCentralAttributesView(generics.CreateAPIView):
