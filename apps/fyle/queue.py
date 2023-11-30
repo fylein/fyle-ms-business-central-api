@@ -25,8 +25,8 @@ def queue_import_reimbursable_expenses(workspace_id: int, synchronous: bool = Fa
 
     if not synchronous:
         async_task(
-            'apps.fyle.tasks.import_reimbursable_expenses',
-            workspace_id, accounting_export,
+            'apps.fyle.tasks.import_expenses',
+            workspace_id, accounting_export, 'PERSONAL_CASH_ACCOUNT', 'PERSONAL'
         )
         return
 
@@ -49,9 +49,9 @@ def queue_import_credit_card_expenses(workspace_id: int, synchronous: bool = Fal
 
     if not synchronous:
         async_task(
-            'apps.fyle.tasks.import_credit_card_expenses',
-            workspace_id, accounting_export,
+            'apps.fyle.tasks.import_expenses',
+            workspace_id, accounting_export, 'PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT', 'CCC'
         )
         return
 
-    import_expenses(workspace_id, accounting_export, 'PERSONAL_CASH_ACCOUNT', 'PERSONAL')
+    import_expenses(workspace_id, accounting_export, 'PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT', 'CCC')

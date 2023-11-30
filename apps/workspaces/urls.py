@@ -1,15 +1,14 @@
-from django.urls import path, include
+from django.urls import include, path
 
 from apps.workspaces.views import (
-    ReadyView,
-    WorkspaceView,
+    AdvancedSettingView,
+    ConnectBusinessCentralView,
     ExportSettingView,
     ImportSettingView,
-    AdvancedSettingView,
+    ReadyView,
     WorkspaceAdminsView,
-    ConnectBusinessCentralView
+    WorkspaceView,
 )
-
 
 workspace_app_paths = [
     path('', WorkspaceView.as_view(), name='workspaces'),
@@ -26,6 +25,7 @@ other_app_paths = [
     path('<int:workspace_id>/accounting_exports/', include('apps.accounting_exports.urls')),
     path('<int:workspace_id>/fyle/', include('apps.fyle.urls')),
     path('<int:workspace_id>/business_central/', include('apps.business_central.urls')),
+    path('<int:workspace_id>/mappings/', include('apps.mappings.urls'))
 ]
 
 urlpatterns = []

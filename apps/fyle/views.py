@@ -13,7 +13,6 @@ from apps.fyle.serializers import (
     FyleFieldsSerializer,
     ImportFyleAttributesSerializer,
 )
-from apps.workspaces.models import Workspace
 from ms_business_central_api.utils import LookupFieldMixin
 
 logger = logging.getLogger(__name__)
@@ -62,7 +61,10 @@ class CustomFieldView(generics.ListAPIView):
     """
 
     serializer_class = ExpenseFieldSerializer
-    queryset = Workspace.objects.all()
+    pagination_class = None
+
+    def get_queryset(self):
+        return ExpenseFieldSerializer().get_expense_fields(self.kwargs["workspace_id"])
 
 
 class ExportableExpenseGroupsView(generics.RetrieveAPIView):

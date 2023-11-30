@@ -61,6 +61,6 @@ def import_expenses(workspace_id, accounting_export: AccountingExport, source_ac
         )
 
     accounting_export.status = 'COMPLETE'
-    accounting_export.errors = None
+    accounting_export.business_central_errors = None
 
     accounting_export.save()
