@@ -3,6 +3,8 @@ from unittest import mock
 
 from django.urls import reverse
 
+from apps.accounting_exports.models import AccountingExport
+from apps.fyle.models import Expense
 from apps.workspaces.models import FyleCredential, Workspace
 from tests.helpers import dict_compare_keys
 from tests.test_fyle.fixtures import fixtures as data
@@ -100,7 +102,7 @@ def test_fyle_expense_fields(api_client, test_connection, create_temp_workspace,
     response = json.loads(response.content)
 
     assert (
-        dict_compare_keys(response['results'], data['fyle_expense_custom_fields']) == []
+        dict_compare_keys(response, data['fyle_expense_custom_fields']) == []
     ), 'expense group api return diffs in keys'
 
 
@@ -112,3 +114,26 @@ def test_exportable_expense_group_view(api_client, test_connection, create_temp_
 
     response = api_client.get(url)
     assert response.status_code == 200
+
+
+def test_accounting_export_sync_view(api_client, test_connection, create_temp_workspace, add_fyle_credentials, add_export_settings, mocker):
+
+    access_token = test_connection.access_token
+    url = reverse('sync-accounting-exports', kwargs={'workspace_id': 1})
+
+    mocker.patch(
+        'fyle_integrations_platform_connector.apis.Expenses.get',
+        return_value = data['expenses'],
+    )
+
+    api_client.credentials(HTTP_AUTHORIZATION='Bearer {}'.format(access_token))
+
+    response = api_client.post(url)
+    assert response.status_code == 200
+
+    accounting_exports = AccountingExport.objects.filter(workspace_id=1)
+
+    assert accounting_exports[0].status == 'COMPLETE'
+
+    expenses = Expense.objects.filter(org_id='or79Cob97KSh')
+    assert len(expenses) == 1

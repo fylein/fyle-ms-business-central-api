@@ -6,13 +6,13 @@ from rest_framework.views import status
 
 from apps.fyle.helpers import get_exportable_accounting_exports_ids
 from apps.fyle.models import ExpenseFilter
+from apps.fyle.queue import queue_import_credit_card_expenses, queue_import_reimbursable_expenses
 from apps.fyle.serializers import (
     ExpenseFieldSerializer,
     ExpenseFilterSerializer,
     FyleFieldsSerializer,
     ImportFyleAttributesSerializer,
 )
-from apps.workspaces.models import Workspace
 from ms_business_central_api.utils import LookupFieldMixin
 
 logger = logging.getLogger(__name__)
@@ -61,7 +61,10 @@ class CustomFieldView(generics.ListAPIView):
     """
 
     serializer_class = ExpenseFieldSerializer
-    queryset = Workspace.objects.all()
+    pagination_class = None
+
+    def get_queryset(self):
+        return ExpenseFieldSerializer().get_expense_fields(self.kwargs["workspace_id"])
 
 
 class ExportableExpenseGroupsView(generics.RetrieveAPIView):
@@ -74,5 +77,22 @@ class ExportableExpenseGroupsView(generics.RetrieveAPIView):
 
         return Response(
             data={'exportable_expense_group_ids': exportable_ids},
+            status=status.HTTP_200_OK
+        )
+
+
+class AccoutingExportSyncView(generics.CreateAPIView):
+    """
+    Create expense groups
+    """
+    def post(self, request, *args, **kwargs):
+        """
+        Post expense groups creation
+        """
+
+        queue_import_reimbursable_expenses(kwargs['workspace_id'], synchronous=True)
+        queue_import_credit_card_expenses(kwargs['workspace_id'], synchronous=True)
+
+        return Response(
             status=status.HTTP_200_OK
         )

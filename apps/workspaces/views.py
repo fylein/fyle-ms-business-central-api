@@ -1,29 +1,20 @@
 import logging
-from django.contrib.auth import get_user_model
 
+from django.contrib.auth import get_user_model
+from fyle_rest_auth.utils import AuthUtils
 from rest_framework import generics
 from rest_framework.views import Response, status
 
-from fyle_rest_auth.utils import AuthUtils
-
-
-from ms_business_central_api.utils import assert_valid
-from apps.workspaces.models import (
-    Workspace,
-    ExportSetting,
-    ImportSetting,
-    AdvancedSetting,
-    BusinessCentralCredentials
-)
+from apps.workspaces.models import AdvancedSetting, BusinessCentralCredentials, ExportSetting, ImportSetting, Workspace
 from apps.workspaces.serializers import (
-    WorkspaceSerializer,
+    AdvancedSettingSerializer,
     BusinessCentralCredentialSerializer,
     ExportSettingsSerializer,
     ImportSettingsSerializer,
-    AdvancedSettingSerializer,
-    WorkspaceAdminSerializer
+    WorkspaceAdminSerializer,
+    WorkspaceSerializer,
 )
-
+from ms_business_central_api.utils import assert_valid
 
 logger = logging.getLogger(__name__)
 logger.level = logging.INFO
@@ -125,4 +116,7 @@ class WorkspaceAdminsView(generics.ListAPIView):
     Retrieve Workspace Admins
     """
     serializer_class = WorkspaceAdminSerializer
-    queryset = Workspace.objects.all()
+    pagination_class = None
+
+    def get_queryset(self):
+        return WorkspaceAdminSerializer().get_admin_emails(self.kwargs['workspace_id'])
