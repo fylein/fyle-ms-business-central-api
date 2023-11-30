@@ -3,18 +3,18 @@ Fyle Serializers
 """
 import logging
 from datetime import datetime, timezone
+
 from django.db.models import Q
-from rest_framework import serializers
-from rest_framework.response import Response
-from rest_framework.exceptions import APIException
-from rest_framework.views import status
-from fyle_integrations_platform_connector import PlatformConnector
-
 from fyle_accounting_mappings.models import ExpenseAttribute
+from fyle_integrations_platform_connector import PlatformConnector
+from rest_framework import serializers
+from rest_framework.exceptions import APIException
+from rest_framework.response import Response
+from rest_framework.views import status
 
-from apps.fyle.models import ExpenseFilter
-from apps.workspaces.models import Workspace, FyleCredential
 from apps.fyle.helpers import get_expense_fields
+from apps.fyle.models import ExpenseFilter
+from apps.workspaces.models import FyleCredential, Workspace
 
 logger = logging.getLogger(__name__)
 logger.level = logging.INFO
@@ -112,14 +112,15 @@ class ExpenseFieldSerializer(serializers.Serializer):
     """
     Workspace Admin Serializer
     """
-    expense_fields = serializers.SerializerMethodField()
+    field_name = serializers.CharField()
+    type = serializers.CharField()
+    is_custom = serializers.BooleanField()
 
-    def get_expense_fields(self, validated_data):
+    def get_expense_fields(self, workspace_id:int):
         """
         Get Expense Fields
         """
 
-        workspace_id = self.context['request'].parser_context.get('kwargs').get('workspace_id')
         expense_fields = get_expense_fields(workspace_id=workspace_id)
 
         return expense_fields

@@ -1,23 +1,24 @@
-from django.db import models
 from django.contrib.auth import get_user_model
 from django.contrib.postgres.fields import ArrayField
+from django.db import models
 
 from ms_business_central_api.models.fields import (
-    StringNotNullField,
+    BooleanFalseField,
+    BooleanTrueField,
     CustomDateTimeField,
+    CustomJsonField,
+    IntegerNullField,
+    StringNotNullField,
+    StringNullField,
     StringOptionsField,
     TextNotNullField,
-    StringNullField,
-    BooleanTrueField,
-    BooleanFalseField,
-    IntegerNullField,
-    CustomJsonField
 )
 
 User = get_user_model()
 
 ONBOARDING_STATE_CHOICES = (
     ('CONNECTION', 'CONNECTION'),
+    ('COMPANY_SELECTION', 'COMPANY_SELECTION'),
     ('EXPORT_SETTINGS', 'EXPORT_SETTINGS'),
     ('IMPORT_SETTINGS', 'IMPORT_SETTINGS'),
     ('ADVANCED_CONFIGURATION', 'ADVANCED_CONFIGURATION'),
@@ -26,7 +27,7 @@ ONBOARDING_STATE_CHOICES = (
 
 
 def get_default_onboarding_state():
-    return 'EXPORT_SETTINGS'
+    return 'CONNECTION'
 
 
 class Workspace(models.Model):
@@ -37,8 +38,8 @@ class Workspace(models.Model):
     name = StringNotNullField(help_text='Name of the workspace')
     user = models.ManyToManyField(User, help_text='Reference to users table')
     org_id = models.CharField(max_length=255, help_text='org id', unique=True)
-    last_synced_at = CustomDateTimeField(help_text='Datetime when expenses were pulled last')
-    ccc_last_synced_at = CustomDateTimeField(help_text='Datetime when ccc expenses were pulled last')
+    reimbursable_last_synced_at = CustomDateTimeField(help_text='Datetime when expenses were pulled last')
+    credit_card_last_synced_at = CustomDateTimeField(help_text='Datetime when ccc expenses were pulled last')
     source_synced_at = CustomDateTimeField(help_text='Datetime when source dimensions were pulled')
     destination_synced_at = CustomDateTimeField(help_text='Datetime when destination dimensions were pulled')
     onboarding_state = StringOptionsField(
