@@ -65,20 +65,20 @@ class ExpenseCustomField(Base):
 
     def construct_fyle_expense_custom_field_payload(
         self,
-        sage300_attributes: List[DestinationAttribute],
+        business_central_attributes: List[DestinationAttribute],
         platform: PlatformConnector,
         source_placeholder: str = None
     ):
         """
         Construct payload for expense custom fields
-        :param sage300_attributes: List of destination attributes
+        :param business_central_attributes: List of destination attributes
         :param platform: PlatformConnector object
         :param source_placeholder: Placeholder from mapping settings
         """
         fyle_expense_custom_field_options = []
         fyle_attribute = self.source_field
 
-        [fyle_expense_custom_field_options.append(sage300_attribute.value) for sage300_attribute in sage300_attributes]
+        [fyle_expense_custom_field_options.append(business_central_attribute.value) for business_central_attribute in business_central_attributes]
 
         if fyle_attribute.lower() not in FYLE_EXPENSE_SYSTEM_FIELDS:
             existing_attribute = ExpenseAttribute.objects.filter(
