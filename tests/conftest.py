@@ -6,14 +6,14 @@ from unittest import mock
 
 import pytest
 from fyle.platform.platform import Platform
-from fyle_accounting_mappings.models import DestinationAttribute
+from fyle_accounting_mappings.models import DestinationAttribute, MappingSetting
 from fyle_rest_auth.models import AuthToken, User
 from rest_framework.test import APIClient
 
 from apps.accounting_exports.models import AccountingExport, AccountingExportSummary, Error
 from apps.fyle.helpers import get_access_token
 from apps.fyle.models import ExpenseFilter
-from apps.workspaces.models import BusinessCentralCredentials, ExportSetting, FyleCredential, Workspace
+from apps.workspaces.models import BusinessCentralCredentials, ExportSetting, FyleCredential, ImportSetting, Workspace
 from ms_business_central_api.tests import settings
 from tests.test_fyle.fixtures import fixtures as fyle_fixtures
 
@@ -68,37 +68,43 @@ def test_connection(db):
 @pytest.fixture(scope="session", autouse=True)
 def default_session_fixture(request):
     patched_1 = mock.patch(
-        'fyle_rest_auth.authentication.get_fyle_admin',
-        return_value=fyle_fixtures['get_my_profile']
+        'dynamics.core.client.Dynamics._Dynamics__refresh_access_token',
+        return_value="dummy_token"
     )
     patched_1.__enter__()
 
     patched_2 = mock.patch(
-        'fyle.platform.internals.auth.Auth.update_access_token',
-        return_value='asnfalsnkflanskflansfklsan'
+        'fyle_rest_auth.authentication.get_fyle_admin',
+        return_value=fyle_fixtures['get_my_profile']
     )
     patched_2.__enter__()
 
     patched_3 = mock.patch(
+        'fyle.platform.internals.auth.Auth.update_access_token',
+        return_value='asnfalsnkflanskflansfklsan'
+    )
+    patched_3.__enter__()
+
+    patched_4 = mock.patch(
         'apps.fyle.helpers.post_request',
         return_value={
             'access_token': 'easnfkjo12233.asnfaosnfa.absfjoabsfjk',
             'cluster_domain': 'https://staging.fyle.tech'
         }
     )
-    patched_3.__enter__()
-
-    patched_4 = mock.patch(
-        'fyle.platform.apis.v1beta.spender.MyProfile.get',
-        return_value=fyle_fixtures['get_my_profile']
-    )
     patched_4.__enter__()
 
     patched_5 = mock.patch(
-        'fyle_rest_auth.helpers.get_fyle_admin',
+        'fyle.platform.apis.v1beta.spender.MyProfile.get',
         return_value=fyle_fixtures['get_my_profile']
     )
     patched_5.__enter__()
+
+    patched_6 = mock.patch(
+        'fyle_rest_auth.helpers.get_fyle_admin',
+        return_value=fyle_fixtures['get_my_profile']
+    )
+    patched_6.__enter__()
 
 
 @pytest.fixture
@@ -315,4 +321,42 @@ def add_export_settings():
             default_ccc_credit_card_account_id='12',
             credit_card_expense_grouped_by='EXPENSE' if workspace_id == 3 else 'REPORT',
             credit_card_expense_date='spent_at'
+        )
+
+
+@pytest.fixture()
+@pytest.mark.django_db(databases=['default'])
+def add_import_settings():
+    """
+    Pytest fixtue to add import_settings to a workspace
+    """
+    workspace_ids = [
+        1, 2, 3
+    ]
+
+    for workspace_id in workspace_ids:
+        ImportSetting.objects.create(
+            workspace_id=workspace_id,
+            import_vendors_as_merchants=True,
+            import_categories=True
+        )
+
+
+@pytest.fixture()
+@pytest.mark.django_db(databases=['default'])
+def add_mapping_settings():
+    """
+    Pytest fixtue to add mapping_settings to a workspace
+    """
+    workspace_ids = [
+        1, 2, 3
+    ]
+
+    for workspace_id in workspace_ids:
+        MappingSetting.objects.create(
+            workspace_id=workspace_id,
+            source_field='CATEGORY',
+            destination_field='ACCOUNT',
+            import_to_fyle=True,
+            is_custom=False
         )
