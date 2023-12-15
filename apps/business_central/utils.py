@@ -61,7 +61,7 @@ class BusinessCentralConnector:
         destination_attributes = []
         for item in data:
             detail = {field: item[field] for field in field_names}
-            if (attribute_type == 'EMPLOYEE' and item['status'] == 'Active') or attribute_type == 'LOCATION' or item['blocked'] != True:
+            if (attribute_type == 'EMPLOYEE' and item.get('status') == 'Active') or (attribute_type == 'LOCATION') or (item.get('blocked') and item['blocked'] != True):
                 active = True
             else:
                 active = False
@@ -115,7 +115,7 @@ class BusinessCentralConnector:
         """
         workspace = Workspace.objects.get(id=self.workspace_id)
         self.connection.company_id = workspace.business_central_company_id
-        field_names = ['email', 'email', 'personalEmail', 'lastModifiedDateTime']
+        field_names = ['email', 'personalEmail', 'lastModifiedDateTime']
 
         employees = self.connection.employees.get_all()
         self._sync_data(employees, 'EMPLOYEE', 'employee', self.workspace_id, field_names)
