@@ -130,6 +130,11 @@ CREDIT_CARD_EXPENSES_DATE_TYPE_CHOICES = (
     ('CREATED_AT', 'created_at')
 )
 
+EXPORT_MODE_CHOICES = (
+    ('MANUAL', 'MANUAL'),
+    ('AUTO', 'AUTO')
+)
+
 
 class BusinessCentralCredentials(BaseModel):
     """
@@ -227,3 +232,19 @@ class AdvancedSetting(BaseModel):
 
     class Meta:
         db_table = 'advanced_settings'
+
+
+class LastExportDetail(BaseModel):
+    """
+    Table to store Last Export Details
+    """
+
+    id = models.AutoField(primary_key=True)
+    last_exported_at = models.DateTimeField(help_text='Last exported at datetime', null=True)
+    export_mode = models.CharField(max_length=50, help_text='Mode of the export Auto / Manual', choices=EXPORT_MODE_CHOICES, null=True)
+    total_accounting_exports_count = models.IntegerField(help_text='Total count of accounting exports exported', null=True)
+    successful_accounting_exports_count = models.IntegerField(help_text='count of successful accounting_exports ', null=True)
+    failed_accounting_exports_count = models.IntegerField(help_text='count of failed accounting_exports ', null=True)
+
+    class Meta:
+        db_table = 'last_export_details'
