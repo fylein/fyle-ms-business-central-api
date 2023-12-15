@@ -115,7 +115,7 @@ class BusinessCentralConnector:
         """
         workspace = Workspace.objects.get(id=self.workspace_id)
         self.connection.company_id = workspace.business_central_company_id
-        field_names = ['email', 'email', 'personalEmail', 'lastModifiedDateTime']
+        field_names = ['email', 'personalEmail', 'lastModifiedDateTime']
 
         employees = self.connection.employees.get_all()
         self._sync_data(employees, 'EMPLOYEE', 'employee', self.workspace_id, field_names)
