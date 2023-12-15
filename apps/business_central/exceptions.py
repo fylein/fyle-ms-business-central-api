@@ -27,6 +27,14 @@ def handle_business_central_error(exception, accounting_export: AccountingExport
     accounting_export.save()
 
 
+def set_last_export_details(accounting_export: AccountingExport, status, message):
+    detail = {'accounting_export_id': accounting_export.id, 'message': '{0}'.format(message)}
+    accounting_export.status = status
+    accounting_export.detail = detail
+
+    accounting_export.save()
+
+
 def handle_business_central_exceptions():
     def decorator(func):
         def new_fn(*args):
@@ -37,36 +45,22 @@ def handle_business_central_exceptions():
                 return func(*args)
             except (FyleCredential.DoesNotExist):
                 logger.info('Fyle credentials not found %s', accounting_export.workspace_id)
-                accounting_export.detail = {'message': 'Fyle credentials do not exist in workspace'}
-                accounting_export.status = 'FAILED'
-
-                accounting_export.save()
+                set_last_export_details(accounting_export, 'FAILED', 'Fyle credentials do not exist in workspace')
 
             except BusinessCentralCredentials.DoesNotExist:
                 logger.info('Business Central Account not connected / token expired for workspace_id %s / accounting export %s', accounting_export.workspace_id, accounting_export.id)
-                detail = {'accounting_export_id': accounting_export.id, 'message': 'Business Central Account not connected / token expired'}
-                accounting_export.status = 'FAILED'
-                accounting_export.detail = detail
-
-                accounting_export.save()
+                set_last_export_details(accounting_export, 'FAILED', 'Business Central Account not connected / token expired')
 
             except WrongParamsError as exception:
-                handle_business_central_error(exception, accounting_export, 'Purchase Invoice')
+                set_last_export_details(exception, accounting_export, 'Purchase Invoice')
 
             except BulkError as exception:
                 logger.info(exception.response)
-                detail = exception.response
-                accounting_export.status = 'FAILED'
-                accounting_export.detail = detail
-
-                accounting_export.save()
+                set_last_export_details(accounting_export, 'FAILED', exception.response)
 
             except Exception as error:
                 error = traceback.format_exc()
-                accounting_export.detail = {'error': error}
-                accounting_export.status = 'FATAL'
-
-                accounting_export.save()
+                set_last_export_details(accounting_export, 'FATAL', error)
                 logger.error('Something unexpected happened workspace_id: %s %s', accounting_export.workspace_id, accounting_export.detail)
 
             update_last_export_details(accounting_export.workspace_id)
