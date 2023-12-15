@@ -96,3 +96,6 @@ class BaseExportModel(models.Model):
 
         # If none of the expected keys are present or if the values are empty, return the current date and time
         return datetime.now().strftime("%Y-%m-%d")
+
+    def get_vendor_id(accounting_export: AccountingExport) -> str:
+        return ""
