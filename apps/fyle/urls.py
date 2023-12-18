@@ -26,6 +26,7 @@ from apps.fyle.views import (
     ExportableExpenseGroupsView,
     FyleFieldsView,
     ImportFyleAttributesView,
+    SkippedExpenseView
 )
 
 accounting_exports_path = [
@@ -38,6 +39,7 @@ other_paths = [
     path('expense_filters/', ExpenseFilterView.as_view(), name='expense-filters'),
     path('fields/', FyleFieldsView.as_view(), name='fyle-fields'),
     path('expense_fields/', CustomFieldView.as_view(), name='fyle-expense-fields'),
+    path('expenses/', SkippedExpenseView.as_view(), name='expenses'),
 ]
 
 fyle_dimension_paths = [
