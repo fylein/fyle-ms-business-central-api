@@ -4,6 +4,8 @@ from django.db import transaction
 
 from apps.accounting_exports.models import AccountingExport
 from apps.business_central.exports.helpers import validate_accounting_export
+from apps.business_central.exports.helpers import resolve_errors_for_exported_accounting_export
+from apps.business_central.exceptions import handle_business_central_exceptions
 from apps.workspaces.models import AdvancedSetting
 
 logger = logging.getLogger(__name__)
@@ -26,6 +28,7 @@ class AccountingDataExporter:
         """
         raise NotImplementedError("Please implement this method")
 
+    #@handle_business_central_exceptions()
     def create_business_central_object(self, accounting_export: AccountingExport):
         """
         Create a accounting expense in the external accounting system.
@@ -36,7 +39,7 @@ class AccountingDataExporter:
         Raises:
             NotImplementedError: If the method is not implemented in the subclass.
         """
-
+        print('create_business_central_object')
         # Retrieve advance settings for the current workspace
         advance_settings = AdvancedSetting.objects.filter(workspace_id=accounting_export.workspace_id).first()
 
@@ -47,27 +50,29 @@ class AccountingDataExporter:
         else:
             # If the status is already 'IN_PROGRESS' or 'COMPLETE', return without further processing
             return
+        try:
+            validate_accounting_export(accounting_export)
+            with transaction.atomic():
+                # Create or update the main body of the accounting object
+                body_model_object = self.body_model.create_or_update_object(accounting_export, advance_settings)
 
-        validate_accounting_export(accounting_export)
-        with transaction.atomic():
-            # Create or update the main body of the accounting object
-            body_model_object = self.body_model.create_or_update_object(accounting_export, advance_settings)
+                # Create or update line items for the accounting object
+                lineitems_model_objects = None
+                if self.lineitem_model:
+                    lineitems_model_objects = self.lineitem_model.create_or_update_object(
+                        accounting_export, advance_settings
+                    )
 
-            # Create or update line items for the accounting object
-            lineitems_model_objects = None
-            if self.lineitem_model:
-                lineitems_model_objects = self.lineitem_model.create_or_update_object(
-                    accounting_export, advance_settings
-                )
+                # Post the data to the external accounting system
+                created_object = self.post(accounting_export, body_model_object, lineitems_model_objects)
 
-            # Post the data to the external accounting system
-            created_object = self.post(accounting_export, body_model_object, lineitems_model_objects)
+                # Update the accounting export details
+                detail = created_object
 
-            # Update the accounting export details
-            detail = {
-                'export_id': created_object
-            }
-
-            accounting_export.detail = detail
-            accounting_export.status = 'EXPORT_QUEUED'
-            accounting_export.save()
+                accounting_export.detail = detail
+                accounting_export.status = 'COMPLETE'
+                accounting_export.save()
+                resolve_errors_for_exported_accounting_export(accounting_export)
+        except Exception as e:
+            logger.error(e)
+            raise e

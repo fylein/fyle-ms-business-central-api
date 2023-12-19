@@ -63,7 +63,7 @@ def handle_business_central_exceptions():
                 set_last_export_details(accounting_export, 'FATAL', error)
                 logger.error('Something unexpected happened workspace_id: %s %s', accounting_export.workspace_id, accounting_export.detail)
 
-            update_last_export_details(accounting_export.workspace_id)
+            # update_last_export_details(accounting_export.workspace_id)
 
         return new_fn
 

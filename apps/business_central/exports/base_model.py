@@ -99,3 +99,6 @@ class BaseExportModel(models.Model):
 
     def get_vendor_id(accounting_export: AccountingExport) -> str:
         return ""
+
+    def get_employee_id(accounting_export: AccountingExport) -> str:
+        return ""
