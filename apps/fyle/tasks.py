@@ -6,7 +6,8 @@ from fyle_integrations_platform_connector import PlatformConnector
 
 from apps.accounting_exports.models import AccountingExport
 from apps.fyle.exceptions import handle_exceptions
-from apps.fyle.models import Expense
+from apps.fyle.models import Expense, ExpenseFilter
+from apps.fyle.helpers import construct_expense_filter_query
 from apps.workspaces.models import ExportSetting, FyleCredential, Workspace
 
 SOURCE_ACCOUNT_MAP = {
@@ -16,6 +17,31 @@ SOURCE_ACCOUNT_MAP = {
 
 logger = logging.getLogger(__name__)
 logger.level = logging.INFO
+
+
+def get_filtered_expenses(workspace: int, expense_objects: list, expense_filters: list):
+    """
+    function to get filtered expense objects
+    """
+
+    expenses_object_ids = [expense_object.id for expense_object in expense_objects]
+    final_query = construct_expense_filter_query(expense_filters)
+
+    Expense.objects.filter(
+        final_query,
+        id__in=expenses_object_ids,
+        accountingexport__isnull=True,
+        org_id=workspace.org_id
+    ).update(is_skipped=True)
+
+    filtered_expenses = Expense.objects.filter(
+        is_skipped=False,
+        id__in=expenses_object_ids,
+        accountingexport__isnull=True,
+        org_id=workspace.org_id
+    )
+
+    return filtered_expenses
 
 
 @handle_exceptions
@@ -53,9 +79,12 @@ def import_expenses(workspace_id, accounting_export: AccountingExport, source_ac
         workspace.save()
 
     with transaction.atomic():
-        expenses_object = Expense.create_expense_objects(expenses, workspace_id)
+        expense_objects = Expense.create_expense_objects(expenses, workspace_id)
+        expense_filters = ExpenseFilter.objects.filter(workspace_id=workspace_id).order_by('rank')
+        if expense_filters:
+            expense_objects = get_filtered_expenses(workspace, expense_objects, expense_filters)
         AccountingExport.create_accounting_export(
-            expenses_object,
+            expense_objects,
             fund_source=fund_source_key,
             workspace_id=workspace_id
         )

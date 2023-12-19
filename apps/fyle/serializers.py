@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from rest_framework.views import status
 
 from apps.fyle.helpers import get_expense_fields
-from apps.fyle.models import ExpenseFilter
+from apps.fyle.models import ExpenseFilter, Expense
 from apps.workspaces.models import FyleCredential, Workspace
 
 logger = logging.getLogger(__name__)
@@ -124,3 +124,13 @@ class ExpenseFieldSerializer(serializers.Serializer):
         expense_fields = get_expense_fields(workspace_id=workspace_id)
 
         return expense_fields
+
+
+class ExpenseSerializer(serializers.ModelSerializer):
+    """
+    Expense serializer
+    """
+
+    class Meta:
+        model = Expense
+        fields = ['updated_at', 'claim_number', 'employee_email', 'employee_name', 'fund_source', 'expense_number', 'payment_number', 'vendor', 'category', 'amount', 'report_id', 'settlement_id', 'expense_id']
