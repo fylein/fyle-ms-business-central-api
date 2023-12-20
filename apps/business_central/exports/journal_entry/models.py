@@ -20,6 +20,7 @@ class JournalEntry(BaseExportModel):
     vendor_id = StringNullField(help_text='destination id of vendor')
     employee_id = StringNullField(help_text='destination id of employee')
     invoice_date = CustomDateTimeField(help_text='date of invoice')
+    accounting_export = models.OneToOneField(AccountingExport, on_delete=models.PROTECT, help_text='Accounting Export reference')
 
     class Meta:
         db_table = 'journal_entries'

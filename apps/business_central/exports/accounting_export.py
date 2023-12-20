@@ -39,7 +39,6 @@ class AccountingDataExporter:
         Raises:
             NotImplementedError: If the method is not implemented in the subclass.
         """
-        print('create_business_central_object')
         # Retrieve advance settings for the current workspace
         advance_settings = AdvancedSetting.objects.filter(workspace_id=accounting_export.workspace_id).first()
 
