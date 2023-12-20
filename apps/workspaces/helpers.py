@@ -29,7 +29,7 @@ def generate_token(authorization_code: str, redirect_uri: str = None) -> str:
         else redirect_uri,
     }
 
-    auth = "{0}:{1}".format(settings.BUSINESS_CENTRAL_ID, settings.BUSINESS_CENTRAL_SECRET)
+    auth = "{0}:{1}".format(settings.BUSINESS_CENTRAL_CLIENT_ID, settings.BUSINESS_CENTRAL_CLIENT_SECRET)
     auth = base64.b64encode(auth.encode("utf-8"))
 
     request_header = {
