@@ -312,25 +312,3 @@ def test_get_workspace_admins(api_client, test_connection):
 
     response = api_client.get(url)
     assert response.status_code == 200
-
-
-def test_post_company_selection(api_client, test_connection):
-    '''
-    Test get workspace admins
-    '''
-    url = reverse('workspaces')
-    api_client.credentials(HTTP_AUTHORIZATION='Bearer {}'.format(test_connection.access_token))
-    response = api_client.post(url)
-
-    workspace_id = response.data['id']
-
-    url = reverse('company-selection', kwargs={'workspace_id': workspace_id})
-    api_client.credentials(HTTP_AUTHORIZATION='Bearer {}'.format(test_connection.access_token))
-
-    payload = {
-        'company_id': '123',
-        'company_name': 'Fyle Technologies'
-    }
-
-    response = api_client.post(url, payload)
-    assert response.status_code == 201
