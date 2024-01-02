@@ -333,4 +333,4 @@ def test_post_company_selection(api_client, test_connection):
     }
 
     response = api_client.post(url, payload)
-    assert response.status_code == 200
+    assert response.status_code == 201
