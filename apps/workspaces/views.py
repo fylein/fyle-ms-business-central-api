@@ -10,6 +10,7 @@ from apps.workspaces.models import AdvancedSetting, BusinessCentralCredentials, 
 from apps.workspaces.serializers import (
     AdvancedSettingSerializer,
     BusinessCentralCredentialSerializer,
+    CompanySelectionSerializer,
     ExportSettingsSerializer,
     ImportSettingsSerializer,
     WorkspaceAdminSerializer,
@@ -138,3 +139,10 @@ class WorkspaceAdminsView(generics.ListAPIView):
 
     def get_queryset(self):
         return WorkspaceAdminSerializer().get_admin_emails(self.kwargs['workspace_id'])
+
+
+class CompanySelectionView(generics.CreateAPIView):
+    """
+    Retrieve Company Selection
+    """
+    serializer_class = CompanySelectionSerializer
