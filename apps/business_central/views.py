@@ -1,6 +1,10 @@
 from rest_framework import generics
 
-from apps.business_central.serializers import BusinessCentralFieldSerializer, ImportBusinessCentralAttributesSerializer
+from apps.business_central.serializers import (
+    BusinessCentralFieldSerializer,
+    CompanySelectionSerializer,
+    ImportBusinessCentralAttributesSerializer,
+)
 
 
 class ImportBusinessCentralAttributesView(generics.CreateAPIView):
@@ -19,3 +23,10 @@ class BusinessCentralFieldsView(generics.ListAPIView):
 
     def get_queryset(self):
         return BusinessCentralFieldSerializer().format_business_central_fields(self.kwargs["workspace_id"])
+
+
+class CompanySelectionView(generics.CreateAPIView):
+    """
+    Retrieve Company Selection
+    """
+    serializer_class = CompanySelectionSerializer

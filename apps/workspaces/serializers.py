@@ -9,7 +9,6 @@ from rest_framework import serializers
 
 from apps.fyle.helpers import get_cluster_domain
 from apps.users.models import User
-from apps.workspaces.helpers import connect_business_central
 from apps.workspaces.models import (
     AdvancedSetting,
     BusinessCentralCredentials,
@@ -84,25 +83,6 @@ class BusinessCentralCredentialSerializer(serializers.ModelSerializer):
     class Meta:
         model = BusinessCentralCredentials
         fields = "__all__"
-
-    def create(self, validated_data):
-        """
-        Create Business Central Credentials
-        """
-        try:
-            workspace_id = self.context['request'].parser_context.get('kwargs').get('workspace_id')
-            authorization_code = self.context['request'].data.get('code')
-            redirect_uri = self.context['request'].data.get('redirect_uri')
-
-            business_central_credentials = connect_business_central(
-                authorization_code=authorization_code,
-                redirect_uri=redirect_uri,
-                workspace_id=workspace_id,
-            )
-
-            return business_central_credentials
-        except Exception as exception:
-            raise serializers.ValidationError(exception)
 
 
 class ExportSettingsSerializer(serializers.ModelSerializer):

@@ -7,8 +7,7 @@ from django.conf import settings
 from dynamics.exceptions.dynamics_exceptions import InternalServerError, InvalidTokenError
 from future.moves.urllib.parse import urlencode
 
-from apps.business_central.utils import BusinessCentralConnector
-from apps.workspaces.models import BusinessCentralCredentials, Workspace
+from apps.workspaces.models import BusinessCentralCredentials
 
 logger = logging.getLogger(__name__)
 
@@ -89,8 +88,6 @@ def connect_business_central(authorization_code, redirect_uri, workspace_id):
     # Retrieve or create BusinessCentralCredentials based on workspace_id
     business_central_credentials = BusinessCentralCredentials.objects.filter(workspace_id=workspace_id).first()
 
-    workspace = Workspace.objects.get(pk=workspace_id)
-
     if not business_central_credentials:
         # If BusinessCentralCredentials does not exist, create a new one
         business_central_credentials = BusinessCentralCredentials.objects.create(
@@ -101,26 +98,5 @@ def connect_business_central(authorization_code, redirect_uri, workspace_id):
         business_central_credentials.refresh_token = refresh_token
         business_central_credentials.is_expired = False
         business_central_credentials.save()
-
-    if workspace and not workspace.business_central_company_id:
-        # If workspace has no associated Business Central company ID, fetch and update it
-        business_central_connector = BusinessCentralConnector(business_central_credentials, workspace_id=workspace_id)
-        connections = business_central_connector.connection.connections.get_all()
-        connection = list(
-            filter(
-                lambda connection: connection["id"] == workspace.business_central_company_id,
-                connections,
-            )
-        )
-
-        if connection:
-            # If a matching connection is found, update workspace's Business Central company ID
-            workspace.business_central_company_id = connection[0]["id"]
-            workspace.save()
-
-    if workspace.onboarding_state == "COMPANY_SELECTION":
-        # If workspace's onboarding state is "COMPANY_SELECTION", update it to "EXPORT_SETTINGS"
-        workspace.onboarding_state = "EXPORT_SETTINGS"
-        workspace.save()
 
     return business_central_credentials
