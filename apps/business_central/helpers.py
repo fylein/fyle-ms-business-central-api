@@ -1,11 +1,10 @@
 
-from datetime import datetime, timezone
 import logging
+from datetime import datetime, timezone
 
 from django.utils.module_loading import import_string
 
-from apps.workspaces.models import Workspace, BusinessCentralCredentials
-
+from apps.workspaces.models import BusinessCentralCredentials, Workspace
 
 logger = logging.getLogger(__name__)
 logger.level = logging.INFO
@@ -49,7 +48,7 @@ def sync_dimensions(business_central_credential: BusinessCentralCredentials, wor
     business_central_connection = import_string('apps.business_central.utils.BusinessCentralConnector')(business_central_credential, workspace_id)
 
     # List of dimensions to sync
-    dimensions = ['accounts', 'vendors', 'employees', 'locations']
+    dimensions = ['accounts', 'vendors', 'employees', 'locations', 'companies']
 
     for dimension in dimensions:
         try:
