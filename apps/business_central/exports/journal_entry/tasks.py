@@ -1,12 +1,12 @@
 from typing import Dict
 
-from apps.business_central.exports.accounting_export import AccountingDataExporter
 from apps.accounting_exports.models import AccountingExport
-from apps.workspaces.models import BusinessCentralCredentials
-from apps.business_central.utils import BusinessCentralConnector
-from apps.business_central.exports.journal_entry.queues import check_accounting_export_and_start_import
 from apps.business_central.exceptions import handle_business_central_exceptions
+from apps.business_central.exports.accounting_export import AccountingDataExporter
 from apps.business_central.exports.journal_entry.models import JournalEntry
+from apps.business_central.exports.journal_entry.queues import check_accounting_export_and_start_import
+from apps.business_central.utils import BusinessCentralConnector
+from apps.workspaces.models import BusinessCentralCredentials
 
 
 class ExportJournalEntry(AccountingDataExporter):
@@ -38,6 +38,7 @@ class ExportJournalEntry(AccountingDataExporter):
             'postingDate': body.invoice_date,
             'documentNumber': None,
             'amount': body.amount,
+            'comment': body.comment,
             'description': body.description
         }
 
@@ -59,14 +60,14 @@ class ExportJournalEntry(AccountingDataExporter):
         return response
 
 
-#@handle_business_central_exceptions()
+@handle_business_central_exceptions()
 def create_journal_entry(accounting_export: AccountingExport):
     """
     Helper function to create and export a journal entry.
     """
-    export_direct_cost_instance = ExportJournalEntry()
+    export_jouranl_entry_instance = ExportJournalEntry()
 
     # Create and export the journal entry using the base class method
-    exported_jornal_entry = export_direct_cost_instance.create_business_central_object(accounting_export=accounting_export)
+    exported_jornal_entry = export_jouranl_entry_instance.create_business_central_object(accounting_export=accounting_export)
 
     return exported_jornal_entry

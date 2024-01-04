@@ -19,7 +19,7 @@ class BaseExportModel(models.Model):
     class Meta:
         abstract = True
 
-    def get_expense_purpose(workspace_id, lineitem: Expense, category: str, advance_setting: AdvancedSetting) -> str:
+    def get_expense_comment(workspace_id, lineitem: Expense, category: str, advance_setting: AdvancedSetting) -> str:
         workspace = Workspace.objects.get(id=workspace_id)
         org_id = workspace.org_id
 

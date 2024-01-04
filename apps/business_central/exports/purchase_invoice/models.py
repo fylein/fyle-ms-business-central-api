@@ -93,7 +93,7 @@ class PurchaseInvoiceLineitems(BaseExportModel):
                 expense_id=lineitem.id,
                 defaults={
                     'amount': lineitem.amount,
-                    'accounts_payable_account_id': account.destination_account.destination_id,
+                    'accounts_payable_account_id': account.destination_account.destination_id if account else None,
                     'description': description,
                     'workspace_id': accounting_export.workspace_id
                 }

@@ -69,7 +69,7 @@ class BusinessCentralConnector:
                 attribute_type,
                 display_name,
                 item['displayName'],
-                item['id'],
+                item['number'],
                 active,
                 detail
             ))

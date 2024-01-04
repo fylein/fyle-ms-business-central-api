@@ -5,7 +5,7 @@ import traceback
 from dynamics.exceptions.dynamics_exceptions import WrongParamsError
 
 from apps.accounting_exports.models import AccountingExport, Error
-from apps.business_central.actions import update_last_export_details
+from apps.business_central.actions import update_accounting_export_summary
 from apps.workspaces.models import BusinessCentralCredentials, FyleCredential
 from ms_business_central_api.exceptions import BulkError
 
@@ -45,25 +45,39 @@ def handle_business_central_exceptions():
                 return func(*args)
             except (FyleCredential.DoesNotExist):
                 logger.info('Fyle credentials not found %s', accounting_export.workspace_id)
-                set_last_export_details(accounting_export, 'FAILED', 'Fyle credentials do not exist in workspace')
+                accounting_export.detail = {'message': 'Fyle credentials do not exist in workspace'}
+                accounting_export.status = 'FAILED'
+
+                accounting_export.save()
 
             except BusinessCentralCredentials.DoesNotExist:
-                logger.info('Business Central Account not connected / token expired for workspace_id %s / accounting export %s', accounting_export.workspace_id, accounting_export.id)
-                set_last_export_details(accounting_export, 'FAILED', 'Business Central Account not connected / token expired')
+                logger.info('Sage300 Account not connected / token expired for workspace_id %s / accounting export %s', accounting_export.workspace_id, accounting_export.id)
+                detail = {'accounting_export_id': accounting_export.id, 'message': 'Sage300 Account not connected / token expired'}
+                accounting_export.status = 'FAILED'
+                accounting_export.detail = detail
+
+                accounting_export.save()
 
             except WrongParamsError as exception:
-                set_last_export_details(exception, accounting_export, 'Purchase Invoice')
+                handle_business_central_error(exception, accounting_export, 'Purchase Invoice')
 
             except BulkError as exception:
                 logger.info(exception.response)
-                set_last_export_details(accounting_export, 'FAILED', exception.response)
+                detail = exception.response
+                accounting_export.status = 'FAILED'
+                accounting_export.detail = detail
+
+                accounting_export.save()
 
             except Exception as error:
                 error = traceback.format_exc()
-                set_last_export_details(accounting_export, 'FATAL', error)
+                accounting_export.detail = {'error': error}
+                accounting_export.status = 'FATAL'
+
+                accounting_export.save()
                 logger.error('Something unexpected happened workspace_id: %s %s', accounting_export.workspace_id, accounting_export.detail)
 
-            # update_last_export_details(accounting_export.workspace_id)
+            update_accounting_export_summary(accounting_export.workspace_id)
 
         return new_fn
 

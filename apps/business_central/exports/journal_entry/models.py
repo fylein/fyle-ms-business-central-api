@@ -5,7 +5,13 @@ from apps.accounting_exports.models import AccountingExport
 from apps.business_central.exports.base_model import BaseExportModel
 from apps.fyle.models import Expense
 from apps.workspaces.models import AdvancedSetting
-from ms_business_central_api.models.fields import CustomDateTimeField, FloatNullField, StringNullField, TextNotNullField
+from ms_business_central_api.models.fields import (
+    CustomDateTimeField,
+    FloatNullField,
+    StringNullField,
+    TextNotNullField,
+    TextNullField,
+)
 
 
 class JournalEntry(BaseExportModel):
@@ -16,9 +22,8 @@ class JournalEntry(BaseExportModel):
     accounts_payable_account_id = StringNullField(help_text='destination id of accounts payable account')
     expense = models.OneToOneField(Expense, on_delete=models.PROTECT, help_text='Reference to Expense')
     amount = FloatNullField(help_text='Amount of the invoice')
-    description = TextNotNullField(help_text='description for the invoice')
-    vendor_id = StringNullField(help_text='destination id of vendor')
-    employee_id = StringNullField(help_text='destination id of employee')
+    comment = TextNotNullField(help_text='description for the invoice')
+    description = TextNullField(help_text='description for the invoice')
     invoice_date = CustomDateTimeField(help_text='date of invoice')
     accounting_export = models.OneToOneField(AccountingExport, on_delete=models.PROTECT, help_text='Accounting Export reference')
 
@@ -32,38 +37,28 @@ class JournalEntry(BaseExportModel):
         :param accounting_export: expense group
         :return: purchase invoices object
         """
+        expense = accounting_export.expenses.first()
 
-        expenses = accounting_export.expenses.all()
-        vendor_id = None
-        employee_id = None
+        account = CategoryMapping.objects.filter(
+            source_category__value=expense.category,
+            workspace_id=accounting_export.workspace_id
+        ).first()
 
-        journal_entry_objects = []
+        comment = self.get_expense_comment(accounting_export.workspace_id, expense, expense.category, advance_setting)
 
-        for lineitem in expenses:
-            account = CategoryMapping.objects.filter(
-                source_category__value=lineitem.category,
-                workspace_id=accounting_export.workspace_id
-            ).first()
+        invoice_date = self.get_invoice_date(accounting_export=accounting_export)
 
-            # vendor_id = self.get_vendor_id(accounting_export.workspace_id, lineitem.vendor, advance_setting)
-            # employee_id = self.get_employee_id(accounting_export.workspace_id, lineitem.employee_email, advance_setting)
+        journal_entry_object, _ = JournalEntry.objects.update_or_create(
+            expense_id=expense.id,
+            defaults={
+                'amount': expense.amount,
+                'accounts_payable_account_id': account.destination_account.destination_id,
+                'comment': comment,
+                'workspace_id': accounting_export.workspace_id,
+                'invoice_date': invoice_date,
+                'accounting_export_id': accounting_export.id,
+                'description': expense.purpose if expense.purpose else None
+            }
+        )
 
-            #description = self.get_expense_purpose(accounting_export.workspace_id, lineitem, lineitem.category, advance_setting)
-
-            invoice_date = self.get_invoice_date(accounting_export=accounting_export)
-
-            journal_entry_object, _ = JournalEntry.objects.update_or_create(
-                expense_id=lineitem.id,
-                defaults={
-                    'amount': lineitem.amount,
-                    'accounts_payable_account_id': account.destination_account.destination_id,
-                    'description': " testing desc rushi",
-                    'workspace_id': accounting_export.workspace_id,
-                    'vendor_id': vendor_id,
-                    'employee_id': employee_id,
-                    'invoice_date': invoice_date
-                }
-            )
-            journal_entry_objects.append(journal_entry_object)
-
-        return journal_entry_objects
+        return journal_entry_object

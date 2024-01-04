@@ -1,4 +1,5 @@
 from typing import List
+
 from django.db.models import Q
 from django_q.tasks import Chain
 
@@ -15,7 +16,7 @@ def check_accounting_export_and_start_import(workspace_id: int, accounting_expor
 
     accounting_exports = AccountingExport.objects.filter(
         ~Q(status__in=['IN_PROGRESS', 'COMPLETE', 'EXPORT_QUEUED']),
-        workspace_id=workspace_id, id__in=accounting_export_ids, directcost__id__isnull=True,
+        workspace_id=workspace_id, id__in=accounting_export_ids,
         exported_at__isnull=True
     ).all()
 
@@ -28,7 +29,7 @@ def check_accounting_export_and_start_import(workspace_id: int, accounting_expor
             id=accounting_export_group.id,
             defaults={
                 'status': 'ENQUEUED',
-                'type': 'DIRECT_COST'
+                'type': 'JOURNAL_ENTRY'
             }
         )
 

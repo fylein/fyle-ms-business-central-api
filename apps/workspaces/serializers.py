@@ -7,6 +7,7 @@ from fyle_rest_auth.helpers import get_fyle_admin
 from fyle_rest_auth.models import AuthToken
 from rest_framework import serializers
 
+from apps.accounting_exports.models import AccountingExportSummary
 from apps.fyle.helpers import get_cluster_domain
 from apps.users.models import User
 from apps.workspaces.helpers import connect_business_central
@@ -16,7 +17,6 @@ from apps.workspaces.models import (
     ExportSetting,
     FyleCredential,
     ImportSetting,
-    LastExportDetail,
     Workspace,
 )
 from ms_business_central_api.utils import assert_valid
@@ -64,7 +64,7 @@ class WorkspaceSerializer(serializers.ModelSerializer):
 
             cluster_domain = get_cluster_domain(auth_tokens.refresh_token)
 
-            LastExportDetail.objects.create(workspace_id=workspace.id)
+            AccountingExportSummary.objects.create(workspace_id=workspace.id)
 
             FyleCredential.objects.update_or_create(
                 refresh_token=auth_tokens.refresh_token,
