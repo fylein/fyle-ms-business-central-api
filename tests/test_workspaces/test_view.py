@@ -75,17 +75,18 @@ def test_get_of_business_central_creds(api_client, test_connection):
     assert response.data['is_expired'] == False
 
 
-def test_export_settings(api_client, test_connection):
+def test_export_settings(api_client, test_connection, create_temp_workspace, add_fyle_credentials, add_business_central_creds, mocker):
     '''
     Test export settings
     '''
-    url = reverse('workspaces')
-    api_client.credentials(HTTP_AUTHORIZATION='Bearer {}'.format(test_connection.access_token))
-    response = api_client.post(url)
+    url = reverse('export-settings', kwargs={'workspace_id': 1})
 
-    workspace_id = response.data['id']
-
-    url = reverse('export-settings', kwargs={'workspace_id': workspace_id})
+    mocker.patch(
+        "dynamics.apis.Journals.post",
+        return_value={
+            "id": '1234'
+        },
+    )
 
     api_client.credentials(HTTP_AUTHORIZATION='Bearer {}'.format(test_connection.access_token))
     response = api_client.post(url)
@@ -100,12 +101,13 @@ def test_export_settings(api_client, test_connection):
         'credit_card_expense_state': 'PAID',
         'credit_card_expense_grouped_by': 'EXPENSE',
         'credit_card_expense_date': 'CREATED_AT',
-        'default_reimbursable_account_name': 'reimbursable account',
-        'default_reimbursable_account_id': '123',
         'default_ccc_credit_card_account_name': 'CCC credit card account',
         'default_ccc_credit_card_account_id': '123',
-        'default_reimbursable_credit_card_account_name': 'reimbursable credit card account',
-        'default_reimbursable_credit_card_account_id': '342',
+        "default_reimbursable_credit_card_account_name": "reimbursable credit card account",
+        "default_reimbursable_credit_card_account_id": "342",
+        "default_reimbursable_account_name": "reimbursable account",
+        "default_reimbursable_account_id": "123",
+        "auto_create_vendors": "true",
         'default_vendor_name': 'Nilesh',
         'default_vendor_id': '123',
         'default_back_account_id': '123',
@@ -114,7 +116,7 @@ def test_export_settings(api_client, test_connection):
 
     response = api_client.post(url, payload)
 
-    export_settings = ExportSetting.objects.filter(workspace_id=workspace_id).first()
+    export_settings = ExportSetting.objects.filter(workspace_id=1).first()
 
     assert response.status_code == 201
     assert export_settings.reimbursable_expenses_export_type == 'PURCHASE_INVOICE'
@@ -125,10 +127,10 @@ def test_export_settings(api_client, test_connection):
     assert export_settings.credit_card_expense_state == 'PAID'
     assert export_settings.credit_card_expense_grouped_by == 'EXPENSE'
     assert export_settings.credit_card_expense_date == 'CREATED_AT'
-    assert export_settings.default_reimbursable_account_name == 'reimbursable account'
-    assert export_settings.default_reimbursable_account_id == '123'
     assert export_settings.default_ccc_credit_card_account_name == 'CCC credit card account'
     assert export_settings.default_ccc_credit_card_account_id == '123'
+    assert export_settings.default_reimbursable_account_name == 'reimbursable account'
+    assert export_settings.default_reimbursable_account_id == '123'
     assert export_settings.default_reimbursable_credit_card_account_name == 'reimbursable credit card account'
     assert export_settings.default_reimbursable_credit_card_account_id == '342'
     assert export_settings.default_vendor_name == 'Nilesh'
