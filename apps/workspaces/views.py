@@ -5,6 +5,7 @@ from fyle_rest_auth.utils import AuthUtils
 from rest_framework import generics
 from rest_framework.views import Response, status
 
+from apps.workspaces.helpers import connect_business_central
 from apps.workspaces.models import AdvancedSetting, BusinessCentralCredentials, ExportSetting, ImportSetting, Workspace
 from apps.workspaces.serializers import (
     AdvancedSettingSerializer,
@@ -78,7 +79,24 @@ class ConnectBusinessCentralView(generics.CreateAPIView, generics.RetrieveAPIVie
     serializer_class = BusinessCentralCredentialSerializer
     lookup_field = 'workspace_id'
 
-    queryset = BusinessCentralCredentials.objects.all()
+    def post(self, request, **kwargs):
+        """
+        Create Business Central Credentials
+        """
+
+        business_central_credentials = connect_business_central(
+            authorization_code=request.data.get("code"),
+            redirect_uri=request.data.get("redirect_uri"),
+            workspace_id=kwargs["workspace_id"],
+        )
+
+        return Response(
+            data=BusinessCentralCredentialSerializer(business_central_credentials).data,
+            status=status.HTTP_200_OK,
+        )
+
+    def get_queryset(self):
+        return BusinessCentralCredentials.objects.all()
 
 
 class ExportSettingView(generics.CreateAPIView, generics.RetrieveAPIView):

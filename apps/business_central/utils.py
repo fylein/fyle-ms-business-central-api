@@ -64,14 +64,14 @@ class BusinessCentralConnector:
         destination_attributes = []
         for item in data:
             detail = {field: item[field] for field in field_names}
-            if (attribute_type == 'EMPLOYEE' and item.get('status') == 'Active') or (attribute_type == 'LOCATION') or (item.get('blocked') and item['blocked'] != True):
+            if (attribute_type == 'EMPLOYEE' and item.get('status') == 'Active') or (attribute_type in ('LOCATION', 'COMPANY')) or (item.get('blocked') and item['blocked'] != True):
                 active = True
             else:
                 active = False
             destination_attributes.append(self._create_destination_attribute(
                 attribute_type,
                 display_name,
-                item['displayName'],
+                item['displayName'] if item['displayName'] else item['name'],
                 item['number'] if item.get('number') else item['id'],
                 active,
                 detail
@@ -84,8 +84,9 @@ class BusinessCentralConnector:
         sync business central companies
         """
         companies = self.connection.companies.get_all()
+        field_names = []
 
-        self._sync_data(companies, 'COMPANY', 'company', self.workspace_id)
+        self._sync_data(companies, 'COMPANY', 'company', self.workspace_id, field_names)
         return []
 
     def sync_accounts(self):

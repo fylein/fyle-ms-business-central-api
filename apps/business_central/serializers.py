@@ -93,3 +93,29 @@ class BusinessCentralFieldSerializer(serializers.Serializer):
         attributes_list = list(serialized_attributes)
 
         return attributes_list
+
+
+class CompanySelectionSerializer(serializers.ModelSerializer):
+    """
+    Company Selection Serializer
+    """
+
+    class Meta:
+        model = Workspace
+        fields = '__all__'
+        read_only_fields = ('id', 'name', 'org_id', 'created_at', 'updated_at', 'user')
+
+    def create(self, validated_data):
+        """
+        Create Company Selection
+        """
+        workspace_id = self.context['request'].parser_context.get('kwargs').get('workspace_id')
+        workspace = Workspace.objects.get(id=workspace_id)
+
+        workspace.business_central_company_id = self.context['request'].data.get('company_id')
+        workspace.business_central_company_name = self.context['request'].data.get('company_name')
+        if workspace.onboarding_state == 'COMPANY_SELECTION':
+            workspace.onboarding_state = 'EXPORT_SETTINGS'
+        workspace.save()
+
+        return workspace
