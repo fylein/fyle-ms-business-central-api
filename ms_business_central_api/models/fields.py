@@ -1,5 +1,5 @@
-from django.db import models
 from django.core.validators import EmailValidator
+from django.db import models
 
 
 class StringNotNullField(models.CharField):
@@ -63,8 +63,17 @@ class TextNotNullField(models.TextField):
 
     def __init__(self, *args, **kwargs):
         kwargs['null'] = False  # Ensure the field is not nullable
-        kwargs['help_text'] = kwargs.get('help_text', 'text field with null false')
+        kwargs['help_text'] = kwargs.get('help_text', 'text field with null true')
         super(TextNotNullField, self).__init__(*args, **kwargs)
+
+
+class TextNullField(models.TextField):
+    description = "Custom Text Field with Not Null"
+
+    def __init__(self, *args, **kwargs):
+        kwargs['null'] = True  # Ensure the field is not nullable
+        kwargs['help_text'] = kwargs.get('help_text', 'text field with null false')
+        super(TextNullField, self).__init__(*args, **kwargs)
 
 
 class StringOptionsField(models.CharField):

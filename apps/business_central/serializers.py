@@ -78,6 +78,7 @@ class BusinessCentralFieldSerializer(serializers.Serializer):
             "ACCOUNT",
             "EMPLOYEE",
             "LOCATION",
+            "COMPANY"
         ]
         attributes = (
             DestinationAttribute.objects.filter(

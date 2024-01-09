@@ -1,20 +1,20 @@
-from typing import List, Dict
+from typing import Dict, List
 
-from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from django.db import models
+
+from apps.workspaces.models import BaseForeignWorkspaceModel
 from ms_business_central_api.models.fields import (
-    StringNotNullField,
-    StringNullField,
     BooleanFalseField,
-    CustomJsonField,
     CustomDateTimeField,
     CustomEmailField,
+    CustomJsonField,
     FloatNullField,
-    StringOptionsField,
     IntegerOptionsField,
+    StringNotNullField,
+    StringNullField,
+    StringOptionsField,
 )
-from apps.workspaces.models import BaseForeignWorkspaceModel
-
 
 EXPENSE_FILTER_RANK = (
     (1, 1),
@@ -153,7 +153,7 @@ class Expense(BaseForeignWorkspaceModel):
             )
 
             # Check if an AccountingExport related to the expense object already exists
-            if not Expense.objects.filter(accountingexport__isnull=False).distinct():
+            if not expense_object.accountingexport_set.exists():
                 expense_objects.append(expense_object)
 
         return expense_objects

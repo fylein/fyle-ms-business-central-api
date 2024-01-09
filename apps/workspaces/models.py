@@ -130,6 +130,11 @@ CREDIT_CARD_EXPENSES_DATE_TYPE_CHOICES = (
     ('CREATED_AT', 'created_at')
 )
 
+EXPORT_MODE_CHOICES = (
+    ('MANUAL', 'MANUAL'),
+    ('AUTO', 'AUTO')
+)
+
 
 class BusinessCentralCredentials(BaseModel):
     """
@@ -192,6 +197,7 @@ class ExportSetting(BaseModel):
     default_vendor_name = StringNullField(help_text='default Vendor Name')
     default_vendor_id = StringNullField(help_text='default Vendor Id')
     auto_map_employees = BooleanTrueField(help_text='Auto map employees')
+    default_journal_entry_folder_id = StringNullField(help_text='default Fyle journal entry id')
 
     class Meta:
         db_table = 'export_settings'
@@ -218,7 +224,7 @@ class AdvancedSetting(BaseModel):
         models.CharField(max_length=255), help_text='Array of fields in memo', null=True
     )
     schedule_is_enabled = BooleanFalseField(help_text='Boolean to check if schedule is enabled')
-    schedule_start_datetime = CustomDateTimeField(help_text='Schedule start date and time')
+    start_datetime = CustomDateTimeField(help_text='Schedule start date and time')
     schedule_id = StringNullField(help_text='Schedule id')
     interval_hours = IntegerNullField(help_text='Interval in hours')
     emails_selected = CustomJsonField(help_text='Emails Selected For Email Notification')
@@ -227,3 +233,19 @@ class AdvancedSetting(BaseModel):
 
     class Meta:
         db_table = 'advanced_settings'
+
+
+class LastExportDetail(BaseModel):
+    """
+    Table to store Last Export Details
+    """
+
+    id = models.AutoField(primary_key=True)
+    last_exported_at = models.DateTimeField(help_text='Last exported at datetime', null=True)
+    export_mode = models.CharField(max_length=50, help_text='Mode of the export Auto / Manual', choices=EXPORT_MODE_CHOICES, null=True)
+    total_accounting_exports_count = models.IntegerField(help_text='Total count of accounting exports exported', null=True)
+    successful_accounting_exports_count = models.IntegerField(help_text='count of successful accounting_exports ', null=True)
+    failed_accounting_exports_count = models.IntegerField(help_text='count of failed accounting_exports ', null=True)
+
+    class Meta:
+        db_table = 'last_export_details'
