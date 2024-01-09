@@ -81,7 +81,6 @@ class ExportJournalEntry(AccountingDataExporter):
             load_attachments(
                 business_central_connection,
                 response["responses"][i]["body"]["id"],
-                "Journal",
                 expenses[i - 1],
                 accounting_export)
 

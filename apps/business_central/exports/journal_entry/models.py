@@ -41,7 +41,9 @@ class JournalEntry(BaseExportModel):
 
         account_id = export_settings.default_back_account_id
 
-        comment = "Consolidated Debit Entry For Report {}".format(accounting_export.description['claim_number'] if accounting_export.description and accounting_export.description['claim_number'] else accounting_export.description['expense_number'])
+        document_number = accounting_export.description['claim_number'] if accounting_export.description and accounting_export.description.get('claim_number') else accounting_export.description['expense_number']
+
+        comment = "Consolidated Credit Entry For Report/Expense {}".format(document_number)
 
         invoice_date = self.get_invoice_date(accounting_export=accounting_export)
 
@@ -49,7 +51,7 @@ class JournalEntry(BaseExportModel):
             accounting_export= accounting_export,
             defaults={
                 'amount': sum([expense.amount for expense in expenses]) * -1,
-                'document_number': accounting_export.description['claim_number'] if accounting_export.description and accounting_export.description['claim_number'] else accounting_export.description['expense_number'],
+                'document_number': document_number,
                 'accounts_payable_account_id': account_id,
                 'comment': comment,
                 'workspace_id': accounting_export.workspace_id,
@@ -99,12 +101,14 @@ class JournalEntryLineItems(BaseExportModel):
 
             invoice_date = self.get_invoice_date(accounting_export=accounting_export)
 
+            document_number = accounting_export.description['claim_number'] if accounting_export.description and accounting_export.description.get('claim_number') else accounting_export.description['expense_number']
+
             journal_entry_lineitems_object, _ = JournalEntryLineItems.objects.update_or_create(
                 journal_entry_id = journal_entry.id,
                 expense_id=lineitem.id,
                 defaults={
                     'amount': lineitem.amount,
-                    'document_number':  accounting_export.description['claim_number'] if accounting_export.description and accounting_export.description['claim_number'] else accounting_export.description['expense_number'],
+                    'document_number':  document_number,
                     'accounts_payable_account_id': account.destination_account.destination_id,
                     'comment': comment,
                     'workspace_id': accounting_export.workspace_id,

@@ -4,7 +4,7 @@ from typing import Dict, List
 from dynamics.core.client import Dynamics
 from fyle_accounting_mappings.models import DestinationAttribute
 
-from apps.workspaces.models import BusinessCentralCredentials, Workspace
+from apps.workspaces.models import BusinessCentralCredentials, ExportSetting, Workspace
 from ms_business_central_api import settings
 
 
@@ -141,10 +141,8 @@ class BusinessCentralConnector:
         """
         Create default journal entry folder
         """
-        workspace = Workspace.objects.get(id=self.workspace_id)
-        self.connection.set_company_id(workspace.business_central_company_id)
 
-        response = self.connection.journal_entry_folders.post({
+        response = self.connection.journals.post({
             'code': 'Fyle_JE',
             'displayName': 'Fyle_JE',
             'templateDisplayName': 'GENERAL'
@@ -156,13 +154,15 @@ class BusinessCentralConnector:
         Bulk post data to MS Dynamics SDK
         """
         workspace = Workspace.objects.get(id=self.workspace_id)
+        export_settings = ExportSetting.objects.get(workspace_id=self.workspace_id)
+
         self.connection.set_company_id(workspace.business_central_company_id)
 
-        response = self.connection.journal_line_items.bulk_post('b3c4303f-4319-ee11-9cc4-6045bdc8dcac', payload)
+        response = self.connection.journal_line_items.bulk_post(export_settings.default_journal_entry_folder_id, payload)
         return response
 
     def post_attachments(
-        self, ref_id: str, ref_type: str, attachments: List[Dict]
+        self, ref_id: str, attachments: List[Dict]
     ) -> List:
         """
         Link attachments to objects Xero
@@ -181,7 +181,6 @@ class BusinessCentralConnector:
                 post_response = self.connection.attachments.post(data)
 
                 self.connection.attachments.upload(
-                    ref_id,
                     post_response["id"],
                     attachment["content_type"],
                     base64.b64decode(attachment["download_url"])

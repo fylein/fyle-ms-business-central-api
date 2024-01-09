@@ -28,11 +28,11 @@ gunicorn==20.1.0
 fyle==0.36.0
 
 # Business central sdk
-ms-dynamics-business-central-sdk==1.3.2
+ms-dynamics-business-central-sdk==1.3.3
 
 # Reusable Fyle Packages
 fyle-rest-auth==1.5.0
-fyle-accounting-mappings==1.27.3
+fyle-accounting-mappings==1.29.0
 fyle-integrations-platform-connector==1.36.1
 
 # Postgres Dependincies
