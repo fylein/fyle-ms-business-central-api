@@ -8,6 +8,7 @@ from fyle_rest_auth.models import AuthToken
 from rest_framework import serializers
 
 from apps.accounting_exports.models import AccountingExportSummary
+from apps.business_central.utils import BusinessCentralConnector
 from apps.fyle.helpers import get_cluster_domain
 from apps.users.models import User
 from apps.workspaces.helpers import connect_business_central
@@ -128,6 +129,17 @@ class ExportSettingsSerializer(serializers.ModelSerializer):
             workspace_id=workspace_id,
             defaults=validated_data
         )
+
+        if (export_settings.reimbursable_expenses_export_type == 'JOURNAL_ENTRY' or export_settings.corporate_credit_card_expenses_export_type == 'JOURNAL_ENTRY') and \
+            not export_settings.default_journal_entry_id:
+
+            business_central_credentials = BusinessCentralCredentials.objects.get(workspace_id=workspace_id)
+            business_central_connector = BusinessCentralConnector(
+                credentials=business_central_credentials
+            )
+            default_journal_entry_id = business_central_connector.create_default_journal_entry_folder()
+            export_settings.default_journal_entry_folder_id = default_journal_entry_id
+            export_settings.save()
 
         # Update workspace onboarding state
         workspace = export_settings.workspace

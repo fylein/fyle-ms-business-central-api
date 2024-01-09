@@ -6,6 +6,7 @@ from apps.workspaces.views import (
     ExportSettingView,
     ImportSettingView,
     ReadyView,
+    TriggerExportsView,
     WorkspaceAdminsView,
     WorkspaceView,
 )
@@ -13,6 +14,7 @@ from apps.workspaces.views import (
 workspace_app_paths = [
     path('', WorkspaceView.as_view(), name='workspaces'),
     path('ready/', ReadyView.as_view(), name='ready'),
+    path('<int:workspace_id>/exports/trigger/', TriggerExportsView.as_view(), name='trigger-exports'),
     path("<int:workspace_id>/connect_business_central/authorization_code/", ConnectBusinessCentralView.as_view(), name='business-central-authorization-code'),
     path("<int:workspace_id>/credentials/business_central/", ConnectBusinessCentralView.as_view(), name='business-central-credentials'),
     path('<int:workspace_id>/export_settings/', ExportSettingView.as_view(), name='export-settings'),

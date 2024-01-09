@@ -195,7 +195,6 @@ def test_construct_fyle_expense_custom_field_payload(
     fyle_payload = expense_custom_field.construct_fyle_expense_custom_field_payload(
         paginated_destination_attributes, platform
     )
-    print(fyle_payload, "fyle_payload")
 
     assert (
         fyle_payload

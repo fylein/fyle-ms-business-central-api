@@ -14,6 +14,7 @@ from apps.workspaces.serializers import (
     WorkspaceAdminSerializer,
     WorkspaceSerializer,
 )
+from apps.workspaces.tasks import export_to_business_central
 from ms_business_central_api.utils import assert_valid
 
 logger = logging.getLogger(__name__)
@@ -120,3 +121,16 @@ class WorkspaceAdminsView(generics.ListAPIView):
 
     def get_queryset(self):
         return WorkspaceAdminSerializer().get_admin_emails(self.kwargs['workspace_id'])
+
+
+class TriggerExportsView(generics.GenericAPIView):
+    """
+    Trigger exports creation
+    """
+
+    def post(self, request, *args, **kwargs):
+        export_to_business_central(workspace_id=kwargs['workspace_id'])
+
+        return Response(
+            status=status.HTTP_200_OK
+        )

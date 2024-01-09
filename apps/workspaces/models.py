@@ -197,6 +197,7 @@ class ExportSetting(BaseModel):
     default_vendor_name = StringNullField(help_text='default Vendor Name')
     default_vendor_id = StringNullField(help_text='default Vendor Id')
     auto_map_employees = BooleanTrueField(help_text='Auto map employees')
+    default_journal_entry_folder_id = StringNullField(help_text='default Fyle journal entry id')
 
     class Meta:
         db_table = 'export_settings'
@@ -223,7 +224,7 @@ class AdvancedSetting(BaseModel):
         models.CharField(max_length=255), help_text='Array of fields in memo', null=True
     )
     schedule_is_enabled = BooleanFalseField(help_text='Boolean to check if schedule is enabled')
-    schedule_start_datetime = CustomDateTimeField(help_text='Schedule start date and time')
+    start_datetime = CustomDateTimeField(help_text='Schedule start date and time')
     schedule_id = StringNullField(help_text='Schedule id')
     interval_hours = IntegerNullField(help_text='Interval in hours')
     emails_selected = CustomJsonField(help_text='Emails Selected For Email Notification')

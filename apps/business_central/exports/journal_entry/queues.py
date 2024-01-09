@@ -14,11 +14,9 @@ def check_accounting_export_and_start_import(workspace_id: int, accounting_expor
 
     fyle_credentials = FyleCredential.objects.filter(workspace_id=workspace_id).first()
 
-    accounting_exports = AccountingExport.objects.filter(
-        ~Q(status__in=['IN_PROGRESS', 'COMPLETE', 'EXPORT_QUEUED']),
-        workspace_id=workspace_id, id__in=accounting_export_ids,
-        exported_at__isnull=True
-    ).all()
+    accounting_exports = AccountingExport.objects.filter(~Q(status__in=['IN_PROGRESS', 'COMPLETE', 'EXPORT_QUEUED']),
+        workspace_id=workspace_id, id__in=accounting_export_ids, journal_entry__id__isnull=True,
+        exported_at__isnull=True).all()
 
     chain = Chain()
     chain.append('apps.fyle.helpers.sync_dimensions', fyle_credentials)

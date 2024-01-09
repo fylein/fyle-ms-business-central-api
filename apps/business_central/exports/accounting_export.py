@@ -1,10 +1,11 @@
 import logging
+from datetime import datetime
 
 from django.db import transaction
 
 from apps.accounting_exports.models import AccountingExport
 from apps.business_central.exports.helpers import resolve_errors_for_exported_accounting_export, validate_accounting_export
-from apps.workspaces.models import AdvancedSetting
+from apps.workspaces.models import AdvancedSetting, ExportSetting
 
 logger = logging.getLogger(__name__)
 logger.level = logging.INFO
@@ -39,6 +40,8 @@ class AccountingDataExporter:
         # Retrieve advance settings for the current workspace
         advance_settings = AdvancedSetting.objects.filter(workspace_id=accounting_export.workspace_id).first()
 
+        export_settings = ExportSetting.objects.filter(workspace_id=accounting_export.workspace_id).first()
+
         # Check and update the status of the accounting export
         if accounting_export.status not in ['IN_PROGRESS', 'COMPLETE']:
             accounting_export.status = 'IN_PROGRESS'
@@ -50,7 +53,7 @@ class AccountingDataExporter:
             validate_accounting_export(accounting_export)
             with transaction.atomic():
                 # Create or update the main body of the accounting object
-                body_model_object = self.body_model.create_or_update_object(accounting_export, advance_settings)
+                body_model_object = self.body_model.create_or_update_object(accounting_export, advance_settings, export_settings)
 
                 # Create or update line items for the accounting object
                 lineitems_model_objects = None
@@ -66,6 +69,8 @@ class AccountingDataExporter:
                 detail = created_object
 
                 accounting_export.detail = detail
+                accounting_export.business_central_errors = None
+                accounting_export.exported_at = datetime.now()
                 accounting_export.status = 'COMPLETE'
                 accounting_export.save()
                 resolve_errors_for_exported_accounting_export(accounting_export)
