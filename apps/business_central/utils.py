@@ -165,7 +165,7 @@ class BusinessCentralConnector:
         self, ref_id: str, attachments: List[Dict]
     ) -> List:
         """
-        Link attachments to objects Xero
+        Link attachments to objects Business Central
         :param ref_id: object id
         :param ref_type: type of object
         :param attachments: attachment[dict()]

@@ -63,7 +63,7 @@ class TextNotNullField(models.TextField):
 
     def __init__(self, *args, **kwargs):
         kwargs['null'] = False  # Ensure the field is not nullable
-        kwargs['help_text'] = kwargs.get('help_text', 'text field with null false')
+        kwargs['help_text'] = kwargs.get('help_text', 'text field with null true')
         super(TextNotNullField, self).__init__(*args, **kwargs)
 
 

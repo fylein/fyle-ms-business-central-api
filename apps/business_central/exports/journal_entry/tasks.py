@@ -92,9 +92,9 @@ def create_journal_entry(accounting_export: AccountingExport):
     '''
     Helper function to create and export a journal entry.
     '''
-    export_jouranl_entry_instance = ExportJournalEntry()
+    export_journal_entry_instance = ExportJournalEntry()
 
     # Create and export the journal entry using the base class method
-    exported_jornal_entry = export_jouranl_entry_instance.create_business_central_object(accounting_export=accounting_export)
+    exported_jornal_entry = export_journal_entry_instance.create_business_central_object(accounting_export=accounting_export)
 
     return exported_jornal_entry
