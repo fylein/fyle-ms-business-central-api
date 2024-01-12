@@ -137,7 +137,7 @@ class BusinessCentralConnector:
         self._sync_data(locations, 'LOCATION', 'location', self.workspace_id, field_names)
         return []
 
-    def create_default_journal_entry_folder(self):
+    def create_journal_entry_folder(self):
         """
         Create default journal entry folder
         """
@@ -158,11 +158,37 @@ class BusinessCentralConnector:
 
         self.connection.set_company_id(workspace.business_central_company_id)
 
-        response = self.connection.journal_line_items.bulk_post(export_settings.default_journal_entry_folder_id, payload)
+        response = self.connection.journal_line_items.bulk_post(export_settings.journal_entry_folder_id, payload)
         return response
 
+    def post_purchase_invoice(self, purchase_invoice_payload, purchase_invoice_lineitem_payload):
+        """
+        Post purchase invoice to MS Dynamics SDK
+        """
+        workspace = Workspace.objects.get(id=self.workspace_id)
+        self.connection.set_company_id(workspace.business_central_company_id)
+
+        try:
+            purchase_invoice_response = self.connection.purchase_invoices.post(purchase_invoice_payload)
+            bulk_post_response = self.connection.purchase_invoice_line_items.bulk_post(purchase_invoice_response['id'], purchase_invoice_lineitem_payload)
+
+            error_messages = [response.get("body", {}).get("error", {}).get("message", None) for response in bulk_post_response.get("responses", [])]
+            error_messages = [message for message in error_messages if message is not None]
+
+            if error_messages:
+                raise Exception(error_messages)
+
+            response = {
+                "purchase_invoice_response": purchase_invoice_response,
+                "bulk_post_response": bulk_post_response
+            }
+            return response
+        except Exception as exception:
+            self.connection.purchase_invoices.delete(purchase_invoice_response['id'])
+            raise exception
+
     def post_attachments(
-        self, ref_id: str, attachments: List[Dict]
+        self, ref_type: str, ref_id: str, attachments: List[Dict]
     ) -> List:
         """
         Link attachments to objects Business Central
@@ -176,7 +202,7 @@ class BusinessCentralConnector:
                 data = {
                     "parentId": ref_id,
                     "fileName": "{0}_{1}".format(attachment["id"], attachment["name"]),
-                    "parentType": "Journal"
+                    "parentType": ref_type
                 }
                 post_response = self.connection.attachments.post(data)
 

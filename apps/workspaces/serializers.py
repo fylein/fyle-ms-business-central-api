@@ -111,13 +111,13 @@ class ExportSettingsSerializer(serializers.ModelSerializer):
         )
 
         if (export_settings.reimbursable_expenses_export_type == 'JOURNAL_ENTRY' or export_settings.credit_card_expense_export_type == 'JOURNAL_ENTRY') and \
-            not export_settings.default_journal_entry_folder_id:
+            not export_settings.journal_entry_folder_id:
 
             business_central_credentials = BusinessCentralCredentials.objects.get(workspace_id=workspace_id)
             business_central_connector = BusinessCentralConnector(business_central_credentials, workspace_id)
 
-            default_journal_entry_folder_id = business_central_connector.create_default_journal_entry_folder()
-            export_settings.default_journal_entry_folder_id = default_journal_entry_folder_id
+            journal_entry_folder_id = business_central_connector.create_journal_entry_folder()
+            export_settings.journal_entry_folder_id = journal_entry_folder_id
             export_settings.save()
 
         # Update workspace onboarding state

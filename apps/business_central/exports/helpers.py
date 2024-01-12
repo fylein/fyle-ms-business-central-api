@@ -89,6 +89,7 @@ def resolve_errors_for_exported_accounting_export(accounting_export: AccountingE
 def load_attachments(
     business_central_connection: BusinessCentralConnector,
     ref_id: str,
+    ref_type: str,
     expense: Expense,
     accounting_export: AccountingExport,
 ):
@@ -116,7 +117,8 @@ def load_attachments(
             if files_list:
                 attachments = platform.files.bulk_generate_file_urls(files_list)
 
-            business_central_connection.post_attachments(ref_id, attachments)
+            response = business_central_connection.post_attachments(ref_type, ref_id, attachments)
+            print(response)
 
     except Exception:
         error = traceback.format_exc()

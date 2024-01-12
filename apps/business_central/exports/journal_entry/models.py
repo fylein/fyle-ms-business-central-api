@@ -20,6 +20,8 @@ class JournalEntry(BaseExportModel):
     """
 
     accounts_payable_account_id = StringNullField(help_text='destination id of accounts payable account')
+    account_id = StringNullField(help_text='destination id of employee account')
+    account_type = StringNullField(help_text='destination id of employee account')
     amount = FloatNullField(help_text='Amount of the invoice')
     comment = TextNotNullField(help_text='description for the invoice')
     description = TextNullField(help_text='description for the invoice')
@@ -47,12 +49,16 @@ class JournalEntry(BaseExportModel):
 
         invoice_date = self.get_invoice_date(accounting_export=accounting_export)
 
+        account_id, account_type = self.get_journal_entry_account_id_type(accounting_export=accounting_export)
+
         journal_entry_object, _ = JournalEntry.objects.update_or_create(
             accounting_export= accounting_export,
             defaults={
                 'amount': sum([expense.amount for expense in expenses]) * -1,
                 'document_number': document_number,
                 'accounts_payable_account_id': account_id,
+                'account_id': account_id,
+                'account_type': account_type,
                 'comment': comment,
                 'workspace_id': accounting_export.workspace_id,
                 'invoice_date': invoice_date
@@ -68,6 +74,8 @@ class JournalEntryLineItems(BaseExportModel):
     """
 
     accounts_payable_account_id = StringNullField(help_text='destination id of accounts payable account')
+    account_id = StringNullField(help_text='destination id of employee account')
+    account_type = StringNullField(help_text='destination id of employee account')
     expense = models.OneToOneField(Expense, on_delete=models.PROTECT, help_text='Reference to Expense')
     amount = FloatNullField(help_text='Amount of the invoice')
     comment = TextNotNullField(help_text='description for the invoice')
@@ -101,6 +109,8 @@ class JournalEntryLineItems(BaseExportModel):
 
             invoice_date = self.get_invoice_date(accounting_export=accounting_export)
 
+            account_id, account_type = self.get_journal_entry_account_id_type(accounting_export=accounting_export)
+
             document_number = accounting_export.description['claim_number'] if accounting_export.description and accounting_export.description.get('claim_number') else accounting_export.description['expense_number']
 
             journal_entry_lineitems_object, _ = JournalEntryLineItems.objects.update_or_create(
@@ -108,6 +118,8 @@ class JournalEntryLineItems(BaseExportModel):
                 expense_id=lineitem.id,
                 defaults={
                     'amount': lineitem.amount,
+                    'account_id': account_id,
+                    'account_type': account_type,
                     'document_number':  document_number,
                     'accounts_payable_account_id': account.destination_account.destination_id,
                     'comment': comment,

@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, List
 
 from apps.accounting_exports.models import AccountingExport
 from apps.business_central.exceptions import handle_business_central_exceptions
@@ -27,7 +27,7 @@ class ExportJournalEntry(AccountingDataExporter):
         '''
         check_accounting_export_and_start_import(workspace_id, accounting_export_ids)
 
-    def __construct_journal_entry(self, body: JournalEntry, lineitems: JournalEntryLineItems) -> Dict:
+    def __construct_journal_entry(self, body: JournalEntry, lineitems: List[JournalEntryLineItems]) -> Dict:
         '''
         Construct the payload for the direct invoice.
         :param expense_report: ExpenseReport object extracted from database
@@ -37,24 +37,31 @@ class ExportJournalEntry(AccountingDataExporter):
         batch_journal_entry_payload = []
 
         journal_entry_payload = {
-            'accountNumber': body.accounts_payable_account_id,
+            'accountType': body.account_type,
+            'accountNumber': body.account_id,
             'postingDate': body.invoice_date,
             'documentNumber': body.document_number,
             'amount': body.amount,
             'comment': body.comment,
-            'description': body.description
+            'description': body.description,
+            'balanceAccountType': 'G/L Account',
+            'balancingAccountNumber': body.accounts_payable_account_id
+
         }
 
         batch_journal_entry_payload.append(journal_entry_payload)
 
         for lineitem in lineitems:
             journal_entry_lineitem_payload = {
-                'accountNumber': lineitem.accounts_payable_account_id,
+                'accountType': lineitem.account_type,
+                'accountNumber': lineitem.account_id,
                 'postingDate': lineitem.invoice_date,
                 'documentNumber': lineitem.document_number,
                 'amount': lineitem.amount,
                 'comment': lineitem.comment,
-                'description': lineitem.description if lineitem.description else ''
+                'description': lineitem.description if lineitem.description else '',
+                'balanceAccountType': 'G/L Account',
+                'balancingAccountNumber': body.accounts_payable_account_id
             }
 
             batch_journal_entry_payload.append(journal_entry_lineitem_payload)
@@ -81,6 +88,7 @@ class ExportJournalEntry(AccountingDataExporter):
             load_attachments(
                 business_central_connection,
                 response["responses"][i]["body"]["id"],
+                "Journal",
                 expenses[i - 1],
                 accounting_export)
 

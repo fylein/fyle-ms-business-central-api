@@ -4,7 +4,6 @@ from django.db import models
 
 from ms_business_central_api.models.fields import (
     BooleanFalseField,
-    BooleanTrueField,
     CustomDateTimeField,
     CustomJsonField,
     IntegerNullField,
@@ -182,12 +181,6 @@ class ExportSetting(BaseModel):
     credit_card_expense_state = StringOptionsField(
         choices=CREDIT_CARD_EXPENSE_STATE_CHOICES
     )
-    default_reimbursable_account_name = StringNullField(help_text='Reimbursable account name')
-    default_reimbursable_account_id = StringNullField(help_text='Reimbursable Account ID')
-    default_ccc_credit_card_account_name = StringNullField(help_text='CCC Credit card account name')
-    default_ccc_credit_card_account_id = StringNullField(help_text='CCC Credit Card Account ID')
-    default_reimbursable_credit_card_account_name = StringNullField(help_text='Reimbursable Credit card account name')
-    default_reimbursable_credit_card_account_id = StringNullField(help_text='Reimbursable Credit card account name')
     credit_card_expense_grouped_by = StringOptionsField(
         choices=CREDIT_CARD_EXPENSES_GROUPED_BY_CHOICES
     )
@@ -196,8 +189,8 @@ class ExportSetting(BaseModel):
     )
     default_vendor_name = StringNullField(help_text='default Vendor Name')
     default_vendor_id = StringNullField(help_text='default Vendor Id')
-    auto_map_employees = BooleanTrueField(help_text='Auto map employees')
-    default_journal_entry_folder_id = StringNullField(help_text='default Fyle journal entry id')
+    journal_entry_folder_id = StringNullField(help_text='default Fyle journal entry id')
+    emoloyee_mapping = StringNullField(help_text='Employee Mapping')
 
     class Meta:
         db_table = 'export_settings'

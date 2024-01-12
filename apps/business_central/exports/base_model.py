@@ -98,7 +98,29 @@ class BaseExportModel(models.Model):
         return datetime.now().strftime("%Y-%m-%d")
 
     def get_vendor_id(accounting_export: AccountingExport) -> str:
-        return ""
+        return "10040"
 
-    def get_employee_id(accounting_export: AccountingExport) -> str:
-        return ""
+    def get_journal_entry_account_id_type(accounting_export: AccountingExport) -> str:
+        return "EH", "Employee"
+
+    def get_expense_purpose(lineitem: Expense, category: str, advance_setting: AdvancedSetting) -> str:
+        memo_structure = advance_setting.expense_memo_structure
+
+        details = {
+            'employee_email': lineitem.employee_email,
+            'merchant': '{0}'.format(lineitem.vendor) if lineitem.vendor else '',
+            'category': '{0}'.format(category) if lineitem.category else '',
+            'purpose': '{0}'.format(lineitem.purpose) if lineitem.purpose else '',
+            'report_number': '{0}'.format(lineitem.claim_number),
+            'spent_on': '{0}'.format(lineitem.spent_at.date()) if lineitem.spent_at else '',
+        }
+
+        purpose = ''
+
+        for id, field in enumerate(memo_structure):
+            if field in details:
+                purpose += details[field]
+                if id + 1 != len(memo_structure):
+                    purpose = '{0} - '.format(purpose)
+
+        return purpose
