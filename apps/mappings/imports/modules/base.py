@@ -170,7 +170,7 @@ class Base:
         :param platform: PlatformConnector object
         """
         platform_class = self.get_platform_class(platform)
-        if self.platform_class_name in ['expense_custom_fields', 'merchants']:
+        if self.platform_class_name in ['expense_custom_fields', 'merchants', 'employees']:
             platform_class.sync()
         else:
             platform_class.sync(sync_after=self.sync_after if self.sync_after else None)
