@@ -41,7 +41,7 @@ class JournalEntry(BaseExportModel):
         """
         expenses = accounting_export.expenses.all()
 
-        account_id = export_settings.default_back_account_id
+        accounts_payable_account_id = export_settings.default_back_account_id
 
         document_number = accounting_export.description['claim_number'] if accounting_export.description and accounting_export.description.get('claim_number') else accounting_export.description['expense_number']
 
@@ -49,14 +49,16 @@ class JournalEntry(BaseExportModel):
 
         invoice_date = self.get_invoice_date(accounting_export=accounting_export)
 
-        account_id, account_type = self.get_journal_entry_account_id_type(accounting_export=accounting_export)
+        merchant = expenses[0].vendor if expenses[0].vendor else None
+
+        account_type, account_id = self.get_account_id_type(accounting_export=accounting_export, export_settings=export_settings, merchant=merchant)
 
         journal_entry_object, _ = JournalEntry.objects.update_or_create(
             accounting_export= accounting_export,
             defaults={
                 'amount': sum([expense.amount for expense in expenses]) * -1,
                 'document_number': document_number,
-                'accounts_payable_account_id': account_id,
+                'accounts_payable_account_id': accounts_payable_account_id,
                 'account_id': account_id,
                 'account_type': account_type,
                 'comment': comment,
@@ -88,7 +90,7 @@ class JournalEntryLineItems(BaseExportModel):
         db_table = 'journal_entries_lineitems'
 
     @classmethod
-    def create_or_update_object(self, accounting_export: AccountingExport, advance_setting: AdvancedSetting):
+    def create_or_update_object(self, accounting_export: AccountingExport, advance_setting: AdvancedSetting, export_settings: ExportSetting):
         """
         Create Jornal Entry LineItems object
         :param accounting_export: expense group
@@ -109,7 +111,7 @@ class JournalEntryLineItems(BaseExportModel):
 
             invoice_date = self.get_invoice_date(accounting_export=accounting_export)
 
-            account_id, account_type = self.get_journal_entry_account_id_type(accounting_export=accounting_export)
+            account_type, account_id = self.get_account_id_type(accounting_export=accounting_export, export_settings=export_settings, merchant=lineitem.vendor)
 
             document_number = accounting_export.description['claim_number'] if accounting_export.description and accounting_export.description.get('claim_number') else accounting_export.description['expense_number']
 

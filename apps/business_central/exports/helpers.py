@@ -117,8 +117,7 @@ def load_attachments(
             if files_list:
                 attachments = platform.files.bulk_generate_file_urls(files_list)
 
-            response = business_central_connection.post_attachments(ref_type, ref_id, attachments)
-            print(response)
+            business_central_connection.post_attachments(ref_type, ref_id, attachments)
 
     except Exception:
         error = traceback.format_exc()

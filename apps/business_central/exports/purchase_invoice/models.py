@@ -33,7 +33,7 @@ class PurchaseInvoice(BaseExportModel):
         :return: purchase invoices object
         """
 
-        vendor_id = self.get_vendor_id(accounting_export=accounting_export)
+        vendor_id = self.get_account_id_type(accounting_export=accounting_export, export_settings=export_settings)
         amount = self.get_total_amount(accounting_export=accounting_export)
         invoice_date = self.get_invoice_date(accounting_export=accounting_export)
 
@@ -65,7 +65,7 @@ class PurchaseInvoiceLineitems(BaseExportModel):
         db_table = 'purchase_invoice_lineitems'
 
     @classmethod
-    def create_or_update_object(self, accounting_export: AccountingExport, advance_setting: AdvancedSetting):
+    def create_or_update_object(self, accounting_export: AccountingExport, advance_setting: AdvancedSetting, export_settings: ExportSetting):
         """
         Create Purchase Invoice
         :param accounting_export: expense group

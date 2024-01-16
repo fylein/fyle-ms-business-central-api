@@ -59,7 +59,7 @@ class AccountingDataExporter:
                 lineitems_model_objects = None
                 if self.lineitem_model:
                     lineitems_model_objects = self.lineitem_model.create_or_update_object(
-                        accounting_export, advance_settings
+                        accounting_export, advance_settings, export_settings
                     )
 
                 # Post the data to the external accounting system
