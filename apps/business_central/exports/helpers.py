@@ -78,7 +78,6 @@ def __validate_category_mapping(accounting_export: AccountingExport):
                 Error.objects.update_or_create(
                     workspace_id=accounting_export.workspace_id,
                     expense_attribute=category_attribute,
-                    accounting_export=accounting_export,
                     defaults={
                         'type': 'CATEGORY_MAPPING',
                         'error_title': category_attribute.value,
@@ -127,7 +126,6 @@ def __validate_employee_mapping(accounting_export: AccountingExport, export_sett
             Error.objects.update_or_create(
                 workspace_id=accounting_export.workspace_id,
                 expense_attribute=employee_attribute,
-                accounting_export=accounting_export,
                 defaults={
                     'type': 'EMPLOYEE_MAPPING',
                     'error_title': employee_attribute.value,
