@@ -49,7 +49,9 @@ class JournalEntry(BaseExportModel):
 
         invoice_date = self.get_invoice_date(accounting_export=accounting_export)
 
-        account_type, account_id = self.get_account_id_type(accounting_export=accounting_export, export_settings=export_settings)
+        merchant = expenses[0].vendor if expenses[0].vendor else None
+
+        account_type, account_id = self.get_account_id_type(accounting_export=accounting_export, export_settings=export_settings, merchant=merchant)
 
         journal_entry_object, _ = JournalEntry.objects.update_or_create(
             accounting_export= accounting_export,
