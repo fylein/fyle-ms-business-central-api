@@ -51,6 +51,8 @@ class ExportPurchaseInvoice(AccountingDataExporter):
                 'quantity': 1,
                 'description': lineitem.description if lineitem.description else ''
             }
+            if lineitem.location_id:
+                purchase_invoice_lineitem_payload['locationId'] = lineitem.location_id
 
             batch_purchase_invoice_lineitem_payload.append(purchase_invoice_lineitem_payload)
 
