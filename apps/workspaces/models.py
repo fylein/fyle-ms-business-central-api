@@ -200,7 +200,7 @@ class ExportSetting(BaseModel):
     default_vendor_name = StringNullField(help_text='default Vendor Name')
     default_vendor_id = StringNullField(help_text='default Vendor Id')
     journal_entry_folder_id = StringNullField(help_text='default Fyle journal entry id')
-    employee_mapping = StringOptionsField(
+    employee_field_mapping = StringOptionsField(
         choices=EMPLOYEE_MAPPING_CHOICES
     )
     name_in_journal_entry = StringOptionsField(

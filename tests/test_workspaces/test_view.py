@@ -106,7 +106,7 @@ def test_export_settings(api_client, test_connection, create_temp_workspace, add
         'default_vendor_id': '123',
         'default_back_account_id': '123',
         'default_bank_account_name': 'Bank account',
-        'employee_mapping': 'VENDOR'
+        'employee_field_mapping': 'VENDOR'
     }
 
     response = api_client.post(url, payload)
@@ -124,7 +124,7 @@ def test_export_settings(api_client, test_connection, create_temp_workspace, add
     assert export_settings.credit_card_expense_date == 'CREATED_AT'
     assert export_settings.default_vendor_name == 'Nilesh'
     assert export_settings.default_vendor_id == '123'
-    assert export_settings.employee_mapping == 'VENDOR'
+    assert export_settings.employee_field_mapping == 'VENDOR'
 
     response = api_client.get(url)
 
@@ -139,7 +139,7 @@ def test_export_settings(api_client, test_connection, create_temp_workspace, add
     assert export_settings.credit_card_expense_date == 'CREATED_AT'
     assert export_settings.default_vendor_name == 'Nilesh'
     assert export_settings.default_vendor_id == '123'
-    assert export_settings.employee_mapping == 'VENDOR'
+    assert export_settings.employee_field_mapping == 'VENDOR'
 
 
 def test_import_settings(api_client, test_connection):

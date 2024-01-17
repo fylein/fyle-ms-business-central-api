@@ -104,23 +104,28 @@ class BaseExportModel(models.Model):
             workspace_id=accounting_export.workspace_id
         ).first()
 
-        if export_settings.reimbursable_expenses_export_type == 'PURCHASE_INVOICE' and mapping and mapping.destination_vendor_id:
+        def get_vendor_or_employee_id(employee_field_mapping: str, mapping: EmployeeMapping) -> str:
+            if employee_field_mapping == 'VENDOR':
+                return "Vendor", mapping.destination_vendor.destination_id
+            else:
+                return "Employee", mapping.destination_employee.destination_id
+
+        if export_settings.reimbursable_expenses_export_type == 'PURCHASE_INVOICE' and accounting_export.fund_source == 'PERSONAL':
             return mapping.destination_vendor.destination_id
-        elif export_settings.reimbursable_expenses_export_type == 'JOURNAL_ENTRY' and accounting_export.fund_source == 'PERSONAL':
-            if export_settings.employee_mapping == 'VENDOR' and mapping and mapping.destination_vendor_id:
-                return "Vendor", mapping.destination_vendor.destination_id
-            elif export_settings.employee_mapping == 'EMPLOYEE' and mapping and mapping.destination_employee_id:
-                return "Employee", mapping.destination_employee.destination_id
-        elif export_settings.credit_card_expense_export_type == 'JOURNAL_ENTRY' and accounting_export.fund_source == 'CCC':
-            if export_settings.name_in_journal_entry == 'MERCHANT' and merchant:
-                vendor = DestinationAttribute.objects.filter(
-                    value__iexact=merchant, attribute_type='VENDOR', workspace_id=accounting_export.workspace_id
-                ).first()
-                return "Vendor", vendor.destination_id if vendor and vendor.destination_id else export_settings.default_vendor_id
-            elif export_settings.employee_mapping == 'VENDOR' and mapping and mapping.destination_vendor_id:
-                return "Vendor", mapping.destination_vendor.destination_id
-            elif export_settings.employee_mapping == 'EMPLOYEE' and mapping and mapping.destination_employee_id:
-                return "Employee", mapping.destination_employee.destination_id
+        else:
+            if accounting_export.fund_source == 'PERSONAL':
+                return get_vendor_or_employee_id(export_settings.employee_field_mapping, mapping)
+            else:
+                if export_settings.name_in_journal_entry == 'MERCHANT':
+                    if merchant:
+                        vendor = DestinationAttribute.objects.filter(
+                            value__iexact=merchant, attribute_type='VENDOR', workspace_id=accounting_export.workspace_id
+                        ).first()
+                        return "Vendor", vendor.destination_id if vendor else export_settings.default_vendor_id
+                    else:
+                        return "Vendor", export_settings.default_vendor_id
+                else:
+                    return get_vendor_or_employee_id(export_settings.employee_field_mapping, mapping)
 
     def get_expense_purpose(lineitem: Expense, category: str, advance_setting: AdvancedSetting) -> str:
         memo_structure = advance_setting.expense_memo_structure

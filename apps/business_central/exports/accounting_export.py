@@ -49,31 +49,28 @@ class AccountingDataExporter:
         else:
             # If the status is already 'IN_PROGRESS' or 'COMPLETE', return without further processing
             return
-        try:
-            validate_accounting_export(accounting_export)
-            with transaction.atomic():
-                # Create or update the main body of the accounting object
-                body_model_object = self.body_model.create_or_update_object(accounting_export, advance_settings, export_settings)
 
-                # Create or update line items for the accounting object
-                lineitems_model_objects = None
-                if self.lineitem_model:
-                    lineitems_model_objects = self.lineitem_model.create_or_update_object(
-                        accounting_export, advance_settings, export_settings
-                    )
+        validate_accounting_export(accounting_export, export_settings)
+        with transaction.atomic():
+            # Create or update the main body of the accounting object
+            body_model_object = self.body_model.create_or_update_object(accounting_export, advance_settings, export_settings)
 
-                # Post the data to the external accounting system
-                created_object = self.post(accounting_export, body_model_object, lineitems_model_objects)
+            # Create or update line items for the accounting object
+            lineitems_model_objects = None
+            if self.lineitem_model:
+                lineitems_model_objects = self.lineitem_model.create_or_update_object(
+                    accounting_export, advance_settings, export_settings
+                )
 
-                # Update the accounting export details
-                detail = created_object
+            # Post the data to the external accounting system
+            created_object = self.post(accounting_export, body_model_object, lineitems_model_objects)
 
-                accounting_export.detail = detail
-                accounting_export.business_central_errors = None
-                accounting_export.exported_at = datetime.now()
-                accounting_export.status = 'COMPLETE'
-                accounting_export.save()
-                resolve_errors_for_exported_accounting_export(accounting_export)
-        except Exception as e:
-            logger.error(e)
-            raise e
+            # Update the accounting export details
+            detail = created_object
+
+            accounting_export.detail = detail
+            accounting_export.business_central_errors = None
+            accounting_export.exported_at = datetime.now()
+            accounting_export.status = 'COMPLETE'
+            accounting_export.save()
+            resolve_errors_for_exported_accounting_export(accounting_export)

@@ -108,7 +108,10 @@ class ExportSettingsSerializer(serializers.ModelSerializer):
             assert_valid(validated_data.get('default_vendor_id'), 'Default Vendor cannot be null')
 
         if validated_data.get('reimbursable_expenses_export_type') == 'PURCHASE_INVOICE' and validated_data.get('credit_card_expense_export_type') == 'JOURNAL_ENTRY':
-            assert_valid(validated_data.get('employee_mapping') == 'VENDOR', 'Employee mapping should be VENDOR')
+            assert_valid(validated_data.get('employee_field_mapping') == 'VENDOR', 'Employee mapping should be VENDOR')
+
+        if validated_data.get('credit_card_expense_export_type') == 'JOURNAL_ENTRY' and validated_data.get('name_in_journal_entry') == 'MERCHANT':
+            assert_valid(validated_data.get('default_vendor_id'), 'Default Vendor cannot be null')
 
         workspace_id = self.context['request'].parser_context.get('kwargs').get('workspace_id')
 
