@@ -6,7 +6,7 @@ from rest_framework import generics
 from rest_framework.views import Response, status
 
 from apps.workspaces.helpers import connect_business_central
-from apps.workspaces.models import AdvancedSetting, BusinessCentralCredentials, ExportSetting, ImportSetting, Workspace
+from apps.workspaces.models import AdvancedSetting, BusinessCentralCredentials, ExportSetting, Workspace
 from apps.workspaces.serializers import (
     AdvancedSettingSerializer,
     BusinessCentralCredentialSerializer,
@@ -109,14 +109,14 @@ class ExportSettingView(generics.CreateAPIView, generics.RetrieveAPIView):
     queryset = ExportSetting.objects.all()
 
 
-class ImportSettingView(generics.CreateAPIView, generics.RetrieveAPIView):
+class ImportSettingView(generics.RetrieveUpdateAPIView):
     """
     Retrieve or Create Import Settings
     """
     serializer_class = ImportSettingsSerializer
-    lookup_field = 'workspace_id'
 
-    queryset = ImportSetting.objects.all()
+    def get_object(self):
+        return Workspace.objects.filter(id=self.kwargs['workspace_id']).first()
 
 
 class AdvancedSettingView(generics.CreateAPIView, generics.RetrieveAPIView):

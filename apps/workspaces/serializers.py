@@ -2,7 +2,9 @@
 Workspace Serializers
 """
 from django.core.cache import cache
-from fyle_accounting_mappings.models import ExpenseAttribute
+from django.db import transaction
+from django.db.models import Q
+from fyle_accounting_mappings.models import ExpenseAttribute, MappingSetting
 from fyle_rest_auth.helpers import get_fyle_admin
 from fyle_rest_auth.models import AuthToken
 from rest_framework import serializers
@@ -19,6 +21,7 @@ from apps.workspaces.models import (
     ImportSetting,
     Workspace,
 )
+from apps.workspaces.triggers import AdvancedSettingsTriggers, ImportSettingsTrigger
 from ms_business_central_api.utils import assert_valid
 
 
@@ -103,6 +106,16 @@ class ExportSettingsSerializer(serializers.ModelSerializer):
         Create Export Settings
         """
         assert_valid(validated_data, 'Body cannot be null')
+
+        if validated_data.get('reimbursable_expenses_export_type') == 'JOURNAL_ENTRY' or validated_data.get('credit_card_expense_export_type') == 'JOURNAL_ENTRY':
+            assert_valid(validated_data.get('default_vendor_id'), 'Default Vendor cannot be null')
+
+        if validated_data.get('reimbursable_expenses_export_type') == 'PURCHASE_INVOICE' and validated_data.get('credit_card_expense_export_type') == 'JOURNAL_ENTRY':
+            assert_valid(validated_data.get('employee_field_mapping') == 'VENDOR', 'Employee mapping should be VENDOR')
+
+        if validated_data.get('credit_card_expense_export_type') == 'JOURNAL_ENTRY' and validated_data.get('name_in_journal_entry') == 'MERCHANT':
+            assert_valid(validated_data.get('default_vendor_id'), 'Default Vendor cannot be null')
+
         workspace_id = self.context['request'].parser_context.get('kwargs').get('workspace_id')
 
         export_settings, _ = ExportSetting.objects.update_or_create(
@@ -130,33 +143,119 @@ class ExportSettingsSerializer(serializers.ModelSerializer):
         return export_settings
 
 
+class MappingSettingFilteredListSerializer(serializers.ListSerializer):
+    """
+    Serializer to filter the active system, which is a boolen field in
+    System Model. The value argument to to_representation() method is
+    the model instance
+    """
+    def to_representation(self, data):
+        data = data.filter(~Q(
+            destination_field__in=[
+                'ACCOUNT',
+                'EMPLOYEE',
+                'VENDOR'
+            ])
+        )
+        return super(MappingSettingFilteredListSerializer, self).to_representation(data)
+
+
+class MappingSettingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MappingSetting
+        list_serializer_class = MappingSettingFilteredListSerializer
+        fields = [
+            'source_field',
+            'destination_field',
+            'import_to_fyle',
+            'is_custom',
+            'source_placeholder'
+        ]
+
+
+class ImportSettingFilterSerializer(serializers.ModelSerializer):
+    """
+    Import Settings Filtered serializer
+    """
+    class Meta:
+        model = ImportSetting
+        fields = [
+            'import_categories',
+            'import_vendors_as_merchants',
+        ]
+
+
 class ImportSettingsSerializer(serializers.ModelSerializer):
     """
     Import Settings serializer
     """
-    class Meta:
-        model = ImportSetting
-        fields = '__all__'
-        read_only_fields = ('id', 'workspace', 'created_at', 'updated_at')
+    import_settings = ImportSettingFilterSerializer()
+    mapping_settings = MappingSettingSerializer(many=True)
+    workspace_id = serializers.SerializerMethodField()
 
-    def create(self, validated_data):
+    class Meta:
+        model = Workspace
+        fields = [
+            'import_settings',
+            'mapping_settings',
+            'workspace_id'
+        ]
+        read_only_fields = ['workspace_id']
+
+    def get_workspace_id(self, instance):
+        return instance.id
+
+    def update(self, instance, validated):
         """
         Create Import Settings
         """
 
-        workspace_id = self.context['request'].parser_context.get('kwargs').get('workspace_id')
-        import_settings, _ = ImportSetting.objects.update_or_create(
-            workspace_id=workspace_id,
-            defaults=validated_data
-        )
+        mapping_settings = validated.pop('mapping_settings')
+        import_settings = validated.pop('import_settings')
+
+        with transaction.atomic():
+            ImportSetting.objects.update_or_create(
+                workspace_id=instance.id,
+                defaults={
+                    'import_categories': import_settings.get('import_categories'),
+                    'import_vendors_as_merchants': import_settings.get('import_vendors_as_merchants')
+                }
+            )
+
+            trigger: ImportSettingsTrigger = ImportSettingsTrigger(
+                mapping_settings=mapping_settings,
+                workspace_id=instance.id
+            )
+
+            for setting in mapping_settings:
+                MappingSetting.objects.update_or_create(
+                    destination_field=setting['destination_field'],
+                    workspace_id=instance.id,
+                    defaults={
+                        'source_field': setting['source_field'],
+                        'import_to_fyle': setting['import_to_fyle'] if 'import_to_fyle' in setting else False,
+                        'is_custom': setting['is_custom'] if 'is_custom' in setting else False,
+                        'source_placeholder': setting['source_placeholder'] if 'source_placeholder' in setting else None
+                    }
+                )
+
+            trigger.post_save_mapping_settings()
 
         # Update workspace onboarding state
-        workspace = import_settings.workspace
-        if workspace.onboarding_state == 'IMPORT_SETTINGS':
-            workspace.onboarding_state = 'ADVANCED_SETTINGS'
-            workspace.save()
+        if instance.onboarding_state == 'IMPORT_SETTINGS':
+            instance.onboarding_state = 'ADVANCED_SETTINGS'
+            instance.save()
 
-        return import_settings
+        return instance
+
+    def validate(self, data):
+        if not data.get('import_settings'):
+            raise serializers.ValidationError('Import Settings are required')
+
+        if data.get('mapping_settings') is None:
+            raise serializers.ValidationError('Mapping settings are required')
+
+        return data
 
 
 class AdvancedSettingSerializer(serializers.ModelSerializer):
@@ -165,7 +264,14 @@ class AdvancedSettingSerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = AdvancedSetting
-        fields = '__all__'
+        fields = [
+            'expense_memo_structure',
+            'schedule_is_enabled',
+            'interval_hours',
+            'emails_selected',
+            'emails_added',
+            'auto_create_vendor'
+        ]
         read_only_fields = ('id', 'workspace', 'created_at', 'updated_at')
 
     def create(self, validated_data):
@@ -193,6 +299,7 @@ class AdvancedSettingSerializer(serializers.ModelSerializer):
         # Update workspace onboarding state
         workspace = advanced_setting.workspace
 
+        AdvancedSettingsTriggers.run_post_advance_settings_triggers(workspace_id, advanced_setting)
         if workspace.onboarding_state == 'ADVANCED_SETTINGS':
             workspace.onboarding_state = 'COMPLETE'
             workspace.save()

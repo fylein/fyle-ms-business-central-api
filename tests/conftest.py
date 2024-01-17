@@ -317,8 +317,6 @@ def add_export_settings():
             reimbursable_expense_grouped_by='REPORT' if workspace_id == 1 else 'EXPENSE',
             credit_card_expense_export_type='CREDIT_CARD_PURCHASE' if workspace_id in [1, 2] else 'JOURNAL_ENTRY',
             credit_card_expense_state='PAYMENT_PROCESSING',
-            default_ccc_credit_card_account_name='Visa',
-            default_ccc_credit_card_account_id='12',
             credit_card_expense_grouped_by='EXPENSE' if workspace_id == 3 else 'REPORT',
             credit_card_expense_date='spent_at'
         )

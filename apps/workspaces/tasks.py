@@ -6,6 +6,7 @@ from django_q.models import Schedule
 
 from apps.accounting_exports.models import AccountingExport, AccountingExportSummary
 from apps.business_central.exports.journal_entry.tasks import ExportJournalEntry
+from apps.business_central.exports.purchase_invoice.tasks import ExportPurchaseInvoice
 from apps.fyle.queue import queue_import_credit_card_expenses, queue_import_reimbursable_expenses
 from apps.workspaces.models import AdvancedSetting, ExportSetting
 
@@ -132,7 +133,8 @@ def export_to_business_central(workspace_id: int):
 
     # Dictionary mapping export types to their corresponding export classes
     export_map = {
-        'JOURNAL_ENTRY': ExportJournalEntry()
+        'JOURNAL_ENTRY': ExportJournalEntry(),
+        'PURCHASE_INVOICE': ExportPurchaseInvoice()
     }
 
     # Check and export reimbursable expenses if configured
