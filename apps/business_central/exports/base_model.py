@@ -2,7 +2,7 @@ from datetime import datetime
 
 from django.db import models
 from django.db.models import Sum
-from fyle_accounting_mappings.models import DestinationAttribute, EmployeeMapping
+from fyle_accounting_mappings.models import DestinationAttribute, EmployeeMapping, ExpenseAttribute, Mapping, MappingSetting
 
 from apps.accounting_exports.models import AccountingExport
 from apps.fyle.models import Expense
@@ -143,3 +143,31 @@ class BaseExportModel(models.Model):
                     purpose = '{0} - '.format(purpose)
 
         return purpose
+
+    def get_location_id_or_none(accounting_export: AccountingExport, lineitem: Expense):
+        location_id = None
+
+        location_setting: MappingSetting = MappingSetting.objects.filter(
+            workspace_id=accounting_export.workspace_id,
+            destination_field='LOCATION'
+        ).first()
+
+        if location_setting:
+            if location_setting.source_field == 'PROJECT':
+                source_value = lineitem.project
+            elif location_setting.source_field == 'COST_CENTER':
+                source_value = lineitem.cost_center
+            else:
+                attribute = ExpenseAttribute.objects.filter(attribute_type=location_setting.source_field).first()
+                source_value = lineitem.custom_properties.get(attribute.display_name, None)
+
+            mapping: Mapping = Mapping.objects.filter(
+                source_type=location_setting.source_field,
+                destination_type='LOCATION',
+                source__value=source_value,
+                workspace_id=accounting_export.workspace_id
+            ).first()
+
+            if mapping:
+                location_id = mapping.destination.destination_id
+        return location_id

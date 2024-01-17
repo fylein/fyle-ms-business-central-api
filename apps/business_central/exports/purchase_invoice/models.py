@@ -60,6 +60,7 @@ class PurchaseInvoiceLineitems(BaseExportModel):
     expense = models.OneToOneField(Expense, on_delete=models.PROTECT, help_text='Reference to Expense')
     amount = FloatNullField(help_text='Amount of the invoice')
     description = TextNotNullField(help_text='description for the invoice')
+    location_id = StringNullField(help_text='location id of the invoice')
 
     class Meta:
         db_table = 'purchase_invoice_lineitems'
@@ -84,6 +85,7 @@ class PurchaseInvoiceLineitems(BaseExportModel):
             ).first()
 
             description = self.get_expense_purpose(lineitem, lineitem.category, advance_setting)
+            location_id = self.get_location_id_or_none(accounting_export, lineitem)
 
             purchase_invoice_lineitem_object, _ = PurchaseInvoiceLineitems.objects.update_or_create(
                 purchase_invoice_id=purchase_invoice.id,
@@ -92,7 +94,8 @@ class PurchaseInvoiceLineitems(BaseExportModel):
                     'amount': lineitem.amount,
                     'accounts_payable_account_id': account.destination_account.destination_id if account else None,
                     'description': description,
-                    'workspace_id': accounting_export.workspace_id
+                    'workspace_id': accounting_export.workspace_id,
+                    'location_id': location_id
                 }
             )
             purchase_invoice_lineitem_objects.append(purchase_invoice_lineitem_object)
