@@ -24,6 +24,95 @@ fixtures = {
             'user_id': 'usqywo0f3nBY',
         }
     },
+    "import_settings_payload": {
+        "import_settings": {
+            "import_categories": True,
+            "import_vendors_as_merchants": True,
+        },
+        "mapping_settings": [
+            {
+                "source_field": "COST_CENTER",
+                "destination_field": "DEPARTMENT",
+                "import_to_fyle": True,
+                "is_custom": False,
+                "source_placeholder": "cost center",
+            },
+            {
+                "source_field": "PROJECT",
+                "destination_field": "JOB",
+                "import_to_fyle": True,
+                "is_custom": False,
+                "source_placeholder": "project",
+            },
+        ]
+    },
+    "import_settings_response": {
+        "import_settings": {
+            "import_categories": True,
+            "import_vendors_as_merchants": True,
+        },
+        "mapping_settings": [
+            {
+                "source_field": "COST_CENTER",
+                "destination_field": "CLASS",
+                "import_to_fyle": True,
+                "is_custom": False,
+                "source_placeholder": "",
+            },
+            {
+                "source_field": "PROJECT",
+                "destination_field": "DEPARTMENT",
+                "import_to_fyle": True,
+                "is_custom": False,
+                "source_placeholder": "",
+            },
+            {
+                "source_field": "CLASS",
+                "destination_field": "EMPLOYEE",
+                "import_to_fyle": True,
+                "is_custom": True,
+                "source_placeholder": "",
+            },
+        ],
+        "workspace_id": 9
+    },
+    "import_settings_schedule_check": {
+        "import_settings": {
+            "import_categories": True,
+            "import_vendors_as_merchants": True,
+        },
+        "mapping_settings": [
+            {
+                "source_field": "PROJECT",
+                "destination_field": "EMPLOYEE",
+                "import_to_fyle": True,
+                "is_custom": False,
+                "source_placeholder": "Select Project",
+            }
+        ]
+    },
+    "import_settings_without_mapping": {
+        "import_settings": {
+            "import_categories": True,
+            "import_vendors_as_merchants": True,
+        },
+        "mapping_settings": [
+            {
+                "source_field": "CLASS",
+                "destination_field": "CUSTOMER",
+                "import_to_fyle": True,
+                "is_custom": True,
+                "source_placeholder": "class",
+            }
+        ]
+    },
+     "invalid_mapping_settings": {
+        "import_settings": {
+            "import_categories": True,
+            "import_vendors_as_merchants": True,
+        },
+        "mapping_settings": None
+    },
     'get_all_orgs': [
         {
             'id': 'orHVw3ikkCxJ',

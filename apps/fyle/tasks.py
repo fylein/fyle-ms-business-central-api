@@ -6,8 +6,8 @@ from fyle_integrations_platform_connector import PlatformConnector
 
 from apps.accounting_exports.models import AccountingExport
 from apps.fyle.exceptions import handle_exceptions
-from apps.fyle.models import Expense, ExpenseFilter
 from apps.fyle.helpers import construct_expense_filter_query
+from apps.fyle.models import Expense, ExpenseFilter
 from apps.workspaces.models import ExportSetting, FyleCredential, Workspace
 
 SOURCE_ACCOUNT_MAP = {
@@ -75,19 +75,18 @@ def import_expenses(workspace_id, accounting_export: AccountingExport, source_ac
     )
 
     if expenses:
-        setattr(workspace, f"{fund_source_map.get(fund_source_key)}_last_synced_at", datetime.now())
-        workspace.save()
-
-    with transaction.atomic():
-        expense_objects = Expense.create_expense_objects(expenses, workspace_id)
-        expense_filters = ExpenseFilter.objects.filter(workspace_id=workspace_id).order_by('rank')
-        if expense_filters:
-            expense_objects = get_filtered_expenses(workspace, expense_objects, expense_filters)
-        AccountingExport.create_accounting_export(
-            expense_objects,
-            fund_source=fund_source_key,
-            workspace_id=workspace_id
-        )
+        with transaction.atomic():
+            setattr(workspace, f"{fund_source_map.get(fund_source_key)}_last_synced_at", datetime.now())
+            workspace.save()
+            expense_objects = Expense.create_expense_objects(expenses, workspace_id)
+            expense_filters = ExpenseFilter.objects.filter(workspace_id=workspace_id).order_by('rank')
+            if expense_filters:
+                expense_objects = get_filtered_expenses(workspace, expense_objects, expense_filters)
+            AccountingExport.create_accounting_export(
+                expense_objects,
+                fund_source=fund_source_key,
+                workspace_id=workspace_id
+            )
 
     accounting_export.status = 'COMPLETE'
     accounting_export.business_central_errors = None

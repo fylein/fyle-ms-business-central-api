@@ -20,8 +20,8 @@ from ms_business_central_api.models.fields import (
 )
 
 TYPE_CHOICES = (
-    ('INVOICES', 'INVOICES'),
-    ('DIRECT_COST', 'DIRECT_COST'),
+    ('PURCHASE_INVOICES', 'PURCHASE_INVOICES'),
+    ('JOURNAL_ENTRY', 'JOURNAL_ENTRY'),
     ('FETCHING_REIMBURSABLE_EXPENSES', 'FETCHING_REIMBURSABLE_EXPENSES'),
     ('FETCHING_CREDIT_CARD_EXPENENSES', 'FETCHING_CREDIT_CARD_EXPENENSES')
 )
@@ -123,9 +123,9 @@ class AccountingExport(BaseForeignWorkspaceModel):
             date_field = getattr(export_setting, f"{fund_source_map.get(fund_source)}_expense_date", None)
 
             # Calculate and assign 'last_spent_at' based on the chosen date field
-            if date_field == 'last_spent_at':
+            if date_field == 'LAST_SPENT_AT':
                 latest_expense = Expense.objects.filter(id__in=accounting_export['expense_ids']).order_by('-spent_at').first()
-                accounting_export['last_spent_at'] = latest_expense.spent_at if latest_expense else None
+                accounting_export['LAST_SPENT_AT'] = latest_expense.spent_at if latest_expense else None
 
             # Store expense IDs and remove unnecessary keys
             expense_ids = accounting_export['expense_ids']

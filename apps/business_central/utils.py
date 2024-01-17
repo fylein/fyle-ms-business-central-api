@@ -1,7 +1,10 @@
+import base64
+from typing import Dict, List
+
 from dynamics.core.client import Dynamics
 from fyle_accounting_mappings.models import DestinationAttribute
 
-from apps.workspaces.models import BusinessCentralCredentials, Workspace
+from apps.workspaces.models import BusinessCentralCredentials, ExportSetting, Workspace
 from ms_business_central_api import settings
 
 
@@ -61,7 +64,7 @@ class BusinessCentralConnector:
         destination_attributes = []
         for item in data:
             detail = {field: item[field] for field in field_names}
-            if (attribute_type == 'EMPLOYEE' and item.get('status') == 'Active') or (attribute_type in ('LOCATION', 'COMPANY')) or (item.get('blocked') and item['blocked'] != True):
+            if (attribute_type == 'EMPLOYEE' and item.get('status') == 'Active') or (attribute_type in ('LOCATION', 'COMPANY')) or (item.get('blocked') is not None and item.get('blocked') != True):
                 active = True
             else:
                 active = False
@@ -69,7 +72,7 @@ class BusinessCentralConnector:
                 attribute_type,
                 display_name,
                 item['displayName'] if item['displayName'] else item['name'],
-                item['id'],
+                item['number'] if item.get('number') else item['id'],
                 active,
                 detail
             ))
@@ -91,7 +94,7 @@ class BusinessCentralConnector:
         Synchronize accounts from MS Dynamics SDK to your application
         """
         workspace = Workspace.objects.get(id=self.workspace_id)
-        self.connection.company_id = workspace.business_central_company_id
+        self.connection.set_company_id(workspace.business_central_company_id)
         field_names = ['category', 'subCategory', 'accountType', 'directPosting', 'lastModifiedDateTime']
 
         accounts = self.connection.accounts.get_all()
@@ -103,7 +106,7 @@ class BusinessCentralConnector:
         Synchronize vendors from MS Dynamics SDK to your application
         """
         workspace = Workspace.objects.get(id=self.workspace_id)
-        self.connection.company_id = workspace.business_central_company_id
+        self.connection.set_company_id(workspace.business_central_company_id)
         field_names = ['email', 'currencyId', 'currencyCode', 'lastModifiedDateTime']
 
         vendors = self.connection.vendors.get_all()
@@ -115,7 +118,7 @@ class BusinessCentralConnector:
         Synchronize employees from MS Dynamics SDK to your application
         """
         workspace = Workspace.objects.get(id=self.workspace_id)
-        self.connection.company_id = workspace.business_central_company_id
+        self.connection.set_company_id(workspace.business_central_company_id)
         field_names = ['email', 'personalEmail', 'lastModifiedDateTime']
 
         employees = self.connection.employees.get_all()
@@ -127,9 +130,88 @@ class BusinessCentralConnector:
         Synchronize locations from MS Dynamics SDK to your application
         """
         workspace = Workspace.objects.get(id=self.workspace_id)
-        self.connection.company_id = workspace.business_central_company_id
+        self.connection.set_company_id(workspace.business_central_company_id)
         field_names = ['code', 'city', 'country']
 
         locations = self.connection.locations.get_all()
         self._sync_data(locations, 'LOCATION', 'location', self.workspace_id, field_names)
         return []
+
+    def create_journal_entry_folder(self):
+        """
+        Create default journal entry folder
+        """
+
+        response = self.connection.journals.post({
+            'code': 'Fyle_JE',
+            'displayName': 'Fyle_JE',
+            'templateDisplayName': 'GENERAL'
+        })
+        return response['id']
+
+    def bulk_post_journal_lineitems(self, payload):
+        """
+        Bulk post data to MS Dynamics SDK
+        """
+        workspace = Workspace.objects.get(id=self.workspace_id)
+        export_settings = ExportSetting.objects.get(workspace_id=self.workspace_id)
+
+        self.connection.set_company_id(workspace.business_central_company_id)
+
+        response = self.connection.journal_line_items.bulk_post(export_settings.journal_entry_folder_id, payload)
+        return response
+
+    def post_purchase_invoice(self, purchase_invoice_payload, purchase_invoice_lineitem_payload):
+        """
+        Post purchase invoice to MS Dynamics SDK
+        """
+        workspace = Workspace.objects.get(id=self.workspace_id)
+        self.connection.set_company_id(workspace.business_central_company_id)
+
+        try:
+            purchase_invoice_response = self.connection.purchase_invoices.post(purchase_invoice_payload)
+            bulk_post_response = self.connection.purchase_invoice_line_items.bulk_post(purchase_invoice_response['id'], purchase_invoice_lineitem_payload)
+
+            error_messages = [response.get("body", {}).get("error", {}).get("message", None) for response in bulk_post_response.get("responses", [])]
+            error_messages = [message for message in error_messages if message is not None]
+
+            if error_messages:
+                raise Exception(error_messages)
+
+            response = {
+                "purchase_invoice_response": purchase_invoice_response,
+                "bulk_post_response": bulk_post_response
+            }
+            return response
+        except Exception as exception:
+            self.connection.purchase_invoices.delete(purchase_invoice_response['id'])
+            raise exception
+
+    def post_attachments(
+        self, ref_type: str, ref_id: str, attachments: List[Dict]
+    ) -> List:
+        """
+        Link attachments to objects Business Central
+        :param ref_id: object id
+        :param ref_type: type of object
+        :param attachments: attachment[dict()]
+        """
+        responses = []
+        if len(attachments):
+            for attachment in attachments:
+                data = {
+                    "parentId": ref_id,
+                    "fileName": "{0}_{1}".format(attachment["id"], attachment["name"]),
+                    "parentType": ref_type
+                }
+                post_response = self.connection.attachments.post(data)
+
+                self.connection.attachments.upload(
+                    post_response["id"],
+                    attachment["content_type"],
+                    base64.b64decode(attachment["download_url"])
+                )
+
+                responses.append(post_response)
+
+        return post_response

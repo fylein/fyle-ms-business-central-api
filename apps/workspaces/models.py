@@ -4,7 +4,6 @@ from django.db import models
 
 from ms_business_central_api.models.fields import (
     BooleanFalseField,
-    BooleanTrueField,
     CustomDateTimeField,
     CustomJsonField,
     IntegerNullField,
@@ -130,6 +129,21 @@ CREDIT_CARD_EXPENSES_DATE_TYPE_CHOICES = (
     ('CREATED_AT', 'created_at')
 )
 
+EXPORT_MODE_CHOICES = (
+    ('MANUAL', 'MANUAL'),
+    ('AUTO', 'AUTO')
+)
+
+EMPLOYEE_MAPPING_CHOICES = (
+    ('EMPLOYEE', 'EMPLOYEE'),
+    ('VENDOR', 'VENDOR')
+)
+
+NAME_IN_JOURNAL_ENTRY_CHOICES = (
+    ('EMPLOYEE', 'EMPLOYEE'),
+    ('MERCHANT', 'MERCHANT')
+)
+
 
 class BusinessCentralCredentials(BaseModel):
     """
@@ -177,12 +191,6 @@ class ExportSetting(BaseModel):
     credit_card_expense_state = StringOptionsField(
         choices=CREDIT_CARD_EXPENSE_STATE_CHOICES
     )
-    default_reimbursable_account_name = StringNullField(help_text='Reimbursable account name')
-    default_reimbursable_account_id = StringNullField(help_text='Reimbursable Account ID')
-    default_ccc_credit_card_account_name = StringNullField(help_text='CCC Credit card account name')
-    default_ccc_credit_card_account_id = StringNullField(help_text='CCC Credit Card Account ID')
-    default_reimbursable_credit_card_account_name = StringNullField(help_text='Reimbursable Credit card account name')
-    default_reimbursable_credit_card_account_id = StringNullField(help_text='Reimbursable Credit card account name')
     credit_card_expense_grouped_by = StringOptionsField(
         choices=CREDIT_CARD_EXPENSES_GROUPED_BY_CHOICES
     )
@@ -191,7 +199,14 @@ class ExportSetting(BaseModel):
     )
     default_vendor_name = StringNullField(help_text='default Vendor Name')
     default_vendor_id = StringNullField(help_text='default Vendor Id')
-    auto_map_employees = BooleanTrueField(help_text='Auto map employees')
+    journal_entry_folder_id = StringNullField(help_text='default Fyle journal entry id')
+    employee_field_mapping = StringOptionsField(
+        choices=EMPLOYEE_MAPPING_CHOICES
+    )
+    name_in_journal_entry = StringOptionsField(
+        choices=NAME_IN_JOURNAL_ENTRY_CHOICES
+    )
+    import_vendors_as_merchants = BooleanFalseField(help_text='toggle for import of vendors as merchant from Business Central')
 
     class Meta:
         db_table = 'export_settings'
@@ -204,6 +219,7 @@ class ImportSetting(BaseModel):
     id = models.AutoField(auto_created=True, primary_key=True, verbose_name='ID', serialize=False)
     import_categories = BooleanFalseField(help_text='toggle for import of chart of accounts from Business Central')
     import_vendors_as_merchants = BooleanFalseField(help_text='toggle for import of vendors as merchant from Business Central')
+    workspace = models.OneToOneField(Workspace, on_delete=models.PROTECT, help_text='Reference to Workspace model', related_name="import_settings")
 
     class Meta:
         db_table = 'import_settings'
@@ -218,7 +234,7 @@ class AdvancedSetting(BaseModel):
         models.CharField(max_length=255), help_text='Array of fields in memo', null=True
     )
     schedule_is_enabled = BooleanFalseField(help_text='Boolean to check if schedule is enabled')
-    schedule_start_datetime = CustomDateTimeField(help_text='Schedule start date and time')
+    start_datetime = CustomDateTimeField(help_text='Schedule start date and time')
     schedule_id = StringNullField(help_text='Schedule id')
     interval_hours = IntegerNullField(help_text='Interval in hours')
     emails_selected = CustomJsonField(help_text='Emails Selected For Email Notification')
@@ -227,3 +243,19 @@ class AdvancedSetting(BaseModel):
 
     class Meta:
         db_table = 'advanced_settings'
+
+
+class LastExportDetail(BaseModel):
+    """
+    Table to store Last Export Details
+    """
+
+    id = models.AutoField(primary_key=True)
+    last_exported_at = models.DateTimeField(help_text='Last exported at datetime', null=True)
+    export_mode = models.CharField(max_length=50, help_text='Mode of the export Auto / Manual', choices=EXPORT_MODE_CHOICES, null=True)
+    total_accounting_exports_count = models.IntegerField(help_text='Total count of accounting exports exported', null=True)
+    successful_accounting_exports_count = models.IntegerField(help_text='count of successful accounting_exports ', null=True)
+    failed_accounting_exports_count = models.IntegerField(help_text='count of failed accounting_exports ', null=True)
+
+    class Meta:
+        db_table = 'last_export_details'

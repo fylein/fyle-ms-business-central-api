@@ -6,7 +6,7 @@ from rest_framework import generics
 from rest_framework.views import Response, status
 
 from apps.workspaces.helpers import connect_business_central
-from apps.workspaces.models import AdvancedSetting, BusinessCentralCredentials, ExportSetting, ImportSetting, Workspace
+from apps.workspaces.models import AdvancedSetting, BusinessCentralCredentials, ExportSetting, Workspace
 from apps.workspaces.serializers import (
     AdvancedSettingSerializer,
     BusinessCentralCredentialSerializer,
@@ -15,6 +15,7 @@ from apps.workspaces.serializers import (
     WorkspaceAdminSerializer,
     WorkspaceSerializer,
 )
+from apps.workspaces.tasks import export_to_business_central
 from ms_business_central_api.utils import assert_valid
 
 logger = logging.getLogger(__name__)
@@ -108,14 +109,14 @@ class ExportSettingView(generics.CreateAPIView, generics.RetrieveAPIView):
     queryset = ExportSetting.objects.all()
 
 
-class ImportSettingView(generics.CreateAPIView, generics.RetrieveAPIView):
+class ImportSettingView(generics.RetrieveUpdateAPIView):
     """
     Retrieve or Create Import Settings
     """
     serializer_class = ImportSettingsSerializer
-    lookup_field = 'workspace_id'
 
-    queryset = ImportSetting.objects.all()
+    def get_object(self):
+        return Workspace.objects.filter(id=self.kwargs['workspace_id']).first()
 
 
 class AdvancedSettingView(generics.CreateAPIView, generics.RetrieveAPIView):
@@ -138,3 +139,16 @@ class WorkspaceAdminsView(generics.ListAPIView):
 
     def get_queryset(self):
         return WorkspaceAdminSerializer().get_admin_emails(self.kwargs['workspace_id'])
+
+
+class TriggerExportsView(generics.GenericAPIView):
+    """
+    Trigger exports creation
+    """
+
+    def post(self, request, *args, **kwargs):
+        export_to_business_central(workspace_id=kwargs['workspace_id'])
+
+        return Response(
+            status=status.HTTP_200_OK
+        )
