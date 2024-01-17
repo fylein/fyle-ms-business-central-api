@@ -27,14 +27,6 @@ def handle_business_central_error(exception, accounting_export: AccountingExport
     accounting_export.save()
 
 
-def set_last_export_details(accounting_export: AccountingExport, status, message):
-    detail = {'accounting_export_id': accounting_export.id, 'message': '{0}'.format(message)}
-    accounting_export.status = status
-    accounting_export.detail = detail
-
-    accounting_export.save()
-
-
 def handle_business_central_exceptions():
     def decorator(func):
         def new_fn(*args):

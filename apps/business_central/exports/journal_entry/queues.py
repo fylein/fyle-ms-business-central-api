@@ -35,11 +35,11 @@ def check_accounting_export_and_start_import(workspace_id: int, accounting_expor
             accounting_export.status = 'ENQUEUED'
             accounting_export.save()
 
-        """
-        Todo: Add last export details
-        """
+        last_export = False
+        if accounting_exports.count() == index + 1:
+            last_export = True
 
-        chain.append('apps.business_central.exports.journal_entry.tasks.create_journal_entry', accounting_export)
+        chain.append('apps.business_central.exports.journal_entry.tasks.create_journal_entry', accounting_export, last_export)
 
     if chain.length() > 1:
         chain.run()
