@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Dict, List
 
 from apps.accounting_exports.models import AccountingExport
+from apps.business_central.actions import update_accounting_export_summary
 from apps.business_central.exceptions import handle_business_central_exceptions
 from apps.business_central.exports.accounting_export import AccountingDataExporter
 from apps.business_central.exports.helpers import load_attachments
@@ -83,7 +84,7 @@ class ExportPurchaseInvoice(AccountingDataExporter):
 
 
 @handle_business_central_exceptions()
-def create_purchase_invoice(accounting_export: AccountingExport):
+def create_purchase_invoice(accounting_export: AccountingExport, last_export: bool):
     '''
     Helper function to create and export a journal entry.
     '''
@@ -91,5 +92,8 @@ def create_purchase_invoice(accounting_export: AccountingExport):
 
     # Create and export the journal entry using the base class method
     exported_purchase_invoice = export_purchase_invoice_instance.create_business_central_object(accounting_export=accounting_export)
+
+    if last_export:
+        update_accounting_export_summary(accounting_export.workspace_id)
 
     return exported_purchase_invoice
