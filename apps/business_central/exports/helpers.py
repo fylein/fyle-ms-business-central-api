@@ -78,6 +78,7 @@ def __validate_category_mapping(accounting_export: AccountingExport):
                 Error.objects.update_or_create(
                     workspace_id=accounting_export.workspace_id,
                     expense_attribute=category_attribute,
+                    accounting_export=accounting_export,
                     defaults={
                         'type': 'CATEGORY_MAPPING',
                         'error_title': category_attribute.value,
