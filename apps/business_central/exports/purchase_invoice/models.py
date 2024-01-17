@@ -26,7 +26,7 @@ class PurchaseInvoice(BaseExportModel):
         db_table = 'purchase_invoices'
 
     @classmethod
-    def create_or_update_object(self, accounting_export: AccountingExport, advance_setting: AdvancedSetting, export_settings: ExportSetting):
+    def create_or_update_object(self, accounting_export: AccountingExport, _: AdvancedSetting, export_settings: ExportSetting):
         """
         Create Purchase Invoice
         :param accounting_export: expense group
@@ -65,7 +65,7 @@ class PurchaseInvoiceLineitems(BaseExportModel):
         db_table = 'purchase_invoice_lineitems'
 
     @classmethod
-    def create_or_update_object(self, accounting_export: AccountingExport, advance_setting: AdvancedSetting, export_settings: ExportSetting):
+    def create_or_update_object(self, accounting_export: AccountingExport, advance_setting: AdvancedSetting, _: ExportSetting):
         """
         Create Purchase Invoice
         :param accounting_export: expense group

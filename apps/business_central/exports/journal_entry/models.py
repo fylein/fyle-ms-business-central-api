@@ -33,7 +33,7 @@ class JournalEntry(BaseExportModel):
         db_table = 'journal_entries'
 
     @classmethod
-    def create_or_update_object(self, accounting_export: AccountingExport, advance_setting: AdvancedSetting, export_settings: ExportSetting):
+    def create_or_update_object(self, accounting_export: AccountingExport, _: AdvancedSetting, export_settings: ExportSetting):
         """
         Create Jornal Entry object
         :param accounting_export: expense group
