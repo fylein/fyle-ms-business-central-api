@@ -134,6 +134,16 @@ EXPORT_MODE_CHOICES = (
     ('AUTO', 'AUTO')
 )
 
+EMPLOYEE_MAPPING_CHOICES = (
+    ('EMPLOYEE', 'EMPLOYEE'),
+    ('VENDOR', 'VENDOR')
+)
+
+NAME_IN_JOURNAL_ENTRY_CHOICES = (
+    ('EMPLOYEE', 'EMPLOYEE'),
+    ('MERCHANT', 'MERCHANT')
+)
+
 
 class BusinessCentralCredentials(BaseModel):
     """
@@ -190,7 +200,13 @@ class ExportSetting(BaseModel):
     default_vendor_name = StringNullField(help_text='default Vendor Name')
     default_vendor_id = StringNullField(help_text='default Vendor Id')
     journal_entry_folder_id = StringNullField(help_text='default Fyle journal entry id')
-    emoloyee_mapping = StringNullField(help_text='Employee Mapping')
+    employee_field_mapping = StringOptionsField(
+        choices=EMPLOYEE_MAPPING_CHOICES
+    )
+    name_in_journal_entry = StringOptionsField(
+        choices=NAME_IN_JOURNAL_ENTRY_CHOICES
+    )
+    import_vendors_as_merchants = BooleanFalseField(help_text='toggle for import of vendors as merchant from Business Central')
 
     class Meta:
         db_table = 'export_settings'
@@ -203,6 +219,7 @@ class ImportSetting(BaseModel):
     id = models.AutoField(auto_created=True, primary_key=True, verbose_name='ID', serialize=False)
     import_categories = BooleanFalseField(help_text='toggle for import of chart of accounts from Business Central')
     import_vendors_as_merchants = BooleanFalseField(help_text='toggle for import of vendors as merchant from Business Central')
+    workspace = models.OneToOneField(Workspace, on_delete=models.PROTECT, help_text='Reference to Workspace model', related_name="import_settings")
 
     class Meta:
         db_table = 'import_settings'

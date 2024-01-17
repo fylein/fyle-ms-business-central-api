@@ -31,7 +31,7 @@ def chain_import_fields_to_fyle(workspace_id):
         )
 
     for mapping_setting in mapping_settings:
-        if mapping_setting.source_field in ['PROJECT', 'COST_CENTER']:
+        if mapping_setting.source_field in ['PROJECT', 'COST_CENTER', 'EMPLOYEE']:
             chain.append(
                 'apps.mappings.imports.tasks.trigger_import_via_schedule',
                 workspace_id,

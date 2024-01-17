@@ -2,10 +2,11 @@ from datetime import datetime
 
 from django.db import models
 from django.db.models import Sum
+from fyle_accounting_mappings.models import DestinationAttribute, EmployeeMapping, ExpenseAttribute, Mapping, MappingSetting
 
 from apps.accounting_exports.models import AccountingExport
 from apps.fyle.models import Expense
-from apps.workspaces.models import AdvancedSetting, FyleCredential, Workspace
+from apps.workspaces.models import AdvancedSetting, ExportSetting, FyleCredential, Workspace
 
 
 class BaseExportModel(models.Model):
@@ -97,11 +98,34 @@ class BaseExportModel(models.Model):
         # If none of the expected keys are present or if the values are empty, return the current date and time
         return datetime.now().strftime("%Y-%m-%d")
 
-    def get_vendor_id(accounting_export: AccountingExport) -> str:
-        return "10040"
+    def get_account_id_type(accounting_export: AccountingExport, export_settings: ExportSetting, merchant: str = None) -> str:
+        mapping = EmployeeMapping.objects.filter(
+            source_employee__value=accounting_export.description.get('employee_email'),
+            workspace_id=accounting_export.workspace_id
+        ).first()
 
-    def get_journal_entry_account_id_type(accounting_export: AccountingExport) -> str:
-        return "EH", "Employee"
+        def get_vendor_or_employee_id(employee_field_mapping: str, mapping: EmployeeMapping) -> str:
+            if employee_field_mapping == 'VENDOR':
+                return "Vendor", mapping.destination_vendor.destination_id
+            else:
+                return "Employee", mapping.destination_employee.destination_id
+
+        if export_settings.reimbursable_expenses_export_type == 'PURCHASE_INVOICE' and accounting_export.fund_source == 'PERSONAL':
+            return mapping.destination_vendor.destination_id
+        else:
+            if accounting_export.fund_source == 'PERSONAL':
+                return get_vendor_or_employee_id(export_settings.employee_field_mapping, mapping)
+            else:
+                if export_settings.name_in_journal_entry == 'MERCHANT':
+                    if merchant:
+                        vendor = DestinationAttribute.objects.filter(
+                            value__iexact=merchant, attribute_type='VENDOR', workspace_id=accounting_export.workspace_id
+                        ).first()
+                        return "Vendor", vendor.destination_id if vendor else export_settings.default_vendor_id
+                    else:
+                        return "Vendor", export_settings.default_vendor_id
+                else:
+                    return get_vendor_or_employee_id(export_settings.employee_field_mapping, mapping)
 
     def get_expense_purpose(lineitem: Expense, category: str, advance_setting: AdvancedSetting) -> str:
         memo_structure = advance_setting.expense_memo_structure
@@ -124,3 +148,31 @@ class BaseExportModel(models.Model):
                     purpose = '{0} - '.format(purpose)
 
         return purpose
+
+    def get_location_id(accounting_export: AccountingExport, lineitem: Expense):
+        location_id = None
+
+        location_setting: MappingSetting = MappingSetting.objects.filter(
+            workspace_id=accounting_export.workspace_id,
+            destination_field='LOCATION'
+        ).first()
+
+        if location_setting:
+            if location_setting.source_field == 'PROJECT':
+                source_value = lineitem.project
+            elif location_setting.source_field == 'COST_CENTER':
+                source_value = lineitem.cost_center
+            else:
+                attribute = ExpenseAttribute.objects.filter(attribute_type=location_setting.source_field).first()
+                source_value = lineitem.custom_properties.get(attribute.display_name, None)
+
+            mapping: Mapping = Mapping.objects.filter(
+                source_type=location_setting.source_field,
+                destination_type='LOCATION',
+                source__value=source_value,
+                workspace_id=accounting_export.workspace_id
+            ).first()
+
+            if mapping:
+                location_id = mapping.destination.destination_id
+        return location_id
