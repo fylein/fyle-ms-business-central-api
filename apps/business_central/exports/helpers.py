@@ -140,7 +140,6 @@ def __validate_employee_mapping(accounting_export: AccountingExport, export_sett
 
 def validate_accounting_export(accounting_export: AccountingExport, export_settings: ExportSetting):
     category_mapping_errors = __validate_category_mapping(accounting_export)
-    employee_mapping_errors = []
 
     employee_mapping_errors = __validate_employee_mapping(accounting_export, export_settings)
 
