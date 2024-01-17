@@ -85,7 +85,7 @@ class PurchaseInvoiceLineitems(BaseExportModel):
             ).first()
 
             description = self.get_expense_purpose(lineitem, lineitem.category, advance_setting)
-            location_id = self.get_location_id_or_none(accounting_export, lineitem)
+            location_id = self.get_location_id(accounting_export, lineitem)
 
             purchase_invoice_lineitem_object, _ = PurchaseInvoiceLineitems.objects.update_or_create(
                 purchase_invoice_id=purchase_invoice.id,

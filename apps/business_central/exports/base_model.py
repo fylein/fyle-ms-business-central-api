@@ -144,7 +144,7 @@ class BaseExportModel(models.Model):
 
         return purpose
 
-    def get_location_id_or_none(accounting_export: AccountingExport, lineitem: Expense):
+    def get_location_id(accounting_export: AccountingExport, lineitem: Expense):
         location_id = None
 
         location_setting: MappingSetting = MappingSetting.objects.filter(
