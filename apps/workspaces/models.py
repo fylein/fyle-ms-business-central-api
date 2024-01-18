@@ -179,7 +179,7 @@ class ExportSetting(BaseModel):
         choices=REIMBURSABLE_EXPENSE_EXPORT_TYPE_CHOICES,
     )
     default_bank_account_name = StringNullField(help_text='Bank account name')
-    default_back_account_id = StringNullField(help_text='Bank Account ID')
+    default_bank_account_id = StringNullField(help_text='Bank Account ID')
     reimbursable_expense_state = StringOptionsField(
         choices=REIMBURSABLE_EXPENSE_STATE_CHOICES
     )
