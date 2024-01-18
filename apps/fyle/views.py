@@ -5,14 +5,14 @@ from rest_framework.response import Response
 from rest_framework.views import status
 
 from apps.fyle.helpers import get_exportable_accounting_exports_ids
-from apps.fyle.models import ExpenseFilter, Expense
+from apps.fyle.models import Expense, ExpenseFilter
 from apps.fyle.queue import queue_import_credit_card_expenses, queue_import_reimbursable_expenses
 from apps.fyle.serializers import (
     ExpenseFieldSerializer,
     ExpenseFilterSerializer,
+    ExpenseSerializer,
     FyleFieldsSerializer,
     ImportFyleAttributesSerializer,
-    ExpenseSerializer
 )
 from apps.workspaces.models import Workspace
 from ms_business_central_api.utils import LookupFieldMixin
@@ -52,6 +52,7 @@ class FyleFieldsView(generics.ListAPIView):
     """
 
     serializer_class = FyleFieldsSerializer
+    pagination_class = None
 
     def get_queryset(self):
         return FyleFieldsSerializer().format_fyle_fields(self.kwargs["workspace_id"])
