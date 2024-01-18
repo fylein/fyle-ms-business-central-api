@@ -153,7 +153,6 @@ class MappingSettingFilteredListSerializer(serializers.ListSerializer):
         data = data.filter(~Q(
             destination_field__in=[
                 'ACCOUNT',
-                'EMPLOYEE',
                 'VENDOR'
             ])
         )

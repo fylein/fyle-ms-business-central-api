@@ -1,6 +1,5 @@
 from apps.mappings.imports.modules.categories import Category
 from apps.mappings.imports.modules.cost_centers import CostCenter
-from apps.mappings.imports.modules.employees import Employee
 from apps.mappings.imports.modules.expense_custom_fields import ExpenseCustomField
 from apps.mappings.imports.modules.merchants import Merchant
 from apps.mappings.imports.modules.projects import Project
@@ -10,8 +9,7 @@ SOURCE_FIELD_CLASS_MAP = {
     'CATEGORY': Category,
     'MERCHANT': Merchant,
     'COST_CENTER': CostCenter,
-    'PROJECT': Project,
-    'EMPLOYEE': Employee,
+    'PROJECT': Project
 }
 
 

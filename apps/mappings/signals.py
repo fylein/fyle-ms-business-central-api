@@ -11,9 +11,15 @@ from rest_framework.exceptions import ValidationError
 from apps.mappings.imports.modules.expense_custom_fields import ExpenseCustomField
 from apps.mappings.imports.schedules import schedule_or_delete_fyle_import_tasks
 from apps.mappings.models import ImportLog
-from apps.workspaces.models import FyleCredential, ImportSetting
+from apps.mappings.tasks import schedule_auto_map_employees
+from apps.workspaces.models import ExportSetting, FyleCredential, ImportSetting
 
 logger = logging.getLogger(__name__)
+
+
+@receiver(post_save, sender=ExportSetting)
+def run_post_export_settings_triggers(sender, instance: ExportSetting, **kwargs):
+    schedule_auto_map_employees(employee_mapping_preference=instance.auto_map_employees, workspace_id=int(instance.workspace_id))
 
 
 @receiver(post_save, sender=MappingSetting)
@@ -42,7 +48,7 @@ def run_pre_mapping_settings_triggers(sender, instance: MappingSetting, **kwargs
     :param instance: Row instance of Sender Class
     :return: None
     """
-    default_attributes = ['EMPLOYEE', 'CATEGORY', 'PROJECT', 'COST_CENTER', 'TAX_GROUP', 'CORPORATE_CARD']
+    default_attributes = ['CATEGORY', 'PROJECT', 'COST_CENTER', 'TAX_GROUP', 'CORPORATE_CARD']
 
     instance.source_field = instance.source_field.upper().replace(' ', '_')
 

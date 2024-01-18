@@ -24,7 +24,6 @@ class ImportSettingsTrigger:
         # We first need to avoid deleting mapping-settings that are always necessary.
         destination_fields = [
             'ACCOUNT',
-            'EMPLOYEE',
             'VENDOR'
         ]
         # Here we are filtering out the mapping_settings payload and adding the destination-fields that are present in the payload
