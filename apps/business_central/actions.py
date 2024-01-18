@@ -13,9 +13,9 @@ def update_accounting_export_summary(workspace_id):
         workspace_id=workspace_id, status='COMPLETE',
     ).count()
 
-    accounting_export_summary.failed_accounting_exports_count = failed_exports
-    accounting_export_summary.successful_accounting_exports_count = successful_exports
-    accounting_export_summary.total_accounting_exports_count = failed_exports + successful_exports
+    accounting_export_summary.failed_accounting_export_count = failed_exports
+    accounting_export_summary.successful_accounting_export_count = successful_exports
+    accounting_export_summary.total_accounting_export_count = failed_exports + successful_exports
     accounting_export_summary.save()
 
     return accounting_export_summary

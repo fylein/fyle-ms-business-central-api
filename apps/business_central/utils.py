@@ -141,6 +141,10 @@ class BusinessCentralConnector:
         """
         Create default journal entry folder
         """
+        journal_entry_folder_list = self.connection.journals.get_all()
+        for journal_entry_folder in journal_entry_folder_list:
+            if journal_entry_folder['code'] == 'FYLE_JE':
+                return journal_entry_folder['id']
 
         response = self.connection.journals.post({
             'code': 'Fyle_JE',
