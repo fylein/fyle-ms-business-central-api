@@ -81,7 +81,7 @@ def test_fyle_fields(api_client, test_connection, create_temp_workspace, add_fyl
     assert response.status_code == 200
 
     response = json.loads(response.content)
-    assert response['results'] == data['fyle_fields_response']
+    assert response == data['fyle_fields_response']
 
 
 def test_fyle_expense_fields(api_client, test_connection, create_temp_workspace, add_fyle_credentials, mocker):
