@@ -91,6 +91,10 @@ def test_export_settings(api_client, test_connection, create_temp_workspace, add
             "id": '1234'
         },
     )
+    mocker.patch(
+        "dynamics.apis.Journals.get_all",
+        return_value=[],
+    )
 
     api_client.credentials(HTTP_AUTHORIZATION='Bearer {}'.format(test_connection.access_token))
     response = api_client.post(url)
