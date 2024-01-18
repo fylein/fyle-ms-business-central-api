@@ -106,8 +106,7 @@ class ExportSettingView(generics.CreateAPIView, generics.RetrieveAPIView):
     serializer_class = ExportSettingsSerializer
     lookup_field = 'workspace_id'
 
-    def get_object(self):
-        return ExportSetting.objects.all()
+    queryset = ExportSetting.objects.all()
 
 
 class ImportSettingView(generics.RetrieveUpdateAPIView):
