@@ -86,7 +86,7 @@ class ConnectBusinessCentralView(generics.CreateAPIView, generics.RetrieveAPIVie
 
         business_central_credentials = connect_business_central(
             authorization_code=request.data.get("code"),
-            redirect_uri=request.data.get("redirect_uri"),
+            redirect_uri=request.data.get("callback_url"),
             workspace_id=kwargs["workspace_id"],
         )
 
