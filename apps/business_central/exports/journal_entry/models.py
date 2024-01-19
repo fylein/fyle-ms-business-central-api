@@ -41,7 +41,7 @@ class JournalEntry(BaseExportModel):
         """
         expenses = accounting_export.expenses.all()
 
-        accounts_payable_account_id = export_settings.default_back_account_id
+        accounts_payable_account_id = export_settings.default_bank_account_id
 
         document_number = accounting_export.description['claim_number'] if accounting_export.description and accounting_export.description.get('claim_number') else accounting_export.description['expense_number']
 

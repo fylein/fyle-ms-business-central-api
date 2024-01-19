@@ -311,7 +311,7 @@ def add_export_settings():
             workspace_id=workspace_id,
             reimbursable_expenses_export_type='BILL' if workspace_id in [1, 2] else 'JOURNAL_ENTRY',
             default_bank_account_name='Accounts Payable',
-            default_back_account_id='1',
+            default_bank_account_id='1',
             reimbursable_expense_state='PAYMENT_PROCESSING',
             reimbursable_expense_date='spent_at' if workspace_id == 1 else 'last_spent_at',
             reimbursable_expense_grouped_by='REPORT' if workspace_id == 1 else 'EXPENSE',

@@ -107,7 +107,7 @@ class ExportSettingsSerializer(serializers.ModelSerializer):
         """
         assert_valid(validated_data, 'Body cannot be null')
 
-        if validated_data.get('reimbursable_expenses_export_type') == 'JOURNAL_ENTRY' or validated_data.get('credit_card_expense_export_type') == 'JOURNAL_ENTRY':
+        if validated_data.get('credit_card_expense_export_type') == 'JOURNAL_ENTRY':
             assert_valid(validated_data.get('default_vendor_id'), 'Default Vendor cannot be null')
 
         if validated_data.get('reimbursable_expenses_export_type') == 'PURCHASE_INVOICE' and validated_data.get('credit_card_expense_export_type') == 'JOURNAL_ENTRY':
@@ -153,7 +153,6 @@ class MappingSettingFilteredListSerializer(serializers.ListSerializer):
         data = data.filter(~Q(
             destination_field__in=[
                 'ACCOUNT',
-                'EMPLOYEE',
                 'VENDOR'
             ])
         )

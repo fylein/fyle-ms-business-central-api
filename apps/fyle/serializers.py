@@ -13,7 +13,7 @@ from rest_framework.response import Response
 from rest_framework.views import status
 
 from apps.fyle.helpers import get_expense_fields
-from apps.fyle.models import ExpenseFilter, Expense
+from apps.fyle.models import Expense, ExpenseFilter
 from apps.workspaces.models import FyleCredential, Workspace
 
 logger = logging.getLogger(__name__)
@@ -86,7 +86,7 @@ class FyleFieldsSerializer(serializers.Serializer):
         Get Fyle Fields
         """
 
-        attribute_types = ['EMPLOYEE', 'CATEGORY', 'PROJECT', 'COST_CENTER', 'TAX_GROUP', 'CORPORATE_CARD', 'MERCHANT']
+        attribute_types = ['CATEGORY', 'PROJECT', 'COST_CENTER', 'TAX_GROUP', 'CORPORATE_CARD', 'MERCHANT']
 
         attributes = ExpenseAttribute.objects.filter(
             ~Q(attribute_type__in=attribute_types),

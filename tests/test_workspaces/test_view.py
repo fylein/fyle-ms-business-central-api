@@ -112,7 +112,7 @@ def test_export_settings(api_client, test_connection, create_temp_workspace, add
         "auto_create_vendors": "true",
         'default_vendor_name': 'Nilesh',
         'default_vendor_id': '123',
-        'default_back_account_id': '123',
+        'default_bank_account_id': '123',
         'default_bank_account_name': 'Bank account',
         'employee_field_mapping': 'VENDOR'
     }
