@@ -8,9 +8,17 @@ from apps.accounting_exports.models import AccountingExport, AccountingExportSum
 from apps.business_central.exports.journal_entry.tasks import ExportJournalEntry
 from apps.business_central.exports.purchase_invoice.tasks import ExportPurchaseInvoice
 from apps.fyle.queue import queue_import_credit_card_expenses, queue_import_reimbursable_expenses
-from apps.workspaces.models import AdvancedSetting, ExportSetting
+from apps.workspaces.models import AdvancedSetting, ExportSetting, FyleCredential
+
 
 logger = logging.getLogger(__name__)
+
+
+def async_update_fyle_credentials(fyle_org_id: str, refresh_token: str):
+    fyle_credentials = FyleCredential.objects.filter(workspace__org_id=fyle_org_id).first()
+    if fyle_credentials:
+        fyle_credentials.refresh_token = refresh_token
+        fyle_credentials.save()
 
 
 def run_import_export(workspace_id: int, export_mode = None):
