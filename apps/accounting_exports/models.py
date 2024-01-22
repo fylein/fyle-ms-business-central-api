@@ -51,12 +51,12 @@ def _group_expenses(expenses: List[Expense], export_setting: ExportSetting, fund
     # Define a mapping for fund sources and their associated group fields
     fund_source_mapping = {
         'CCC': {
-            'group_by': report_grouping_fields if credit_card_expense_grouped_by == 'REPORT' else expense_grouping_fields,
-            'date_field': credit_card_expense_date.lower() if credit_card_expense_date and credit_card_expense_date != 'LAST_SPENT_AT' else None
+            'group_by': report_grouping_fields if (export_setting.credit_card_expense_grouped_by and credit_card_expense_grouped_by == 'REPORT') else expense_grouping_fields,
+            'date_field': credit_card_expense_date.lower() if (export_setting.credit_card_expense_date and credit_card_expense_date != 'LAST_SPENT_AT') else None
         },
         'PERSONAL': {
-            'group_by': report_grouping_fields if reimbursable_expense_grouped_by == 'REPORT' else expense_grouping_fields,
-            'date_field': reimbursable_expense_date.lower() if reimbursable_expense_date and reimbursable_expense_date != 'LAST_SPENT_AT' else None
+            'group_by': report_grouping_fields if (export_setting.reimbursable_expense_grouped_by and reimbursable_expense_grouped_by == 'REPORT') else expense_grouping_fields,
+            'date_field': reimbursable_expense_date.lower() if (export_setting.reimbursable_expense_grouped_by and reimbursable_expense_date != 'LAST_SPENT_AT') else None
         }
     }
 
