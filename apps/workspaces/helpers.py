@@ -12,7 +12,7 @@ from apps.workspaces.models import BusinessCentralCredentials
 logger = logging.getLogger(__name__)
 
 
-def generate_token(authorization_code: str, redirect_uri: str = None) -> str:
+def generate_token(authorization_code: str, redirect_uri: str) -> str:
     """
     Generates a token using the provided authorization code.
 
@@ -23,9 +23,7 @@ def generate_token(authorization_code: str, redirect_uri: str = None) -> str:
     api_data = {
         "grant_type": "authorization_code",
         "code": authorization_code,
-        "redirect_uri": settings.BUSINESS_CENTRAL_REDIRECT_URI
-        if not redirect_uri
-        else redirect_uri,
+        "redirect_uri": redirect_uri,
     }
 
     auth = "{0}:{1}".format(settings.BUSINESS_CENTRAL_CLIENT_ID, settings.BUSINESS_CENTRAL_CLIENT_SECRET)
@@ -44,7 +42,7 @@ def generate_token(authorization_code: str, redirect_uri: str = None) -> str:
     return response
 
 
-def generate_business_central_refresh_token(authorization_code: str, redirect_uri: str = None) -> str:
+def generate_business_central_refresh_token(authorization_code: str, redirect_uri: str) -> str:
     """
     Generates a Business Central refresh token from the provided authorization code.
 
@@ -60,7 +58,7 @@ def generate_business_central_refresh_token(authorization_code: str, redirect_ur
         successful_response = json.loads(response.text)
         return successful_response["refresh_token"]
 
-    elif response.status_code == 401:
+    elif response.status_code == 400:
         raise InvalidTokenError(
             "Wrong client secret or/and refresh token", response.text
         )
@@ -78,12 +76,7 @@ def connect_business_central(authorization_code, redirect_uri, workspace_id):
     :param workspace_id: ID of the workspace.
     :return: BusinessCentralCredentials object.
     """
-    if redirect_uri:
-        # If redirect_uri is provided, use it in the token request
-        refresh_token = generate_business_central_refresh_token(authorization_code, redirect_uri)
-    else:
-        # If redirect_uri is not provided, use the default redirect_uri in the token request
-        refresh_token = generate_business_central_refresh_token(authorization_code)
+    refresh_token = generate_business_central_refresh_token(authorization_code, redirect_uri)
 
     # Retrieve or create BusinessCentralCredentials based on workspace_id
     business_central_credentials = BusinessCentralCredentials.objects.filter(workspace_id=workspace_id).first()
