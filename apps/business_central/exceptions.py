@@ -14,9 +14,8 @@ logger.level = logging.INFO
 
 
 def handle_business_central_error(exception, accounting_export: AccountingExport, export_type: str):
-    logger.info(exception)
-
-    business_central_error = exception
+    logger.info(exception.response)
+    business_central_error = str(exception.response)
     error_msg = 'Failed to create {0}'.format(export_type)
 
     Error.objects.update_or_create(workspace_id=accounting_export.workspace_id, accounting_export=accounting_export, defaults={'error_title': error_msg, 'type': 'BUSINESS_CENTRAL_ERROR', 'error_detail': business_central_error, 'is_resolved': False})
