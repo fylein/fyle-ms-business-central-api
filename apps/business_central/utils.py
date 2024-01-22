@@ -162,8 +162,16 @@ class BusinessCentralConnector:
 
         self.connection.set_company_id(workspace.business_central_company_id)
 
-        response = self.connection.journal_line_items.bulk_post(export_settings.journal_entry_folder_id, payload)
-        return response
+        try:
+            bulk_post_response = self.connection.journal_line_items.bulk_post(export_settings.journal_entry_folder_id, payload)
+            error_messages = [response.get("body", {}).get("error", {}).get("message", None) for response in bulk_post_response.get("responses", [])]
+            error_messages = [message for message in error_messages if message is not None]
+
+            if error_messages:
+                raise Exception(error_messages)
+        except Exception as exception:
+            raise exception
+        return bulk_post_response
 
     def post_purchase_invoice(self, purchase_invoice_payload, purchase_invoice_lineitem_payload):
         """
