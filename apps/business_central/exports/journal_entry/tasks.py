@@ -66,7 +66,7 @@ class ExportJournalEntry(AccountingDataExporter):
                 'comment': lineitem.comment,
                 'description': lineitem.description if lineitem.description else '',
                 'balanceAccountType': 'G/L Account',
-                'balancingAccountNumber': body.accounts_payable_account_id
+                'balancingAccountNumber': lineitem.accounts_payable_account_id
             }
 
             batch_journal_entry_payload.append(journal_entry_lineitem_payload)
