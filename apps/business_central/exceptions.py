@@ -43,8 +43,8 @@ def handle_business_central_exceptions():
                 accounting_export.save()
 
             except BusinessCentralCredentials.DoesNotExist:
-                logger.info('Sage300 Account not connected / token expired for workspace_id %s / accounting export %s', accounting_export.workspace_id, accounting_export.id)
-                detail = {'accounting_export_id': accounting_export.id, 'message': 'Sage300 Account not connected / token expired'}
+                logger.info('Business Central Account not connected / token expired for workspace_id %s / accounting export %s', accounting_export.workspace_id, accounting_export.id)
+                detail = {'accounting_export_id': accounting_export.id, 'message': 'Business Central Account not connected / token expired'}
                 accounting_export.status = 'FAILED'
                 accounting_export.detail = detail
 

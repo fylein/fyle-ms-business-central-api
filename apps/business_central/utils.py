@@ -1,11 +1,16 @@
 import base64
+import logging
 from typing import Dict, List
 
 from dynamics.core.client import Dynamics
+from dynamics.exceptions.dynamics_exceptions import WrongParamsError
 from fyle_accounting_mappings.models import DestinationAttribute
 
 from apps.workspaces.models import BusinessCentralCredentials, ExportSetting, Workspace
 from ms_business_central_api import settings
+
+logger = logging.getLogger(__name__)
+logger.level = logging.INFO
 
 
 class BusinessCentralConnector:
@@ -168,9 +173,9 @@ class BusinessCentralConnector:
             error_messages = [message for message in error_messages if message is not None]
 
             if error_messages:
-                raise Exception(error_messages)
-        except Exception as exception:
-            raise exception
+                raise WrongParamsError(error_messages)
+        except WrongParamsError as exception:
+            logger.error(exception)
         return bulk_post_response
 
     def post_purchase_invoice(self, purchase_invoice_payload, purchase_invoice_lineitem_payload):
