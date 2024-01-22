@@ -103,7 +103,7 @@ REIMBURSABLE_EXPENSES_GROUPED_BY_CHOICES = (
 
 REIMBURSABLE_EXPENSES_DATE_TYPE_CHOICES = (
     ('LAST_SPENT_AT', 'last_spent_at'),
-    ('CREATED_AT', 'created_at'),
+    ('CURRENT_DATE', 'current_date'),
     ('SPENT_AT', 'spent_at')
 )
 

@@ -74,15 +74,16 @@ class ExportPurchaseInvoice(AccountingDataExporter):
         expenses = accounting_export.expenses.all()
 
         # Load attachments to Business Central
-        for expense in expenses:
-            load_attachments(
-                business_central_connection,
-                response["purchase_invoice_response"]["id"],
-                "Purchase Invoice",
-                expense,
-                accounting_export)
+        if response:
+            for expense in expenses:
+                load_attachments(
+                    business_central_connection,
+                    response["purchase_invoice_response"]["id"],
+                    "Purchase Invoice",
+                    expense,
+                    accounting_export)
 
-        return response
+            return response
 
 
 @handle_business_central_exceptions()

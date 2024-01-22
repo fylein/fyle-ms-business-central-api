@@ -85,15 +85,16 @@ class ExportJournalEntry(AccountingDataExporter):
         expenses = accounting_export.expenses.all()
 
         # Load attachments to Business Central
-        for i in range(1, len(response["responses"])):
-            load_attachments(
-                business_central_connection,
-                response["responses"][i]["body"]["id"],
-                "Journal",
-                expenses[i - 1],
-                accounting_export)
+        if response:
+            for i in range(1, len(response["responses"])):
+                load_attachments(
+                    business_central_connection,
+                    response["responses"][i]["body"]["id"],
+                    "Journal",
+                    expenses[i - 1],
+                    accounting_export)
 
-        return response
+            return response
 
 
 @handle_business_central_exceptions()

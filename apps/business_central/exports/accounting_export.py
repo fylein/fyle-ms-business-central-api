@@ -66,11 +66,12 @@ class AccountingDataExporter:
             created_object = self.post(accounting_export, body_model_object, lineitems_model_objects)
 
             # Update the accounting export details
-            detail = created_object
+            if created_object:
+                detail = created_object
 
-            accounting_export.detail = detail
-            accounting_export.business_central_errors = None
-            accounting_export.exported_at = datetime.now()
-            accounting_export.status = 'COMPLETE'
-            accounting_export.save()
-            resolve_errors_for_exported_accounting_export(accounting_export)
+                accounting_export.detail = detail
+                accounting_export.business_central_errors = None
+                accounting_export.exported_at = datetime.now()
+                accounting_export.status = 'COMPLETE'
+                accounting_export.save()
+                resolve_errors_for_exported_accounting_export(accounting_export)

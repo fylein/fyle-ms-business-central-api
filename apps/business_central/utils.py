@@ -175,34 +175,34 @@ class BusinessCentralConnector:
         if error_messages:
             handle_business_central_error(error_messages, accounting_export, 'JOURNAL_ENTRY')
             update_accounting_export_summary(accounting_export.workspace_id)
+            return
         else:
             return bulk_post_response
 
-    def post_purchase_invoice(self, purchase_invoice_payload, purchase_invoice_lineitem_payload):
+    def post_purchase_invoice(self, purchase_invoice_payload, purchase_invoice_lineitem_payload, accounting_export):
         """
         Post purchase invoice to MS Dynamics SDK
         """
         workspace = Workspace.objects.get(id=self.workspace_id)
         self.connection.set_company_id(workspace.business_central_company_id)
 
-        try:
-            purchase_invoice_response = self.connection.purchase_invoices.post(purchase_invoice_payload)
-            bulk_post_response = self.connection.purchase_invoice_line_items.bulk_post(purchase_invoice_response['id'], purchase_invoice_lineitem_payload)
+        purchase_invoice_response = self.connection.purchase_invoices.post(purchase_invoice_payload)
+        bulk_post_response = self.connection.purchase_invoice_line_items.bulk_post(purchase_invoice_response['id'], purchase_invoice_lineitem_payload)
 
-            error_messages = [response.get("body", {}).get("error", {}).get("message", None) for response in bulk_post_response.get("responses", [])]
-            error_messages = [message for message in error_messages if message is not None]
+        error_messages = [response.get("body", {}).get("error", {}).get("message", None) for response in bulk_post_response.get("responses", [])]
+        error_messages = [message for message in error_messages if message is not None]
 
-            if error_messages:
-                raise Exception(error_messages)
-
+        if error_messages:
+            self.connection.purchase_invoices.delete(purchase_invoice_response['id'])
+            handle_business_central_error(error_messages, accounting_export, 'PURCHAL_INVOICE')
+            update_accounting_export_summary(accounting_export.workspace_id)
+            return
+        else:
             response = {
                 "purchase_invoice_response": purchase_invoice_response,
                 "bulk_post_response": bulk_post_response
             }
             return response
-        except Exception as exception:
-            self.connection.purchase_invoices.delete(purchase_invoice_response['id'])
-            raise exception
 
     def post_attachments(
         self, ref_type: str, ref_id: str, attachments: List[Dict]
