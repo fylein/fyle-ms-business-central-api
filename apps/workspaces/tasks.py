@@ -79,7 +79,7 @@ def run_import_export(workspace_id: int, export_mode = None):
         accounting_summary.export_mode = export_mode or 'MANUAL'
 
         if advance_settings:
-            accounting_summary.next_export_at = last_exported_at + timedelta(hours=24)
+            accounting_summary.next_export_at = last_exported_at + timedelta(hours=advance_settings.interval_hours)
 
         accounting_summary.save()
 
@@ -129,6 +129,7 @@ def export_to_business_central(workspace_id: int):
     """
     # Retrieve export settings for the given workspace
     export_settings = ExportSetting.objects.get(workspace_id=workspace_id)
+    advance_settings = AdvancedSetting.objects.filter(workspace_id=workspace_id).first()
 
     # Update or create an AccountingExportSummary for the workspace
     accounting_summary, _ = AccountingExportSummary.objects.update_or_create(workspace_id=workspace_id)
@@ -173,6 +174,10 @@ def export_to_business_central(workspace_id: int):
 
     # Update the accounting summary if expenses are exported
     if is_expenses_exported:
+
+        if advance_settings.schedule_is_enabled:
+            accounting_summary.next_export_at = last_exported_at + timedelta(hours=advance_settings.interval_hours)
+
         accounting_summary.last_exported_at = last_exported_at
         accounting_summary.export_mode = 'MANUAL'
         accounting_summary.save()
