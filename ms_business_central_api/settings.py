@@ -113,6 +113,69 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 100
 }
 
+SERVICE_NAME = os.environ.get('SERVICE_NAME')
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': True,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} %s {asctime} {module} {message} ' % SERVICE_NAME,
+            'style': '{',
+        },
+        'requests': {
+            'format': 'request {levelname} %s {asctime} {message}' % SERVICE_NAME,
+            'style': '{'
+        }
+    },
+    'handlers': {
+        'debug_logs': {
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
+            'formatter': 'verbose'
+        },
+        'request_logs': {
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
+            'formatter': 'requests'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['request_logs'],
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['request_logs'],
+            'propagate': False
+        },
+        'fyle_sage_desktop_api': {
+            'handlers': ['debug_logs'],
+            'level': 'ERROR',
+            'propagate': False
+        },
+        'apps': {
+            'handlers': ['debug_logs'],
+            'level': 'ERROR',
+            'propagate': False
+        },
+         'django_q': {
+            'handlers': ['debug_logs'],
+            'propagate': True,
+        },
+        'fyle_integrations_platform_connector': {
+            'handlers': ['debug_logs'],
+            'propagate': True,
+        },
+        'gunicorn': {
+            'handlers': ['request_logs'],
+            'level': 'INFO',
+            'propagate': False
+        }
+    }
+}
+
+
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
