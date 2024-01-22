@@ -5,6 +5,7 @@ from apps.business_central.serializers import (
     CompanySelectionSerializer,
     ImportBusinessCentralAttributesSerializer,
 )
+from apps.workspaces.models import Workspace
 
 
 class ImportBusinessCentralAttributesView(generics.CreateAPIView):
@@ -25,8 +26,11 @@ class BusinessCentralFieldsView(generics.ListAPIView):
         return BusinessCentralFieldSerializer().format_business_central_fields(self.kwargs["workspace_id"])
 
 
-class CompanySelectionView(generics.CreateAPIView):
+class CompanySelectionView(generics.ListCreateAPIView):
     """
     Retrieve Company Selection
     """
     serializer_class = CompanySelectionSerializer
+
+    def get_queryset(self):
+        return Workspace.objects.filter(id=self.kwargs['workspace_id'])
