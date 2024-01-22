@@ -30,6 +30,19 @@ class ExpenseFilterSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('id', 'workspace', 'created_at', 'updated_at')
 
+    def create(self, validated_data):
+        """
+        Create Expense Filter
+        """
+        workspace_id = self.context['request'].parser_context.get('kwargs').get('workspace_id')
+        expense_filter, _ = ExpenseFilter.objects.update_or_create(
+            workspace_id=workspace_id,
+            rank=validated_data['rank'],
+            defaults=validated_data
+        )
+
+        return expense_filter
+
 
 class ImportFyleAttributesSerializer(serializers.Serializer):
     """
