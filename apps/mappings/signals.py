@@ -4,10 +4,11 @@ from datetime import datetime, timedelta, timezone
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from fyle.platform.exceptions import WrongParamsError
-from fyle_accounting_mappings.models import MappingSetting
+from fyle_accounting_mappings.models import CategoryMapping, EmployeeMapping, MappingSetting
 from fyle_integrations_platform_connector import PlatformConnector
 from rest_framework.exceptions import ValidationError
 
+from apps.accounting_exports.models import Error
 from apps.mappings.imports.modules.expense_custom_fields import ExpenseCustomField
 from apps.mappings.imports.schedules import schedule_or_delete_fyle_import_tasks
 from apps.mappings.models import ImportLog
@@ -116,3 +117,23 @@ def run_pre_mapping_settings_triggers(sender, instance: MappingSetting, **kwargs
             last_successful_run_at = import_log.last_successful_run_at - timedelta(minutes=30)
             import_log.last_successful_run_at = last_successful_run_at
             import_log.save()
+
+
+@receiver(post_save, sender=CategoryMapping)
+def resolve_post_category_mapping_errors(sender, instance: CategoryMapping, **kwargs):
+    """
+    Resolve errors after mapping is created
+    """
+    Error.objects.filter(expense_attribute_id=instance.source_category).update(
+        is_resolved=True
+    )
+
+
+@receiver(post_save, sender=EmployeeMapping)
+def resolve_post_employee_mapping_errors(sender, instance: EmployeeMapping, **kwargs):
+    """
+    Resolve errors after mapping is created
+    """
+    Error.objects.filter(expense_attribute_id=instance.source_employee).update(
+        is_resolved=True
+    )
