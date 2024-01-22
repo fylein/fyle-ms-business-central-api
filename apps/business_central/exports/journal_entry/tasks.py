@@ -80,7 +80,7 @@ class ExportJournalEntry(AccountingDataExporter):
         business_central_connection = BusinessCentralConnector(business_central_credentials, accounting_export.workspace_id)
 
         # Post the journal entry to Business Central
-        response = business_central_connection.bulk_post_journal_lineitems(batch_journal_entry_payload)
+        response = business_central_connection.bulk_post_journal_lineitems(batch_journal_entry_payload, accounting_export)
 
         expenses = accounting_export.expenses.all()
 

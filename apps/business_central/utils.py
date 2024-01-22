@@ -3,9 +3,10 @@ import logging
 from typing import Dict, List
 
 from dynamics.core.client import Dynamics
-from dynamics.exceptions.dynamics_exceptions import WrongParamsError
 from fyle_accounting_mappings.models import DestinationAttribute
 
+from apps.business_central.actions import update_accounting_export_summary
+from apps.business_central.exceptions import handle_business_central_error
 from apps.workspaces.models import BusinessCentralCredentials, ExportSetting, Workspace
 from ms_business_central_api import settings
 
@@ -158,7 +159,7 @@ class BusinessCentralConnector:
         })
         return response['id']
 
-    def bulk_post_journal_lineitems(self, payload):
+    def bulk_post_journal_lineitems(self, payload, accounting_export):
         """
         Bulk post data to MS Dynamics SDK
         """
@@ -167,16 +168,15 @@ class BusinessCentralConnector:
 
         self.connection.set_company_id(workspace.business_central_company_id)
 
-        try:
-            bulk_post_response = self.connection.journal_line_items.bulk_post(export_settings.journal_entry_folder_id, payload)
-            error_messages = [response.get("body", {}).get("error", {}).get("message", None) for response in bulk_post_response.get("responses", [])]
-            error_messages = [message for message in error_messages if message is not None]
+        bulk_post_response = self.connection.journal_line_items.bulk_post(export_settings.journal_entry_folder_id, payload)
+        error_messages = [response.get("body", {}).get("error", {}).get("message", None) for response in bulk_post_response.get("responses", [])]
+        error_messages = [message for message in error_messages if message is not None]
 
-            if error_messages:
-                raise WrongParamsError(error_messages)
-        except WrongParamsError as exception:
-            logger.error(exception)
-        return bulk_post_response
+        if error_messages:
+            handle_business_central_error(error_messages, accounting_export, 'JOURNAL_ENTRY')
+            update_accounting_export_summary(accounting_export.workspace_id)
+        else:
+            return bulk_post_response
 
     def post_purchase_invoice(self, purchase_invoice_payload, purchase_invoice_lineitem_payload):
         """

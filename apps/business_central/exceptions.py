@@ -51,7 +51,7 @@ def handle_business_central_exceptions():
                 accounting_export.save()
 
             except WrongParamsError as exception:
-                handle_business_central_error(exception, accounting_export, 'Purchase Invoice')
+                handle_business_central_error(exception, accounting_export, accounting_export.type)
 
             except BulkError as exception:
                 logger.info(exception.response)
