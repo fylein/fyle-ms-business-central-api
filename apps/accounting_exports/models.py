@@ -1,5 +1,6 @@
-from typing import List
 from datetime import datetime
+from typing import List
+
 from django.contrib.postgres.aggregates import ArrayAgg
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
@@ -52,11 +53,11 @@ def _group_expenses(expenses: List[Expense], export_setting: ExportSetting, fund
     fund_source_mapping = {
         'CCC': {
             'group_by': report_grouping_fields if (export_setting.credit_card_expense_grouped_by and credit_card_expense_grouped_by == 'REPORT') else expense_grouping_fields,
-            'date_field': credit_card_expense_date.lower() if (export_setting.credit_card_expense_date and credit_card_expense_date != 'LAST_SPENT_AT') else None
+            'date_field': credit_card_expense_date.lower() if (export_setting.credit_card_expense_date and credit_card_expense_date not in ('LAST_SPENT_AT', 'CURRENT_DATE')) else None
         },
         'PERSONAL': {
             'group_by': report_grouping_fields if (export_setting.reimbursable_expense_grouped_by and reimbursable_expense_grouped_by == 'REPORT') else expense_grouping_fields,
-            'date_field': reimbursable_expense_date.lower() if (export_setting.reimbursable_expense_grouped_by and reimbursable_expense_date != 'LAST_SPENT_AT') else None
+            'date_field': reimbursable_expense_date.lower() if (export_setting.reimbursable_expense_grouped_by and reimbursable_expense_date not in ('LAST_SPENT_AT', 'CURRENT_DATE')) else None
         }
     }
 
@@ -121,7 +122,7 @@ class AccountingExport(BaseForeignWorkspaceModel):
         for accounting_export in accounting_exports:
             # Determine the date field based on fund_source
             date_field = getattr(export_setting, f"{fund_source_map.get(fund_source)}_expense_date", None).lower()
-            if date_field and date_field not in ['current_date', 'last_spent_at']:
+            if date_field and date_field != 'last_spent_at':
                 if accounting_export[date_field]:
                     accounting_export[date_field] = accounting_export[date_field].strftime('%Y-%m-%d')
                 else:
