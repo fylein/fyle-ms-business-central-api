@@ -131,7 +131,6 @@ class AccountingExport(BaseForeignWorkspaceModel):
 
             # Store expense IDs and remove unnecessary keys
             expense_ids = accounting_export['expense_ids']
-            accounting_export[date_field] = accounting_export[date_field].strftime('%Y-%m-%dT%H:%M:%S')
             accounting_export.pop('total')
             accounting_export.pop('expense_ids')
 
