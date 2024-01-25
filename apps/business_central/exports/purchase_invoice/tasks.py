@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from typing import Dict, List
 
@@ -10,6 +11,9 @@ from apps.business_central.exports.purchase_invoice.models import PurchaseInvoic
 from apps.business_central.exports.purchase_invoice.queues import check_accounting_export_and_start_import
 from apps.business_central.utils import BusinessCentralConnector
 from apps.workspaces.models import BusinessCentralCredentials
+
+logger = logging.getLogger(__name__)
+logger.level = logging.INFO
 
 
 class ExportPurchaseInvoice(AccountingDataExporter):
@@ -65,6 +69,7 @@ class ExportPurchaseInvoice(AccountingDataExporter):
         '''
 
         purchase_invoice_payload, batch_purchase_invoice_payload = self.__construct_purchase_invoice(item, lineitem)
+        logger.info('WORKSPACE_ID: {0}, ACCOUNTING_EXPORT_ID: {1}, PURCHASE_INVOICE_PAYLOAD: {2}, BATCH_PURCHASE_INVOICE_PAYLOAD: {3}'.format(accounting_export.workspace_id, accounting_export.id, purchase_invoice_payload, batch_purchase_invoice_payload))
         business_central_credentials = BusinessCentralCredentials.objects.filter(workspace_id=accounting_export.workspace_id).first()
         # Establish a connection to Business Central
         business_central_connection = BusinessCentralConnector(business_central_credentials, accounting_export.workspace_id)

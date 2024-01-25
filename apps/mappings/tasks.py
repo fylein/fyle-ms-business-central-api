@@ -3,13 +3,14 @@ from datetime import datetime
 from typing import List
 
 from django_q.models import Schedule
+from dynamics.exceptions.dynamics_exceptions import InvalidTokenError, NoPrivilegeError
+from fyle.platform.exceptions import InvalidTokenError as FyleInvalidTokenError
 from fyle_accounting_mappings.helpers import EmployeesAutoMappingHelper
 from fyle_accounting_mappings.models import EmployeeMapping
 from fyle_integrations_platform_connector import PlatformConnector
 
 from apps.accounting_exports.models import Error
 from apps.business_central.utils import BusinessCentralConnector
-from apps.mappings.exceptions import handle_import_exceptions
 from apps.workspaces.models import BusinessCentralCredentials, ExportSetting, FyleCredential
 
 logger = logging.getLogger(__name__)
@@ -75,7 +76,6 @@ def resolve_expense_attribute_errors(
             Error.objects.filter(expense_attribute_id__in=mapped_attribute_ids).update(is_resolved=True)
 
 
-@handle_import_exceptions
 def async_auto_map_employees(workspace_id: int):
     export_settings: ExportSetting = ExportSetting.objects.get(workspace_id=workspace_id)
 
@@ -85,23 +85,32 @@ def async_auto_map_employees(workspace_id: int):
 
     fyle_credentials = FyleCredential.objects.get(workspace_id=workspace_id)
 
-    platform = PlatformConnector(fyle_credentials=fyle_credentials)
-    sage_intacct_credentials = BusinessCentralCredentials.objects.get(workspace_id=workspace_id)
-    sage_intacct_connection = BusinessCentralConnector(
-        credentials_object=sage_intacct_credentials, workspace_id=workspace_id)
+    try:
+        platform = PlatformConnector(fyle_credentials=fyle_credentials)
+        business_central_credentials = BusinessCentralCredentials.objects.get(workspace_id=workspace_id)
+        business_central_connection = BusinessCentralConnector(
+            credentials_object=business_central_credentials, workspace_id=workspace_id)
 
-    platform.employees.sync()
-    if destination_type == 'EMPLOYEE':
-        sage_intacct_connection.sync_employees()
-    else:
-        sage_intacct_connection.sync_vendors()
+        platform.employees.sync()
+        if destination_type == 'EMPLOYEE':
+            business_central_connection.sync_employees()
+        else:
+            business_central_connection.sync_vendors()
 
-    EmployeesAutoMappingHelper(workspace_id, destination_type, employee_mapping_preference).reimburse_mapping()
-    resolve_expense_attribute_errors(
-        source_attribute_type="EMPLOYEE",
-        workspace_id=workspace_id,
-        destination_attribute_type=destination_type,
-    )
+        EmployeesAutoMappingHelper(workspace_id, destination_type, employee_mapping_preference).reimburse_mapping()
+        resolve_expense_attribute_errors(
+            source_attribute_type="EMPLOYEE",
+            workspace_id=workspace_id,
+            destination_attribute_type=destination_type,
+        )
+    except (BusinessCentralCredentials.DoesNotExist, InvalidTokenError):
+        logger.info('Invalid Token or Sage Intacct Credentials does not exist - %s', workspace_id)
+
+    except FyleInvalidTokenError:
+        logger.info('Invalid Token for fyle')
+
+    except NoPrivilegeError:
+        logger.info('Insufficient permission to access the requested module')
 
 
 def schedule_auto_map_employees(employee_mapping_preference: str, workspace_id: int):

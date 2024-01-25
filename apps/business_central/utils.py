@@ -1,4 +1,5 @@
 import base64
+import logging
 from typing import Dict, List
 
 from dynamics.core.client import Dynamics
@@ -6,6 +7,9 @@ from fyle_accounting_mappings.models import DestinationAttribute
 
 from apps.workspaces.models import BusinessCentralCredentials, ExportSetting, Workspace
 from ms_business_central_api import settings
+
+logger = logging.getLogger(__name__)
+logger.level = logging.INFO
 
 
 class BusinessCentralConnector:
@@ -19,11 +23,14 @@ class BusinessCentralConnector:
         environment = settings.BUSINESS_CENTRAL_ENVIRONMENT
         refresh_token = credentials_object.refresh_token
 
+        business_central_company_id = credentials_object.workspace.business_central_company_id
+
         self.connection = Dynamics(
             environment=environment,
             client_id=client_id,
             client_secret=client_secret,
             refresh_token=refresh_token,
+            company_id=business_central_company_id
         )
 
         self.workspace_id = workspace_id
@@ -93,8 +100,6 @@ class BusinessCentralConnector:
         """
         Synchronize accounts from MS Dynamics SDK to your application
         """
-        workspace = Workspace.objects.get(id=self.workspace_id)
-        self.connection.set_company_id(workspace.business_central_company_id)
         field_names = ['category', 'subCategory', 'accountType', 'directPosting', 'lastModifiedDateTime']
 
         accounts = self.connection.accounts.get_all()
@@ -105,8 +110,6 @@ class BusinessCentralConnector:
         """
         Synchronize vendors from MS Dynamics SDK to your application
         """
-        workspace = Workspace.objects.get(id=self.workspace_id)
-        self.connection.set_company_id(workspace.business_central_company_id)
         field_names = ['email', 'currencyId', 'currencyCode', 'lastModifiedDateTime']
 
         vendors = self.connection.vendors.get_all()
@@ -117,8 +120,6 @@ class BusinessCentralConnector:
         """
         Synchronize employees from MS Dynamics SDK to your application
         """
-        workspace = Workspace.objects.get(id=self.workspace_id)
-        self.connection.set_company_id(workspace.business_central_company_id)
         field_names = ['email', 'personalEmail', 'lastModifiedDateTime']
 
         employees = self.connection.employees.get_all()
@@ -129,8 +130,6 @@ class BusinessCentralConnector:
         """
         Synchronize locations from MS Dynamics SDK to your application
         """
-        workspace = Workspace.objects.get(id=self.workspace_id)
-        self.connection.set_company_id(workspace.business_central_company_id)
         field_names = ['code', 'city', 'country']
 
         locations = self.connection.locations.get_all()
@@ -153,43 +152,31 @@ class BusinessCentralConnector:
         })
         return response['id']
 
-    def bulk_post_journal_lineitems(self, payload):
+    def bulk_post_journal_lineitems(self, payload, accounting_export):
         """
         Bulk post data to MS Dynamics SDK
         """
         workspace = Workspace.objects.get(id=self.workspace_id)
         export_settings = ExportSetting.objects.get(workspace_id=self.workspace_id)
 
-        self.connection.set_company_id(workspace.business_central_company_id)
+        bulk_post_response = self.connection.journal_line_items.bulk_post(export_settings.journal_entry_folder_id, payload, workspace.business_central_company_id)
 
-        response = self.connection.journal_line_items.bulk_post(export_settings.journal_entry_folder_id, payload)
-        return response
+        return bulk_post_response
 
     def post_purchase_invoice(self, purchase_invoice_payload, purchase_invoice_lineitem_payload):
         """
         Post purchase invoice to MS Dynamics SDK
         """
         workspace = Workspace.objects.get(id=self.workspace_id)
-        self.connection.set_company_id(workspace.business_central_company_id)
 
-        try:
-            purchase_invoice_response = self.connection.purchase_invoices.post(purchase_invoice_payload)
-            bulk_post_response = self.connection.purchase_invoice_line_items.bulk_post(purchase_invoice_response['id'], purchase_invoice_lineitem_payload)
+        purchase_invoice_response = self.connection.purchase_invoices.post(purchase_invoice_payload)
+        bulk_post_response = self.connection.purchase_invoice_line_items.bulk_post(purchase_invoice_response['id'], purchase_invoice_lineitem_payload, workspace.business_central_company_id)
 
-            error_messages = [response.get("body", {}).get("error", {}).get("message", None) for response in bulk_post_response.get("responses", [])]
-            error_messages = [message for message in error_messages if message is not None]
-
-            if error_messages:
-                raise Exception(error_messages)
-
-            response = {
-                "purchase_invoice_response": purchase_invoice_response,
-                "bulk_post_response": bulk_post_response
-            }
-            return response
-        except Exception as exception:
-            self.connection.purchase_invoices.delete(purchase_invoice_response['id'])
-            raise exception
+        response = {
+            "purchase_invoice_response": purchase_invoice_response,
+            "bulk_post_response": bulk_post_response
+        }
+        return response
 
     def post_attachments(
         self, ref_type: str, ref_id: str, attachments: List[Dict]

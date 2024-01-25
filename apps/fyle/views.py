@@ -1,5 +1,6 @@
 import logging
 
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import status
@@ -14,7 +15,6 @@ from apps.fyle.serializers import (
     FyleFieldsSerializer,
     ImportFyleAttributesSerializer,
 )
-from apps.workspaces.models import Workspace
 from ms_business_central_api.utils import LookupFieldMixin
 
 logger = logging.getLogger(__name__)
@@ -79,7 +79,7 @@ class ExportableExpenseGroupsView(generics.RetrieveAPIView):
         exportable_ids = get_exportable_accounting_exports_ids(workspace_id=kwargs['workspace_id'])
 
         return Response(
-            data={'exportable_expense_group_ids': exportable_ids},
+            data={'exportable_accounting_export_ids': exportable_ids},
             status=status.HTTP_200_OK
         )
 
@@ -105,20 +105,8 @@ class SkippedExpenseView(generics.ListAPIView):
     """
     List Skipped Expenses
     """
+    queryset = Expense.objects.all()
     serializer_class = ExpenseSerializer
-
-    def get_queryset(self):
-        start_date = self.request.query_params.get('start_date', None)
-        end_date = self.request.query_params.get('end_date', None)
-        org_id = Workspace.objects.get(id=self.kwargs['workspace_id']).org_id
-
-        filters = {
-            'org_id': org_id,
-            'is_skipped': True
-        }
-
-        if start_date and end_date:
-            filters['updated_at__range'] = [start_date, end_date]
-
-        queryset = Expense.objects.filter(**filters).order_by('-updated_at')
-        return queryset
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = {'org_id': {'exact'}, 'is_skipped': {'exact'}, 'updated_at': {'gte', 'lte'}}
+    ordering_fields = ('-updated_at',)

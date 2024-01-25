@@ -108,7 +108,7 @@ def test_export_settings(api_client, test_connection, create_temp_workspace, add
         'credit_card_expense_export_type': 'JOURNAL_ENTRY',
         'credit_card_expense_state': 'PAID',
         'credit_card_expense_grouped_by': 'EXPENSE',
-        'credit_card_expense_date': 'CREATED_AT',
+        'credit_card_expense_date': 'CURRENT_DATE',
         "auto_create_vendors": "true",
         'default_vendor_name': 'Nilesh',
         'default_vendor_id': '123',
@@ -129,7 +129,7 @@ def test_export_settings(api_client, test_connection, create_temp_workspace, add
     assert export_settings.credit_card_expense_export_type == 'JOURNAL_ENTRY'
     assert export_settings.credit_card_expense_state == 'PAID'
     assert export_settings.credit_card_expense_grouped_by == 'EXPENSE'
-    assert export_settings.credit_card_expense_date == 'CREATED_AT'
+    assert export_settings.credit_card_expense_date == 'CURRENT_DATE'
     assert export_settings.default_vendor_name == 'Nilesh'
     assert export_settings.default_vendor_id == '123'
     assert export_settings.employee_field_mapping == 'VENDOR'
@@ -144,7 +144,7 @@ def test_export_settings(api_client, test_connection, create_temp_workspace, add
     assert export_settings.credit_card_expense_export_type == 'JOURNAL_ENTRY'
     assert export_settings.credit_card_expense_state == 'PAID'
     assert export_settings.credit_card_expense_grouped_by == 'EXPENSE'
-    assert export_settings.credit_card_expense_date == 'CREATED_AT'
+    assert export_settings.credit_card_expense_date == 'CURRENT_DATE'
     assert export_settings.default_vendor_name == 'Nilesh'
     assert export_settings.default_vendor_id == '123'
     assert export_settings.employee_field_mapping == 'VENDOR'

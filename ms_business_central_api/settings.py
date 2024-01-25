@@ -15,6 +15,8 @@ import sys
 
 import dj_database_url
 
+from ms_business_central_api.sentry import Sentry
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -288,5 +290,8 @@ USE_TZ = True
 STATIC_URL = "static/"
 
 CORS_ORIGIN_ALLOW_ALL = True
+
+# Sentry
+Sentry.init()
 
 CORS_ALLOW_HEADERS = ['sentry-trace', 'authorization', 'content-type']

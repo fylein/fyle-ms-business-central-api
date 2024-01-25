@@ -1,3 +1,4 @@
+import logging
 from typing import Dict, List
 
 from apps.accounting_exports.models import AccountingExport
@@ -9,6 +10,9 @@ from apps.business_central.exports.journal_entry.models import JournalEntry, Jou
 from apps.business_central.exports.journal_entry.queues import check_accounting_export_and_start_import
 from apps.business_central.utils import BusinessCentralConnector
 from apps.workspaces.models import BusinessCentralCredentials
+
+logger = logging.getLogger(__name__)
+logger.level = logging.INFO
 
 
 class ExportJournalEntry(AccountingDataExporter):
@@ -62,7 +66,7 @@ class ExportJournalEntry(AccountingDataExporter):
                 'comment': lineitem.comment,
                 'description': lineitem.description if lineitem.description else '',
                 'balanceAccountType': 'G/L Account',
-                'balancingAccountNumber': body.accounts_payable_account_id
+                'balancingAccountNumber': lineitem.accounts_payable_account_id
             }
 
             batch_journal_entry_payload.append(journal_entry_lineitem_payload)
@@ -75,12 +79,13 @@ class ExportJournalEntry(AccountingDataExporter):
         '''
 
         batch_journal_entry_payload = self.__construct_journal_entry(item, lineitem)
+        logger.info('WORKSPACE_ID: {0}, ACCOUNTING_EXPORT_ID: {1}, BATCH_PURCHASE_INVOICE_PAYLOAD: {2}'.format(accounting_export.workspace_id, accounting_export.id, batch_journal_entry_payload))
         business_central_credentials = BusinessCentralCredentials.objects.filter(workspace_id=accounting_export.workspace_id).first()
         # Establish a connection to Business Central
         business_central_connection = BusinessCentralConnector(business_central_credentials, accounting_export.workspace_id)
 
         # Post the journal entry to Business Central
-        response = business_central_connection.bulk_post_journal_lineitems(batch_journal_entry_payload)
+        response = business_central_connection.bulk_post_journal_lineitems(batch_journal_entry_payload, accounting_export)
 
         expenses = accounting_export.expenses.all()
 

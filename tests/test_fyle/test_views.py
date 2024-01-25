@@ -106,7 +106,7 @@ def test_fyle_expense_fields(api_client, test_connection, create_temp_workspace,
     ), 'expense group api return diffs in keys'
 
 
-def test_exportable_expense_group_view(api_client, test_connection, create_temp_workspace, add_export_settings):
+def test_exportable_accounting_export_view(api_client, test_connection, create_temp_workspace, add_export_settings):
 
     access_token = test_connection.access_token
     url = reverse('exportable-accounting-exports', kwargs={'workspace_id': 1})
