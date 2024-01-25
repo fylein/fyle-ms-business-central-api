@@ -23,11 +23,14 @@ class BusinessCentralConnector:
         environment = settings.BUSINESS_CENTRAL_ENVIRONMENT
         refresh_token = credentials_object.refresh_token
 
+        business_central_company_id = credentials_object.workspace.business_central_company_id
+
         self.connection = Dynamics(
             environment=environment,
             client_id=client_id,
             client_secret=client_secret,
             refresh_token=refresh_token,
+            company_id=business_central_company_id
         )
 
         self.workspace_id = workspace_id
