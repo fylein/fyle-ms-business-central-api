@@ -100,8 +100,6 @@ class BusinessCentralConnector:
         """
         Synchronize accounts from MS Dynamics SDK to your application
         """
-        workspace = Workspace.objects.get(id=self.workspace_id)
-        self.connection.set_company_id(workspace.business_central_company_id)
         field_names = ['category', 'subCategory', 'accountType', 'directPosting', 'lastModifiedDateTime']
 
         accounts = self.connection.accounts.get_all()
@@ -112,8 +110,6 @@ class BusinessCentralConnector:
         """
         Synchronize vendors from MS Dynamics SDK to your application
         """
-        workspace = Workspace.objects.get(id=self.workspace_id)
-        self.connection.set_company_id(workspace.business_central_company_id)
         field_names = ['email', 'currencyId', 'currencyCode', 'lastModifiedDateTime']
 
         vendors = self.connection.vendors.get_all()
@@ -124,8 +120,6 @@ class BusinessCentralConnector:
         """
         Synchronize employees from MS Dynamics SDK to your application
         """
-        workspace = Workspace.objects.get(id=self.workspace_id)
-        self.connection.set_company_id(workspace.business_central_company_id)
         field_names = ['email', 'personalEmail', 'lastModifiedDateTime']
 
         employees = self.connection.employees.get_all()
@@ -136,8 +130,6 @@ class BusinessCentralConnector:
         """
         Synchronize locations from MS Dynamics SDK to your application
         """
-        workspace = Workspace.objects.get(id=self.workspace_id)
-        self.connection.set_company_id(workspace.business_central_company_id)
         field_names = ['code', 'city', 'country']
 
         locations = self.connection.locations.get_all()
@@ -167,8 +159,7 @@ class BusinessCentralConnector:
         workspace = Workspace.objects.get(id=self.workspace_id)
         export_settings = ExportSetting.objects.get(workspace_id=self.workspace_id)
 
-        self.connection.set_company_id(workspace.business_central_company_id)
-        bulk_post_response = self.connection.journal_line_items.bulk_post(export_settings.journal_entry_folder_id, payload)
+        bulk_post_response = self.connection.journal_line_items.bulk_post(export_settings.journal_entry_folder_id, payload, workspace.business_central_company_id)
 
         return bulk_post_response
 
@@ -177,10 +168,9 @@ class BusinessCentralConnector:
         Post purchase invoice to MS Dynamics SDK
         """
         workspace = Workspace.objects.get(id=self.workspace_id)
-        self.connection.set_company_id(workspace.business_central_company_id)
 
         purchase_invoice_response = self.connection.purchase_invoices.post(purchase_invoice_payload)
-        bulk_post_response = self.connection.purchase_invoice_line_items.bulk_post(purchase_invoice_response['id'], purchase_invoice_lineitem_payload)
+        bulk_post_response = self.connection.purchase_invoice_line_items.bulk_post(purchase_invoice_response['id'], purchase_invoice_lineitem_payload, workspace.business_central_company_id)
 
         response = {
             "purchase_invoice_response": purchase_invoice_response,
