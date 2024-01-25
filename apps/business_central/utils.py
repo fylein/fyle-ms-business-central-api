@@ -75,14 +75,25 @@ class BusinessCentralConnector:
                 active = True
             else:
                 active = False
-            destination_attributes.append(self._create_destination_attribute(
-                attribute_type,
-                display_name,
-                item['displayName'] if item['displayName'] else item['name'],
-                item['number'] if item.get('number') else item['id'],
-                active,
-                detail
-            ))
+            if attribute_type == 'ACCOUNT':
+                if item.get('accountType') == 'Posting':
+                    destination_attributes.append(self._create_destination_attribute(
+                        attribute_type,
+                        display_name,
+                        item['displayName'] if item['displayName'] else item['name'],
+                        item['number'] if item.get('number') else item['id'],
+                        active,
+                        detail
+                    ))
+            else:
+                destination_attributes.append(self._create_destination_attribute(
+                    attribute_type,
+                    display_name,
+                    item['displayName'] if item['displayName'] else item['name'],
+                    item['number'] if item.get('number') else item['id'],
+                    active,
+                    detail
+                ))
         DestinationAttribute.bulk_create_or_update_destination_attributes(
             destination_attributes, attribute_type, workspace_id, True)
 
