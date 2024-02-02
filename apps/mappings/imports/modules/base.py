@@ -180,7 +180,7 @@ class Base:
         Sync destination attributes
         :param business_central_attribute_type: Business Central attribute type
         """
-        business_central_credentials = BusinessCentralCredentials.objects.get(workspace_id=self.workspace_id)
+        business_central_credentials = BusinessCentralCredentials.get_active_business_central_credentials(self.workspace_id)
         business_central_connection = BusinessCentralConnector(credentials_object=business_central_credentials, workspace_id=self.workspace_id)
 
         sync_methods = {

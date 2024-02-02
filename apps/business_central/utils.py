@@ -139,6 +139,13 @@ class BusinessCentralConnector:
         self._sync_data(locations, 'LOCATION', 'location', self.workspace_id, field_names)
         return []
 
+    def get_companies(self):
+        """
+        Get business central companies
+        """
+        companies = self.connection.companies.get_all()
+        return companies
+
     def create_journal_entry_folder(self):
         """
         Create default journal entry folder

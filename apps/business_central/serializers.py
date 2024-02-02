@@ -2,12 +2,14 @@ import logging
 from datetime import datetime
 
 from django.db.models import Q
+from dynamics.exceptions.dynamics_exceptions import InvalidTokenError, WrongParamsError
 from fyle_accounting_mappings.models import DestinationAttribute
 from rest_framework import serializers
 from rest_framework.response import Response
 from rest_framework.views import status
 
 from apps.business_central.helpers import check_interval_and_sync_dimension, sync_dimensions
+from apps.business_central.utils import BusinessCentralConnector
 from apps.workspaces.models import BusinessCentralCredentials, Workspace
 
 logger = logging.getLogger(__name__)
@@ -29,9 +31,7 @@ class ImportBusinessCentralAttributesSerializer(serializers.Serializer):
 
             # Retrieve the workspace and Business Central credentials
             workspace = Workspace.objects.get(pk=workspace_id)
-            business_central_credentials = BusinessCentralCredentials.objects.get(
-                workspace_id=workspace.id
-            )
+            business_central_credentials = BusinessCentralCredentials.get_active_business_central_credentials(workspace.id)
 
             if refresh_dimension:
                 # If 'refresh' is true, perform a full sync of dimensions
@@ -120,3 +120,30 @@ class CompanySelectionSerializer(serializers.ModelSerializer):
         workspace.save()
 
         return workspace
+
+
+class Connectionserializer(serializers.Serializer):
+    """
+    Connection Serializer
+    """
+
+    def get_company(self, workspace_id):
+        """
+        Get Company
+        """
+        try:
+            business_central_credentials: BusinessCentralCredentials = BusinessCentralCredentials.get_active_business_central_credentials(workspace_id)
+
+            business_central_connector = BusinessCentralConnector(business_central_credentials, workspace_id=workspace_id)
+
+            companies = business_central_connector.get_companies()
+
+            return Response(data=companies, status=status.HTTP_200_OK)
+        except BusinessCentralCredentials.DoesNotExist:
+            return Response(data={'message': 'Business Central credentials not found in workspace'}, status=status.HTTP_400_BAD_REQUEST)
+        except (WrongParamsError, InvalidTokenError):
+            if business_central_credentials:
+                business_central_credentials.refresh_token = None
+                business_central_credentials.is_expired = True
+                business_central_credentials.save()
+        return Response(data={'message': 'Invalid token or Business Central connection expired'}, status=status.HTTP_400_BAD_REQUEST)

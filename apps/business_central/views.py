@@ -3,6 +3,7 @@ from rest_framework import generics
 from apps.business_central.serializers import (
     BusinessCentralFieldSerializer,
     CompanySelectionSerializer,
+    Connectionserializer,
     ImportBusinessCentralAttributesSerializer,
 )
 from apps.workspaces.models import Workspace
@@ -34,3 +35,13 @@ class CompanySelectionView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         return Workspace.objects.filter(id=self.kwargs['workspace_id'])
+
+
+class ConnectionView(generics.RetrieveAPIView):
+    """
+    Connection View
+    """
+    serializer_class = Connectionserializer
+
+    def get(self, request, *args, **kwargs):
+        return Connectionserializer.get_company(kwargs['workspace_id'])

@@ -2,7 +2,7 @@
 import logging
 import traceback
 
-from dynamics.exceptions.dynamics_exceptions import WrongParamsError
+from dynamics.exceptions.dynamics_exceptions import InvalidTokenError, WrongParamsError
 
 from apps.accounting_exports.models import AccountingExport, Error
 from apps.business_central.actions import update_accounting_export_summary
@@ -51,6 +51,14 @@ def handle_business_central_exceptions():
 
             except WrongParamsError as exception:
                 handle_business_central_error(exception, accounting_export, accounting_export.type)
+
+            except InvalidTokenError as exception:
+                logger.info(exception.response)
+                business_central_credentials: BusinessCentralCredentials = BusinessCentralCredentials.objects.filter(workspace_id=accounting_export.workspace_id).first()
+                if business_central_credentials:
+                    business_central_credentials.is_expired = True
+                    business_central_credentials.refresh_token = None
+                    business_central_credentials.save()
 
             except BulkError as exception:
                 logger.info(exception.response)

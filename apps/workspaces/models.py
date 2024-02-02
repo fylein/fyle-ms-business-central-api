@@ -164,7 +164,7 @@ class BusinessCentralCredentials(BaseModel):
         db_table = "business_central_credentials"
 
     @staticmethod
-    def get_active_business_central(workspace_id):
+    def get_active_business_central_credentials(workspace_id):
         return BusinessCentralCredentials.objects.get(
             workspace_id=workspace_id, is_expired=False, refresh_token__isnull=False
         )
