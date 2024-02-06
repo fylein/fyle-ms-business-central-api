@@ -133,7 +133,7 @@ BEGIN
   FROM business_central_credentials sc
   WHERE sc.workspace_id = _workspace_id;
   GET DIAGNOSTICS rcount = ROW_COUNT;
-  RAISE NOTICE 'Deleted % sage300_credentials', rcount;
+  RAISE NOTICE 'Deleted % business_central_credentials', rcount;
 
   DELETE
   FROM expense_attributes ea
