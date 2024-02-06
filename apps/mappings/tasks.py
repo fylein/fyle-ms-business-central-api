@@ -18,7 +18,7 @@ logger.level = logging.INFO
 
 
 def sync_business_central_attributes(business_central_attribute_type: str, workspace_id: int):
-    business_central_credentials: BusinessCentralCredentials = BusinessCentralCredentials.objects.get(workspace_id=workspace_id)
+    business_central_credentials: BusinessCentralCredentials = BusinessCentralCredentials.get_active_business_central_credentials(workspace_id)
 
     business_central_connection = BusinessCentralConnector(
         credentials_object=business_central_credentials,
@@ -87,7 +87,7 @@ def async_auto_map_employees(workspace_id: int):
 
     try:
         platform = PlatformConnector(fyle_credentials=fyle_credentials)
-        business_central_credentials = BusinessCentralCredentials.objects.get(workspace_id=workspace_id)
+        business_central_credentials = BusinessCentralCredentials.get_active_business_central_credentials(workspace_id)
         business_central_connection = BusinessCentralConnector(
             credentials_object=business_central_credentials, workspace_id=workspace_id)
 

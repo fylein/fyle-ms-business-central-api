@@ -80,7 +80,7 @@ class ExportJournalEntry(AccountingDataExporter):
 
         batch_journal_entry_payload = self.__construct_journal_entry(item, lineitem)
         logger.info('WORKSPACE_ID: {0}, ACCOUNTING_EXPORT_ID: {1}, BATCH_PURCHASE_INVOICE_PAYLOAD: {2}'.format(accounting_export.workspace_id, accounting_export.id, batch_journal_entry_payload))
-        business_central_credentials = BusinessCentralCredentials.objects.filter(workspace_id=accounting_export.workspace_id).first()
+        business_central_credentials = BusinessCentralCredentials.get_active_business_central_credentials(accounting_export.workspace_id)
         # Establish a connection to Business Central
         business_central_connection = BusinessCentralConnector(business_central_credentials, accounting_export.workspace_id)
 
