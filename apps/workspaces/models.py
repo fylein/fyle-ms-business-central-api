@@ -165,9 +165,9 @@ class BusinessCentralCredentials(BaseModel):
 
     @staticmethod
     def get_active_business_central_credentials(workspace_id):
-        return BusinessCentralCredentials.objects.get(
+        return BusinessCentralCredentials.objects.filter(
             workspace_id=workspace_id, is_expired=False, refresh_token__isnull=False
-        )
+        ).first()
 
 
 class ExportSetting(BaseModel):
