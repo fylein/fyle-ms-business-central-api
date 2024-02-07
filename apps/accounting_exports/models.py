@@ -94,6 +94,7 @@ class AccountingExport(BaseForeignWorkspaceModel):
     mapping_errors = ArrayField(help_text='Mapping errors', base_field=models.CharField(max_length=255), blank=True, null=True)
     expenses = models.ManyToManyField(Expense, help_text="Expenses under this Expense Group")
     task_id = StringNullField(help_text='Fyle Jobs task reference')
+    export_url = StringNullField(help_text='Export URL')
     description = CustomJsonField(help_text='Description')
     status = StringNotNullField(help_text='Task Status')
     detail = CustomJsonField(help_text='Task Response')
