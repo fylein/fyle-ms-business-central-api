@@ -31,7 +31,7 @@ class ImportBusinessCentralAttributesSerializer(serializers.Serializer):
 
             # Retrieve the workspace and Business Central credentials
             workspace = Workspace.objects.get(pk=workspace_id)
-            business_central_credentials = BusinessCentralCredentials.get_active_business_central_credentials(workspace.id)
+            business_central_credentials = BusinessCentralCredentials.objects.get(workspace_id=workspace.id)
 
             if refresh_dimension:
                 # If 'refresh' is true, perform a full sync of dimensions
