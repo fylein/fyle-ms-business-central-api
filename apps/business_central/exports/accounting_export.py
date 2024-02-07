@@ -65,6 +65,7 @@ class AccountingDataExporter:
             detail = created_object
 
             accounting_export.detail = detail
+            accounting_export.export_url = 'https://businesscentral.dynamics.com/'
             accounting_export.business_central_errors = None
             accounting_export.exported_at = datetime.now()
             accounting_export.status = 'COMPLETE'
