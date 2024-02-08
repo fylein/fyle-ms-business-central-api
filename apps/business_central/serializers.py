@@ -146,4 +146,4 @@ class Connectionserializer(serializers.Serializer):
                 business_central_credentials.refresh_token = None
                 business_central_credentials.is_expired = True
                 business_central_credentials.save()
-        return Response(data={'message': 'Invalid token or Business Central connection expired'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data={'message': 'Invalid token or Business Central connection expired'}, status=status.HTTP_400_BAD_REQUEST)

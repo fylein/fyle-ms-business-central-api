@@ -30,7 +30,7 @@ class BusinessCentralConnector:
             client_id=client_id,
             client_secret=client_secret,
             refresh_token=refresh_token,
-            company_id=business_central_company_id
+            company_id=business_central_company_id if business_central_company_id else None
         )
 
         self.workspace_id = workspace_id
