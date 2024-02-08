@@ -132,7 +132,9 @@ class Connectionserializer(serializers.Serializer):
         Get Company
         """
         try:
-            business_central_credentials: BusinessCentralCredentials = BusinessCentralCredentials.get_active_business_central_credentials(workspace_id)
+            business_central_credentials: BusinessCentralCredentials = BusinessCentralCredentials.objects.get(
+                workspace_id=workspace_id, is_expired=False, refresh_token__isnull=False
+            )
 
             business_central_connector = BusinessCentralConnector(business_central_credentials, workspace_id=workspace_id)
 
