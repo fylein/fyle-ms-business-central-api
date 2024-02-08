@@ -30,7 +30,7 @@ class BusinessCentralConnector:
             client_id=client_id,
             client_secret=client_secret,
             refresh_token=refresh_token,
-            company_id=business_central_company_id if business_central_company_id else None
+            company_id=business_central_company_id
         )
 
         self.workspace_id = workspace_id
@@ -93,6 +93,7 @@ class BusinessCentralConnector:
         """
         sync business central companies
         """
+        print('sync_companies')
         companies = self.connection.companies.get_all()
         field_names = []
 
@@ -143,6 +144,7 @@ class BusinessCentralConnector:
         """
         Get business central companies
         """
+        self.connection.__company_id = None
         companies = self.connection.companies.get_all()
         return companies
 

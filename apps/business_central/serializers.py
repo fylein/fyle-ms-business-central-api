@@ -136,7 +136,7 @@ class Connectionserializer(serializers.Serializer):
 
             business_central_connector = BusinessCentralConnector(business_central_credentials, workspace_id=workspace_id)
 
-            companies = business_central_connector.sync_companies()
+            companies = business_central_connector.get_companies()
 
             return Response(data=companies, status=status.HTTP_200_OK)
         except BusinessCentralCredentials.DoesNotExist:
