@@ -48,7 +48,7 @@ def sync_dimensions(business_central_credential: BusinessCentralCredentials, wor
     business_central_connection = import_string('apps.business_central.utils.BusinessCentralConnector')(business_central_credential, workspace_id)
 
     # List of dimensions to sync
-    dimensions = ['accounts', 'vendors', 'employees', 'locations', 'companies']
+    dimensions = ['companies', 'accounts', 'vendors', 'employees', 'locations']
 
     for dimension in dimensions:
         try:
