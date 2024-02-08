@@ -83,8 +83,8 @@ def connect_business_central(authorization_code, redirect_uri, workspace_id):
 
     if not business_central_credentials:
         # If BusinessCentralCredentials does not exist, create a new one
-        business_central_credentials = BusinessCentralCredentials.objects.create(
-            refresh_token=refresh_token, workspace_id=workspace_id
+        business_central_credentials = BusinessCentralCredentials.objects.update_or_create(
+            refresh_token=refresh_token, workspace_id=workspace_id, is_expired=False
         )
     else:
         # If BusinessCentralCredentials exists, update refresh_token and reset expiration status
