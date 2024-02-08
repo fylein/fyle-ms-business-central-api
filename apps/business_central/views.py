@@ -44,4 +44,4 @@ class ConnectionView(generics.RetrieveAPIView):
     serializer_class = Connectionserializer
 
     def get(self, request, *args, **kwargs):
-        return Connectionserializer.get_company(kwargs['workspace_id'])
+        return Connectionserializer.get_company(self.kwargs['workspace_id'])
