@@ -93,7 +93,6 @@ class BusinessCentralConnector:
         """
         sync business central companies
         """
-        print('sync_companies')
         companies = self.connection.companies.get_all()
         field_names = []
 
@@ -144,7 +143,6 @@ class BusinessCentralConnector:
         """
         Get business central companies
         """
-        self.connection.__company_id = None
         companies = self.connection.companies.get_all()
         return companies
 
