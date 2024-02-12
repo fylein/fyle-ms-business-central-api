@@ -79,7 +79,7 @@ def connect_business_central(authorization_code, redirect_uri, workspace_id):
     refresh_token = generate_business_central_refresh_token(authorization_code, redirect_uri)
 
     # Retrieve or create BusinessCentralCredentials based on workspace_id
-    business_central_credentials = BusinessCentralCredentials.get_active_business_central_credentials(workspace_id)
+    business_central_credentials = BusinessCentralCredentials.objects.filter(workspace_id=workspace_id).first()
 
     if not business_central_credentials:
         # If BusinessCentralCredentials does not exist, create a new one
