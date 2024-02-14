@@ -4,7 +4,7 @@ import traceback
 from dynamics.exceptions.dynamics_exceptions import InvalidTokenError
 from fyle.platform.exceptions import InternalServerError
 from fyle.platform.exceptions import InvalidTokenError as FyleInvalidTokenError
-from fyle.platform.exceptions import WrongParamsError
+from fyle.platform.exceptions import WrongParamsError, RetryException
 
 from apps.mappings.models import ImportLog
 from apps.workspaces.models import BusinessCentralCredentials
@@ -41,6 +41,10 @@ def handle_import_exceptions(func):
             error['message'] = 'Invalid Token for fyle'
             error['alert'] = False
             import_log.status = 'FAILED'
+
+        except RetryException:
+            error['message'] = 'Fyle Retry Exception occured'
+            import_log.status = 'FATAL'
 
         except InternalServerError:
             error['message'] = 'Internal server error while importing to Fyle'
