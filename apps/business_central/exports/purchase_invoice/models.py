@@ -33,7 +33,7 @@ class PurchaseInvoice(BaseExportModel):
         :return: purchase invoices object
         """
 
-        vendor_id = self.get_account_id_type(accounting_export=accounting_export, export_settings=export_settings)
+        _, vendor_id = self.get_account_id_type(accounting_export=accounting_export, export_settings=export_settings)
         amount = self.get_total_amount(accounting_export=accounting_export)
         invoice_date = self.get_invoice_date(accounting_export=accounting_export)
 
