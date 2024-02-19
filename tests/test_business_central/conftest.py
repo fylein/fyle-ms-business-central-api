@@ -6,8 +6,11 @@ from fyle_accounting_mappings.models import (
     ExpenseAttribute,
     DestinationAttribute,
     EmployeeMapping,
-    CategoryMapping
+    CategoryMapping,
+    Mapping
 )
+from apps.business_central.models import JournalEntry, JournalEntryLineItems
+from apps.business_central.models import PurchaseInvoice, PurchaseInvoiceLineitems
 from apps.workspaces.models import Workspace
 
 from .fixtures import data
@@ -141,3 +144,114 @@ def create_category_mapping(create_source_category_attribute, create_destination
     )
 
     return category_mapping
+
+
+@pytest.fixture()
+@pytest.mark.django_db(databases=['default'])
+def create_journal_entry(
+    create_temp_workspace,
+    create_export_settings,
+    add_advanced_settings,
+    create_accounting_export_expenses,
+    create_employee_mapping_with_employee
+):
+    workspace_id = 1
+    export_settings = ExportSetting.objects.get(workspace_id=workspace_id)
+    advanced_setting = AdvancedSetting.objects.get(workspace_id=workspace_id)
+    accounting_export = AccountingExport.objects.get(workspace_id=workspace_id)
+
+    JournalEntry.create_or_update_object(
+        accounting_export=accounting_export,
+        _=advanced_setting,
+        export_settings=export_settings
+    )
+
+    return JournalEntry.objects.first()
+
+
+@pytest.fixture()
+@pytest.mark.django_db(databases=['default'])
+def create_journal_line_items(
+    add_fyle_credentials,
+    create_journal_entry,
+    create_category_mapping
+):
+    workspace_id = 1
+    export_settings = ExportSetting.objects.get(workspace_id=workspace_id)
+    advanced_setting = AdvancedSetting.objects.get(workspace_id=workspace_id)
+    accounting_export = AccountingExport.objects.get(workspace_id=workspace_id)
+
+    journal_line_items = JournalEntryLineItems.create_or_update_object(
+        accounting_export=accounting_export,
+        advance_setting=advanced_setting,
+        export_settings=export_settings
+    )
+
+    return journal_line_items
+
+
+@pytest.fixture()
+@pytest.mark.django_db(databases=['default'])
+def create_purchase_invoice(
+    create_temp_workspace,
+    create_export_settings,
+    add_advanced_settings,
+    create_employee_mapping_with_employee,
+    create_accounting_export_expenses,
+):
+    workspace_id = 1
+    export_settings = ExportSetting.objects.get(workspace_id=workspace_id)
+    advanced_setting = AdvancedSetting.objects.get(workspace_id=workspace_id)
+    accounting_export = AccountingExport.objects.get(workspace_id=workspace_id)
+
+    PurchaseInvoice.create_or_update_object(
+        accounting_export=accounting_export,
+        _=advanced_setting,
+        export_settings=export_settings
+    )
+
+    return PurchaseInvoice.objects.first()
+
+
+@pytest.fixture()
+@pytest.mark.django_db(databases=['default'])
+def create_purchase_invoice_line_items(
+    add_fyle_credentials,
+    create_purchase_invoice,
+    create_category_mapping
+):
+    workspace_id = 1
+    export_settings = ExportSetting.objects.get(workspace_id=workspace_id)
+    advanced_setting = AdvancedSetting.objects.get(workspace_id=workspace_id)
+    accounting_export = AccountingExport.objects.get(workspace_id=workspace_id)
+
+    purchase_invoice_line_items = PurchaseInvoiceLineitems.create_or_update_object(
+        accounting_export=accounting_export,
+        advance_setting=advanced_setting,
+        _=export_settings
+    )
+
+    return purchase_invoice_line_items
+
+
+@pytest.fixture()
+@pytest.mark.django_db(databases=['default'])
+def create_mapping_object(
+    create_temp_workspace,
+    create_expense_attribute,
+    create_destination_attribute
+):
+    workspace_id = 1
+    expense_attribute = ExpenseAttribute.objects.filter(workspace_id=workspace_id).first()
+    destination_attribute = DestinationAttribute.objects.filter(workspace_id=workspace_id).first()
+    workspace = Workspace.objects.get(id=workspace_id)
+
+    mapping_object = Mapping.objects.create(
+        source_type=expense_attribute.attribute_type,
+        destination_type=destination_attribute.attribute_type,
+        source=expense_attribute,
+        destination=destination_attribute,
+        workspace=workspace
+    )
+
+    return mapping_object

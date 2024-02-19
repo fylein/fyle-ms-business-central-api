@@ -48,14 +48,14 @@ data = {
         "auto_create_vendor": False
     },
     "employee_expense_attributes": {
-        "attribute_type": "Employee",
+        "attribute_type": "EMPLOYEE",
         "value": "ashwin.t@fyle.in",
         "display_name": "Employee One",
         "active": True,
         "source_id": "source123",
     },
     "employee_destination_attributes": {
-        "attribute_type": "Employee",
+        "attribute_type": "EMPLOYEE",
         "value": "hello.world@test.in",
         "display_name": "Employee One",
         "active": True,
@@ -69,14 +69,14 @@ data = {
         "destination_id": "dest_vendor123",
     },
     "category_expense_attributes": {
-        "attribute_type": "Category",
+        "attribute_type": "CATEGORY",
         "value": "Food",
         "display_name": "Food",
         "active": True,
         "source_id": "src_category123",
     },
     "category_destination_attributes": {
-        "attribute_type": "Category",
+        "attribute_type": "CATEGORY",
         "value": "Food",
         "display_name": "Food",
         "active": True,
