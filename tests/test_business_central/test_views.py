@@ -1,4 +1,5 @@
 import json
+import pytest
 
 from django.urls import reverse
 
@@ -26,6 +27,22 @@ def test_sync_dimensions(api_client, test_connection, mocker, create_temp_worksp
 
     response = json.loads(response.content)
     assert response['message'] == 'Business Central credentials not found / invalid in workspace'
+
+
+def test_sync_dimensions_1(api_client, test_connection, mocker, create_temp_workspace, add_business_central_creds):
+    workspace_id = 1
+
+    access_token = test_connection.access_token
+    url = reverse('import-business-central-attributes', kwargs={'workspace_id': workspace_id})
+
+    api_client.credentials(HTTP_AUTHORIZATION='Bearer {}'.format(access_token))
+
+    mocker.patch('apps.business_central.helpers.sync_dimensions', return_value=None)
+
+    mocker.patch('apps.workspaces.models.BusinessCentralCredentials.objects.get', side_effect=Exception("Unexpected error"))
+
+    with pytest.raises(Exception):
+        api_client.post(url)
 
 
 def test_business_central_fields(api_client, test_connection, create_temp_workspace, add_fyle_credentials, add_destination_attributes):
@@ -62,3 +79,52 @@ def test_post_company_selection(api_client, test_connection):
 
     response = api_client.post(url, payload)
     assert response.status_code == 201
+
+
+def test_connection_view_1(api_client, test_connection, create_temp_workspace):
+    workspace_id = 1
+    url = reverse('connection', kwargs={'workspace_id': workspace_id})
+    api_client.credentials(HTTP_AUTHORIZATION='Bearer {}'.format(test_connection.access_token))
+    response = api_client.get(url)
+
+    assert response.status_code == 400
+    assert response.data['message'] == 'Business Central credentials not found in workspace'
+
+
+def test_connection_view_2(api_client, test_connection, create_temp_workspace, add_business_central_creds, mocker):
+    workspace_id = 1
+    url = reverse('connection', kwargs={'workspace_id': workspace_id})
+    api_client.credentials(HTTP_AUTHORIZATION='Bearer {}'.format(test_connection.access_token))
+
+    business_central_credentials = BusinessCentralCredentials.objects.get(workspace_id=workspace_id)
+
+    assert business_central_credentials.workspace.id == workspace_id
+    assert business_central_credentials.refresh_token == 'dummy_refresh_token'
+    assert business_central_credentials.is_expired == False
+
+    response = api_client.get(url)
+
+    assert response.status_code == 400
+    assert response.data['message'] == 'Invalid token or Business Central connection expired'
+
+
+def test_connection_view_3(
+        api_client,
+        test_connection,
+        create_temp_workspace,
+        add_business_central_creds,
+        mocker
+):
+    workspace_id = 1
+    url = reverse('connection', kwargs={'workspace_id': workspace_id})
+    api_client.credentials(HTTP_AUTHORIZATION='Bearer {}'.format(test_connection.access_token))
+
+    mocker.patch(
+        'apps.business_central.utils.BusinessCentralConnector.get_companies',
+        return_value=[{'id': '123', 'name': 'Fyle Technologies'}]
+    )
+
+    response = api_client.get(url)
+
+    assert response.status_code == 200
+    assert response.data == [{'id': '123', 'name': 'Fyle Technologies'}]

@@ -111,7 +111,7 @@ class BaseExportModel(models.Model):
                 return "Employee", mapping.destination_employee.destination_id
 
         if export_settings.reimbursable_expenses_export_type == 'PURCHASE_INVOICE' and accounting_export.fund_source == 'PERSONAL':
-            return mapping.destination_vendor.destination_id
+            return "", mapping.destination_vendor.destination_id
         else:
             if accounting_export.fund_source == 'PERSONAL':
                 return get_vendor_or_employee_id(export_settings.employee_field_mapping, mapping)
