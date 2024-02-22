@@ -42,10 +42,7 @@ def test_sync_dimensions_1(api_client, test_connection, mocker, create_temp_work
     mocker.patch('apps.workspaces.models.BusinessCentralCredentials.objects.get', side_effect=Exception("Unexpected error"))
 
     with pytest.raises(Exception):
-        response = api_client.post(url)
-
-        assert response.status_code == 500
-        assert response.data['message'] == 'Something unexpected happened'
+        api_client.post(url)
 
 
 def test_business_central_fields(api_client, test_connection, create_temp_workspace, add_fyle_credentials, add_destination_attributes):
