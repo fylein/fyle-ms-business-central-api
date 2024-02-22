@@ -235,3 +235,9 @@ def get_fyle_orgs(refresh_token: str, cluster_domain: str):
     api_url = '{0}/api/orgs/'.format(cluster_domain)
 
     return get_request(api_url, {}, refresh_token)
+
+
+def sync_dimensions(fyle_credentials: FyleCredential) -> None:
+    platform = PlatformConnector(fyle_credentials)
+
+    platform.import_fyle_dimensions()

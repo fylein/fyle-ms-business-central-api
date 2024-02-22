@@ -1,17 +1,25 @@
 import pytest
 from apps.accounting_exports.models import AccountingExport
-from apps.workspaces.models import AdvancedSetting, ExportSetting
+from apps.workspaces.models import (
+    AdvancedSetting,
+    ExportSetting,
+    Workspace,
+    ImportSetting,
+    BusinessCentralCredentials
+)
 from apps.fyle.models import Expense
 from fyle_accounting_mappings.models import (
     ExpenseAttribute,
     DestinationAttribute,
     EmployeeMapping,
     CategoryMapping,
-    Mapping
+    Mapping,
+    MappingSetting,
+    ExpenseField
 )
 from apps.business_central.models import JournalEntry, JournalEntryLineItems
 from apps.business_central.models import PurchaseInvoice, PurchaseInvoiceLineitems
-from apps.workspaces.models import Workspace
+from apps.business_central.utils import BusinessCentralConnector
 
 from .fixtures import data
 
@@ -255,3 +263,63 @@ def create_mapping_object(
     )
 
     return mapping_object
+
+
+@pytest.fixture()
+@pytest.mark.django_db(databases=['default'])
+def create_mapping_settings(
+    create_temp_workspace,
+    create_expense_attribute
+):
+    workspace_id = 1
+
+    ImportSetting.objects.create(
+        workspace=Workspace.objects.get(id=workspace_id),
+        import_categories=False,
+        import_vendors_as_merchants=False,
+    )
+
+    ExpenseField.create_or_update_expense_fields(
+        attributes = data["expense_fields"],
+        fields_included = data["included_fields"],
+        workspace_id = workspace_id
+    )
+
+    attribute = data['included_fields'][0]
+
+    MappingSetting.objects.update_or_create(
+        source_field = attribute,
+        destination_field = 'LOCATION',
+        import_to_fyle = False,
+        is_custom = False,
+        source_placeholder = attribute,
+        expense_field = ExpenseField.objects.filter(
+            workspace_id=workspace_id,
+            attribute_type=attribute
+        ).first(),
+        workspace_id=workspace_id
+    )
+
+
+@pytest.fixture()
+@pytest.mark.django_db(databases=['default'])
+def create_business_central_connection(
+    mocker,
+    create_temp_workspace,
+    add_business_central_creds
+):
+    workspace_id = 1
+
+    business_central_creds = BusinessCentralCredentials.objects.filter(workspace_id=workspace_id).first()
+    business_central_creds.workspace.business_central_company_id = "Business_Company_Id"
+    business_central_creds.save()
+
+    dynamic_connection_mock = mocker.patch('apps.business_central.utils.Dynamics')
+    dynamic_connection_mock.return_value.refresh_token = 'Dummy_Token'
+
+    business_central_connection = BusinessCentralConnector(
+        credentials_object=business_central_creds,
+        workspace_id=workspace_id
+    )
+
+    return business_central_connection

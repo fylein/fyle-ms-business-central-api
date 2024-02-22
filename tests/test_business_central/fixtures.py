@@ -38,7 +38,7 @@ data = {
     },
     "advanced_setting": {
         "workspace_id": 1,
-        "expense_memo_structure": ["Field1", "Field2", "Field3"],
+        "expense_memo_structure": ["Field1", "Field2", "category", "employee_email"],
         "schedule_is_enabled": True,
         "start_datetime": "2024-02-15T08:00:00Z",
         "schedule_id": "schedule123",
@@ -143,5 +143,45 @@ data = {
             'paid_on_qbo':False,
             'payment_number':'P/2022/05/R/7'
         }
+    ],
+    "expense_fields": [
+        {
+            'field_name': 'EMPLOYEE',
+            'id': 1,
+            'is_enabled': True
+        },
+        {
+            'field_name': 'CATEGORY',
+            'id': 2,
+            'is_enabled': True
+        },
+        {
+            'field_name': 'VENDOR',
+            'id': 3,
+            'is_enabled': True
+        },
+        {
+            'field_name': 'PROJECT',
+            'id': 4,
+            'is_enabled': True
+        },
+        {
+            'field_name': 'COST_CENTER',
+            'id': 5,
+            'is_enabled': True
+        },
+        {
+            'field_name': 'LOCATION',
+            'id': 6,
+            'is_enabled': True
+        }
+    ],
+    "included_fields": [
+        'EMPLOYEE',
+        'CATEGORY',
+        'VENDOR',
+        'PROJECT',
+        'COST_CENTER',
+        'LOCATION'
     ]
 }
