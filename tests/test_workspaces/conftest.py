@@ -1,0 +1,1 @@
+from tests.test_business_central.conftest import *  # noqa
