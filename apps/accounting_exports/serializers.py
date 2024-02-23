@@ -10,6 +10,7 @@ class AccountingExportSerializer(serializers.ModelSerializer):
     Accounting Export serializer
     """
 
+    id = serializers.IntegerField()
     expenses = ExpenseSerializer(many=True)
 
     class Meta:
@@ -31,9 +32,8 @@ class ErrorSerializer(serializers.ModelSerializer):
     """
     Serializer for the Errors
     """
-
-    expense_attribute = ExpenseAttributeSerializer()
     accounting_export = AccountingExportSerializer()
+    expense_attribute = ExpenseAttributeSerializer()
 
     class Meta:
         model = Error
