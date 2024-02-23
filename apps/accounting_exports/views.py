@@ -53,7 +53,6 @@ class AccountingExportSummaryView(generics.RetrieveAPIView):
 
 class ErrorsView(generics.ListAPIView):
     serializer_class = ErrorSerializer
-    pagination_class = None
 
     def get_queryset(self):
         type = self.request.query_params.get('type')
