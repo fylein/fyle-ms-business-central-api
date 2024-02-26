@@ -189,10 +189,9 @@ def test_sync_schedule_2(
         args=f'{workspace_id}',
         func='apps.workspaces.tasks.run_import_export',
     )
-    # needs to change after fixing the issue in tasks.py
-    assert schedules.count() == 1
 
-    assert schedules.first() is not None
+    assert schedules.count() == 0
+    assert schedules.first() is None
     assert advanced_settings.schedule_is_enabled == False
 
 
