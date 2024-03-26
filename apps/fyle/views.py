@@ -15,6 +15,8 @@ from apps.fyle.serializers import (
     FyleFieldsSerializer,
     ImportFyleAttributesSerializer,
 )
+from apps.accounting_exports.helpers import ExpenseSearchFilter
+
 from ms_business_central_api.utils import LookupFieldMixin
 
 logger = logging.getLogger(__name__)
@@ -105,8 +107,7 @@ class SkippedExpenseView(generics.ListAPIView):
     """
     List Skipped Expenses
     """
-    queryset = Expense.objects.all()
     serializer_class = ExpenseSerializer
+    queryset = Expense.objects.all().order_by("-updated_at")
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = {'org_id': {'exact'}, 'is_skipped': {'exact'}, 'updated_at': {'gte', 'lte'}}
-    ordering_fields = ('-updated_at',)
+    filterset_class = ExpenseSearchFilter
