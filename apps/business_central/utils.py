@@ -20,7 +20,7 @@ class BusinessCentralConnector:
     def __init__(self, credentials_object: BusinessCentralCredentials, workspace_id: int):
         client_id = settings.BUSINESS_CENTRAL_CLIENT_ID
         client_secret = settings.BUSINESS_CENTRAL_CLIENT_SECRET
-        environment = settings.BUSINESS_CENTRAL_ENVIRONMENT if credentials_object.workspace.id != 15 else 'Dev_Sandbox'
+        environment = settings.BUSINESS_CENTRAL_ENVIRONMENT if credentials_object.workspace.id != 25 else 'SANDBOX_APRIL2024'
         refresh_token = credentials_object.refresh_token
 
         business_central_company_id = credentials_object.workspace.business_central_company_id
