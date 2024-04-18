@@ -10,6 +10,8 @@ from apps.accounting_exports.serializers import (
     AccountingExportSummarySerializer,
     ErrorSerializer,
 )
+from apps.accounting_exports.helpers import AccountingExportSearchFilter
+
 from ms_business_central_api.utils import LookupFieldMixin
 
 logger = logging.getLogger(__name__)
@@ -23,7 +25,7 @@ class AccountingExportView(LookupFieldMixin, generics.ListAPIView):
     serializer_class = AccountingExportSerializer
     queryset = AccountingExport.objects.all().order_by("-updated_at")
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = {"type": {"in"}, "exported_at": {"lte", "gte"}, "id": {"in"}, "status": {"in"}}
+    filterset_class = AccountingExportSearchFilter
 
 
 class AccountingExportCountView(generics.RetrieveAPIView):
@@ -53,6 +55,7 @@ class AccountingExportSummaryView(generics.RetrieveAPIView):
 
 class ErrorsView(LookupFieldMixin, generics.ListAPIView):
     serializer_class = ErrorSerializer
+
     queryset = Error.objects.all()
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = {"type": {"exact"}, "is_resolved": {"exact"}}

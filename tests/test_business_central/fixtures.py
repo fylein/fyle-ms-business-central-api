@@ -41,7 +41,6 @@ data = {
         "expense_memo_structure": ["Field1", "Field2", "category", "employee_email"],
         "schedule_is_enabled": True,
         "start_datetime": "2024-02-15T08:00:00Z",
-        "schedule_id": "schedule123",
         "interval_hours": 24,
         "emails_selected": ["email1@example.com", "email2@example.com"],
         "emails_added": ["newemail@example.com"],
