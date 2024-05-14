@@ -60,7 +60,7 @@ def construct_expense_filter(expense_filter):
             else:
                 # If the isnull filter value is False, invert the exact filter using the ~Q operator and assign it to the constructed expense filter
                 constructed_expense_filter = ~Q(**filter2)
-   # for category non-custom field with not_in as operator, to check this later on
+    # for category non-custom field with not_in as operator, to check this later on
     elif expense_filter.condition == 'category' and expense_filter.operator == 'not_in' and not expense_filter.is_custom:
         # construct the filter
         filter1 = {
