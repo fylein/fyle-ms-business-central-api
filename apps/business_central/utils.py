@@ -76,7 +76,7 @@ class BusinessCentralConnector:
             else:
                 active = False
             if attribute_type == 'ACCOUNT':
-                if item.get('accountType') != 'Posting' or not item.get('directPosting'):
+                if item.get('accountType') != 'Posting' and item.get('directPosting') is False:
                     continue
             destination_attributes.append(self._create_destination_attribute(
                 attribute_type,
