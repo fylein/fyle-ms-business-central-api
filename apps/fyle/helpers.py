@@ -203,13 +203,6 @@ def get_expense_fields(workspace_id: int):
                 'is_custom': custom_field['is_custom']
             })
 
-        response.append({
-            'field_name': custom_field['CATEGORY'],
-            'type': custom_field['type'],
-            'is_custom': custom_field['is_custom']
-        })
-    
-
     return response
 
 
