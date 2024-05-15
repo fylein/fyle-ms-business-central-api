@@ -143,6 +143,7 @@ def test_construct_expense_filter_query(
 
     assert str(returned_filter) == "(OR: ('custom_properties__some_field__isnull', True), ('custom_properties__some_field__exact', None), ('custom_properties__employee_id__not_in', [12, 13]), ('custom_properties__is_email_sent__not_in', False))"
 
+
 @pytest.mark.django_db()
 def test_construct_expense_filter():
     # employee-email-is-equal
