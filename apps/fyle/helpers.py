@@ -77,6 +77,7 @@ def construct_expense_filter(expense_filter):
                 expense_filter.values[0] if len(expense_filter.values) == 1 and expense_filter.operator != 'in'
                 else expense_filter.values
         }
+        print('anish12345', filter1)
         # Assign the constructed filter to the constructed expense filter
         constructed_expense_filter = Q(**filter1)
 
