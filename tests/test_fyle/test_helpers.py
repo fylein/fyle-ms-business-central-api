@@ -1,5 +1,8 @@
+import pytest
 from requests import Response
 from apps.fyle.helpers import (
+    Q,
+    construct_expense_filter,
     get_fyle_orgs,
     get_request,
     post_request,
@@ -139,3 +142,36 @@ def test_construct_expense_filter_query(
     returned_filter = construct_expense_filter_query(expense_filters=expense_payload_req)
 
     assert str(returned_filter) == "(OR: ('custom_properties__some_field__isnull', True), ('custom_properties__some_field__exact', None), ('custom_properties__employee_id__not_in', [12, 13]), ('custom_properties__is_email_sent__not_in', False))"
+
+
+@pytest.mark.django_db()
+def test_construct_expense_filter():
+    # category_in
+    expense_filter = ExpenseFilter(
+        condition = 'category',
+        operator = 'in',
+        values = ['anish'],
+        rank = 1,
+        is_custom = False
+    )
+    constructed_expense_filter = construct_expense_filter(expense_filter)
+
+    filter_1 = {'category__in':['anish']}
+    response = Q(**filter_1)
+
+    assert constructed_expense_filter == response
+
+    # category_not_in
+    expense_filter = ExpenseFilter(
+        condition = 'category',
+        operator = 'not_in',
+        values = ['anish', 'singh'],
+        rank = 1,
+        is_custom = False
+    )
+    constructed_expense_filter = construct_expense_filter(expense_filter)
+
+    filter_1 = {'category__in':['anish', 'singh']}
+    response = ~Q(**filter_1)
+
+    assert constructed_expense_filter == response
