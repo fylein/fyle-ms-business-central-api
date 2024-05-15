@@ -14,6 +14,7 @@ from apps.workspaces.models import ExportSetting, FyleCredential
 
 def construct_expense_filter(expense_filter):
     constructed_expense_filter = {}
+    print('anish268', constructed_expense_filter)
     # If the expense filter is a custom field
     if expense_filter.is_custom:
         # If the operator is not isnull

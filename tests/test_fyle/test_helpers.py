@@ -152,7 +152,6 @@ def test_construct_expense_filter():
 
     filter_1 = {'employee_email__in': ['killua.z@fyle.in', 'naruto.u@fyle.in']}
     response = Q(**filter_1)
-
     assert constructed_expense_filter == response
 
     # employee-email-is-equal-one-email-only
