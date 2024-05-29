@@ -331,7 +331,6 @@ fixtures = {
             'foreign_currency':None,
             'tax_amount':None,
             'tax_group_id':None,
-            'settlement_id':'setDiksMn83K7',
             'reimbursable':True,
             'billable':False,
             'exported':False,
