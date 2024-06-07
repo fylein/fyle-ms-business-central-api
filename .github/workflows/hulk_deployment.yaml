@@ -14,7 +14,8 @@ jobs:
     environment: Staging
     steps:
       - uses: actions/checkout@v2
-
+        with:
+            fetch-depth: 0
       - name: Push to dockerhub
         uses: fylein/docker-release-action@master
         id: generate-and-push-tag
