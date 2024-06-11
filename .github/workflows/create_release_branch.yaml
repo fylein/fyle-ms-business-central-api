@@ -31,6 +31,15 @@ jobs:
       - name: Branch already exists
         if: ${{env.branch_exists == 'true'}}
         run: echo "message=Branch `${{env.release_branch}}` already exists." >> $GITHUB_ENV
+      - name: Commit Empty commit and push changes
+        run: |
+          git config --global user.email "integrations@fylehq.com"
+          git config --global user.name "GitHub Actions"
+          git checkout ${{env.release_branch}}
+          git add .
+          git pull origin ${{ env.release_branch }}
+          git commit --allow-empty -m "Release branch creation commit"
+          git push origin ${{ env.release_branch }}
       - name: Send message on Slack
         uses: archive/github-actions-slack@v2.0.1
         id: notify
