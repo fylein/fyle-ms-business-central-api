@@ -4,6 +4,10 @@ on:
   push:
     branches:
     - 'ms-business-central_release_*'
+  workflow_run:
+    workflows: ["Create Release Branch"]
+    types:
+      - completed
 
 jobs:
   hulk_deploy:
