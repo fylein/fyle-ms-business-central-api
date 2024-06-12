@@ -27,7 +27,7 @@ jobs:
         if: github.event_name == 'workflow_run'
         run: |
           echo "release_branch=ms-business-central_release_$(date +%Y_%m_%d)" >> $GITHUB_ENV
-          git checkout release_branch
+          git checkout ${{env.release_branch}}
 
       - name: Push to dockerhub
         if: ${{ success() }}
