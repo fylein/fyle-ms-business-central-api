@@ -4,26 +4,34 @@ on:
   push:
     branches:
     - 'ms-business-central_release_*'
-  create:
-    branches:
-    - 'ms-business-central_release_*'
 
 jobs:
   hulk_deploy:
-    if: (github.event_name != 'create' || (github.event_name == 'create' && github.event.ref_type == 'branch' && github.event.ref == 'ms-business-central_release_*'))
+    name: Hulk Release Pipeline
     runs-on: ubuntu-latest
     environment: Staging
     steps:
       - uses: actions/checkout@v2
         with:
             fetch-depth: 0
+      - name: Run CI
+        id: run-ci
+        run: |
+          echo "Running ci"
+
       - name: Push to dockerhub
+        if: ${{ success() }}
         uses: fylein/docker-release-action@master
         id: generate-and-push-tag
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_TOKEN }}
           IMAGE_NAME: fyle_ms-business-central-api
+
+      - name: Print docker image version
+        run: |
+          NEW_TAG=${{ steps.generate-and-push-tag.outputs.new_tag }}
+          echo "docker image version: $NEW_TAG"
 
       - name: Install kustomize
         run: |
@@ -47,7 +55,6 @@ jobs:
 
       - name: Commit and push changes
         run: |
-          NEW_TAG=${{ steps.generate-and-push-tag.outputs.new_tag }}
           cd ${{ vars.STAGING_DEPLOY_REPO }}
           git config --global user.email "integrations@fylehq.com"
           git config --global user.name "GitHub Actions"
