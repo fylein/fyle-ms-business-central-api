@@ -1,2 +1,2 @@
-# fyle-ms-business-central-api
-API to connect to Microsoft Dynamics Business Central
+# Fyle MS Business Central API
+Django Rest Framework API for Fyle MS Business Central Integration
