@@ -23,11 +23,19 @@ jobs:
         run: |
           echo "Running ci"
 
-      - name: Checkout to Release branch if workflow_run
+      - name: Get Release branch name if workflow_run
         if: github.event_name == 'workflow_run'
         run: |
           echo "release_branch=ms-business-central_release_$(date +%Y_%m_%d)" >> $GITHUB_ENV
-          git checkout ${{env.release_branch}}
+
+      - name: Checkout to Release branch if workflow_run
+        uses: actions/checkout@v4
+        if: github.event_name == 'workflow_run'
+        with:
+          ref: ${{env.release_branch}}
+
+      - name: Verify current branch
+        run: git branch --show-current
 
       - name: Push to dockerhub
         if: ${{ success() }}
