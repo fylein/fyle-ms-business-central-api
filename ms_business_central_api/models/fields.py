@@ -80,7 +80,7 @@ class StringOptionsField(models.CharField):
     description = "Custom String Field with Options"
 
     def __init__(self, *args, **kwargs):
-        choices = kwargs.pop('choices', [])  # Retrieve choices from kwargs
+        choices = kwargs.pop('choices', [])  # Retrieve choices from kwarg
         max_length = kwargs.pop('max_length', 255)  # Retrieve max_length from kwargs
         default = kwargs.pop('default', '')  # Retrieve default value from kwargs
         kwargs['help_text'] = kwargs.get('help_text', 'string field with options')
