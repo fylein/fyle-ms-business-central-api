@@ -23,6 +23,12 @@ jobs:
         run: |
           echo "Running ci"
 
+      - name: Checkout to Release branch if workflow_run
+        if: github.event_name == 'workflow_run'
+        run: |
+          echo "release_branch=ms-business-central_release_$(date +%Y_%m_%d)" >> $GITHUB_ENV
+          git checkout release_branch
+
       - name: Push to dockerhub
         if: ${{ success() }}
         uses: fylein/docker-release-action@master
