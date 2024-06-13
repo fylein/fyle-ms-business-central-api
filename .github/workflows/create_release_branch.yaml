@@ -1,8 +1,10 @@
 name: Create Release Branch
+
 on:
   schedule:
     # Run every Friday at 11:30 AM UTC (5:00 PM IST)
     - cron: '30 11 * * FRI'
+
 jobs:
   create-release-branch:
     name: Create Release Branch
@@ -15,8 +17,8 @@ jobs:
 
       - name: Get Release Branch Name
         run: |
-          echo "release_branch=ms-business-central_release_$(date +%Y_%m_%d)" >> $GITHUB_ENV
-          echo "last_release_branch=ms-business-central_release_$(date -d 'last friday' +%Y_%m_%d)" >> $GITHUB_ENV
+          echo "release_branch=ms_business_central_release_$(date +%Y_%m_%d)" >> $GITHUB_ENV
+          echo "last_release_branch=ms_business_central_release_$(date -d 'last friday' +%Y_%m_%d)" >> $GITHUB_ENV
 
       - name: Check if release branch exists
         run: |
