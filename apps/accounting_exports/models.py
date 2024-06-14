@@ -181,9 +181,17 @@ class Error(BaseForeignWorkspaceModel):
         ExpenseAttribute, on_delete=models.PROTECT,
         null=True, help_text='Reference to Expense Attribute'
     )
+    repetition_count = models.IntegerField(help_text='repetition count for the error', default=0)
     is_resolved = BooleanFalseField(help_text='Is resolved')
     error_title = StringNotNullField(help_text='Error title')
     error_detail = TextNotNullField(help_text='Error detail')
+
+    def increase_repetition_count_by_one(self):
+        """
+        Increase the repetition count by 1.
+        """
+        self.repetition_count += 1
+        self.save()
 
     class Meta:
         db_table = 'errors'
