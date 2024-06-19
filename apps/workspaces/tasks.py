@@ -55,7 +55,8 @@ def run_import_export(workspace_id: int, export_mode = None):
             if len(accounting_export_ids):
                 is_expenses_exported = True
                 export = export_map.get(export_settings.reimbursable_expenses_export_type, None)
-                export.trigger_export(workspace_id=workspace_id, accounting_export_ids=accounting_export_ids)
+                if export:
+                    export.trigger_export(workspace_id=workspace_id, accounting_export_ids=accounting_export_ids)
 
     # For Credit Card Expenses
     if export_settings.credit_card_expense_export_type:
@@ -70,8 +71,9 @@ def run_import_export(workspace_id: int, export_mode = None):
 
             if len(accounting_export_ids):
                 is_expenses_exported = True
-                export = export_map[export_settings.credit_card_expense_export_type]
-                export.trigger_export(workspace_id=workspace_id, accounting_export_ids=accounting_export_ids)
+                export = export_map.get(export_settings.credit_card_expense_export_type, None)
+                if export:
+                    export.trigger_export(workspace_id=workspace_id, accounting_export_ids=accounting_export_ids)
 
     if is_expenses_exported:
         accounting_summary.last_exported_at = last_exported_at
@@ -158,7 +160,8 @@ def export_to_business_central(workspace_id: int):
             is_expenses_exported = True
             # Get the appropriate export class and trigger the export
             export = export_map.get(export_settings.reimbursable_expenses_export_type, None)
-            export.trigger_export(workspace_id=workspace_id, accounting_export_ids=accounting_export_ids)
+            if export:
+                export.trigger_export(workspace_id=workspace_id, accounting_export_ids=accounting_export_ids)
 
     # Check and export credit card expenses if configured
     if export_settings.credit_card_expense_export_type:
@@ -170,8 +173,9 @@ def export_to_business_central(workspace_id: int):
             # Set the flag indicating expenses are exported
             is_expenses_exported = True
             # Get the appropriate export class and trigger the export
-            export = export_map[export_settings.credit_card_expense_export_type]
-            export.trigger_export(workspace_id=workspace_id, accounting_export_ids=accounting_export_ids)
+            export = export_map.get(export_settings.credit_card_expense_export_type, None)
+            if export:
+                export.trigger_export(workspace_id=workspace_id, accounting_export_ids=accounting_export_ids)
 
     # Update the accounting summary if expenses are exported
     if is_expenses_exported:
