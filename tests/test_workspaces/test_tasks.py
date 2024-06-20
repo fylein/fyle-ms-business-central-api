@@ -2,11 +2,14 @@ from apps.workspaces.tasks import (
     async_update_fyle_credentials,
     run_import_export,
     schedule_sync,
-    export_to_business_central
+    export_to_business_central,
+    async_create_admin_subcriptions
 )
 from apps.accounting_exports.models import AccountingExport, AccountingExportSummary
 from apps.workspaces.models import FyleCredential, AdvancedSetting, ExportSetting
 from django_q.models import Schedule
+from django.conf import settings
+from django.urls import reverse
 
 
 def test_async_update_fyle_credentials(
@@ -258,3 +261,54 @@ def test_export_to_business_central_with_reimbursable_expense(
     assert accounting_export.fund_source == 'PERSONAL'
     assert accounting_summary.export_mode == 'MANUAL'
     assert accounting_summary.last_exported_at is not None
+
+
+def test_async_create_admin_subcriptions(
+    db,
+    mocker,
+    create_temp_workspace,
+    add_fyle_credentials
+):
+    mock_api = mocker.patch(
+        'fyle.platform.apis.v1beta.admin.Subscriptions.post',
+        return_value={}
+    )
+    workspace_id = 1
+    async_create_admin_subcriptions(workspace_id=workspace_id)
+
+    payload = {
+        'is_enabled': True,
+        'webhook_url': '{}/workspaces/{}/fyle/webhook_callback/'.format(settings.API_URL, workspace_id)
+    }
+
+    assert mock_api.once_called_with(payload)
+
+    mock_api.side_effect = Exception('Error')
+    try:
+        async_create_admin_subcriptions(workspace_id=workspace_id)
+    except Exception as e:
+        assert str(e) == 'Error'
+
+
+def test_async_create_admin_subcriptions_2(
+    db,
+    mocker,
+    create_temp_workspace,
+    add_fyle_credentials
+):
+    mock_api = mocker.patch(
+        'fyle.platform.apis.v1beta.admin.Subscriptions.post',
+        return_value={}
+    )
+    workspace_id = 1
+    reverse('webhook-callback', kwargs={'workspace_id': workspace_id})
+
+    payload = {
+        'is_enabled': True,
+        'webhook_url': '{}/workspaces/{}/fyle/webhook_callback/'.format(settings.API_URL, workspace_id)
+    }
+
+    assert mock_api.once_called_with(payload)
+
+    mock_api.side_effect = Exception('Error')
+    reverse('webhook-callback', kwargs={'workspace_id': workspace_id})
