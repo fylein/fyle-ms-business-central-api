@@ -7,6 +7,7 @@ from django_q.tasks import async_task
 
 from apps.accounting_exports.models import AccountingExport
 from apps.fyle.tasks import import_expenses
+from apps.workspaces.models import Workspace
 
 
 def queue_import_reimbursable_expenses(workspace_id: int, synchronous: bool = False):
@@ -55,3 +56,15 @@ def queue_import_credit_card_expenses(workspace_id: int, synchronous: bool = Fal
         return
 
     import_expenses(workspace_id, accounting_export, 'PERSONAL_CORPORATE_CREDIT_CARD_ACCOUNT', 'CCC')
+
+
+def async_handle_webhook_callback(body: dict) -> None:
+    """
+    Async'ly import and export expenses
+    :param body: body
+    :return: None
+    """
+    if body.get('action') == 'ACCOUNTING_EXPORT_INITIATED' and body.get('data'):
+        org_id = body['data']['org_id']
+        workspace = Workspace.objects.get(org_id=org_id)
+        async_task('apps.workspaces.tasks.run_import_export', workspace.id)
