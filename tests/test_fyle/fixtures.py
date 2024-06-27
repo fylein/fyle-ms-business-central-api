@@ -180,14 +180,12 @@ fixtures = {
             'reimbursement_id': 'reimYNNUkKQiWp',
             'reimbursement_seq_num': 'P/2024/05/T/P/2024/05/R/30',
             'seq_num': 'C/2024/05/R/45',
-            'settlement_id': 'setUkp31alIp7',
             'state': 'PAYMENT_PROCESSING',
             'title': '#5:  May 2024'
         },
         'report_id': 'rpN41rGGnxNI',
         'report_last_approved_at': '2024-05-10T07:53:25.774000+00:00',
         'report_last_paid_at': None,
-        'report_settlement_id': 'setUkp31alIp7',
         'seq_num': 'E/2024/05/T/442',
         'source': 'WEBAPP',
         'source_account': {
