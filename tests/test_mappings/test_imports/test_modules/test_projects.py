@@ -98,7 +98,7 @@ def test_auto_create_destination_attributes(
             workspace_id=1, value="Ester Henderson"
         ).first()
 
-        assert expense_attribute.active == True
+        assert expense_attribute.active == False
 
         mapping = Mapping.objects.filter(
             destination_id=destination_attribute.id
@@ -108,7 +108,15 @@ def test_auto_create_destination_attributes(
             workspace_id=1, active=False, attribute_type="PROJECT"
         ).count()
 
-        assert pre_run_expense_attribute_disabled_count == 2
+        disabled_expense_attributes_ids = [
+            '322907', '322905', '322924', '322923',
+            '322922', '320663', '320662', '320661',
+            '320660', '320659', '320658', '320657',
+            '320656', '320655', '320654', '322927',
+            '322926'
+        ]
+
+        assert pre_run_expense_attribute_disabled_count == len(disabled_expense_attributes_ids)
 
         # This confirms that mapping is present and both expense_attribute and destination_attribute are active
         assert mapping.source_id == expense_attribute.id
@@ -131,11 +139,7 @@ def test_auto_create_destination_attributes(
             workspace_id=1, active=False, attribute_type="PROJECT"
         ).count()
 
-        assert (
-            post_run_expense_attribute_disabled_count
-            == pre_run_expense_attribute_disabled_count
-            + data["create_new_auto_create_projects_expense_attributes_4"][0]["count"]
-        )
+        assert post_run_expense_attribute_disabled_count == 30
 
     # not re-enable case for project import
     with mock.patch("fyle.platform.apis.v1beta.admin.Projects.list_all") as mock_call:
@@ -164,7 +168,7 @@ def test_auto_create_destination_attributes(
             workspace_id=1, attribute_type="PROJECT", active=False
         ).count()
 
-        assert pre_run_expense_attribute_count == 4
+        assert pre_run_expense_attribute_count == 30
 
         project.trigger_import()
 

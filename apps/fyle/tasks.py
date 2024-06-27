@@ -1,8 +1,10 @@
 import logging
+from typing import Dict
 from datetime import datetime
 
 from django.db import transaction
 from fyle_integrations_platform_connector import PlatformConnector
+from fyle_integrations_platform_connector.apis.expenses import Expenses as FyleExpenses
 
 from apps.accounting_exports.models import AccountingExport
 from apps.fyle.exceptions import handle_exceptions
@@ -92,3 +94,28 @@ def import_expenses(workspace_id, accounting_export: AccountingExport, source_ac
     accounting_export.business_central_errors = None
 
     accounting_export.save()
+
+
+def update_non_exported_expenses(data: Dict) -> None:
+    """
+    To update expenses not in COMPLETE, IN_PROGRESS state
+    """
+    expense_state = None
+    org_id = data['org_id']
+    expense_id = data['id']
+    workspace = Workspace.objects.get(org_id=org_id)
+    expense = Expense.objects.filter(workspace_id=workspace.id, expense_id=expense_id).first()
+
+    if expense:
+        if 'state' in expense.accounting_export_summary:
+            expense_state = expense.accounting_export_summary['state']
+        else:
+            expense_state = 'NOT_EXPORTED'
+
+        if expense_state and expense_state not in ['COMPLETE', 'IN_PROGRESS']:
+            expense_obj = []
+            expense_obj.append(data)
+            expense_objects = FyleExpenses().construct_expense_object(expense_obj, expense.workspace_id)
+            Expense.create_expense_objects(
+                expense_objects, expense.workspace_id
+            )

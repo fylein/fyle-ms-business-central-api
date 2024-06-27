@@ -6,7 +6,7 @@ from fyle.platform.exceptions import NoPrivilegeError, RetryException, InvalidTo
 from apps.business_central.exceptions import BulkError
 from rest_framework.response import Response
 from rest_framework.views import status
-
+from rest_framework.exceptions import ValidationError
 
 from apps.workspaces.models import FyleCredential, BusinessCentralCredentials, Workspace, ExportSetting, AdvancedSetting
 from apps.accounting_exports.models import AccountingExport
@@ -83,6 +83,10 @@ def handle_view_exceptions():
             except BulkError as exception:
                 logger.info('Bulk Error %s', exception.response)
                 return Response(data={'message': 'Bulk Error'}, status=status.HTTP_400_BAD_REQUEST)
+
+            except ValidationError as e:
+                logger.exception(e)
+                return Response({"message": e.detail}, status=status.HTTP_400_BAD_REQUEST)
 
             except Exception as exception:
                 logger.exception(exception)

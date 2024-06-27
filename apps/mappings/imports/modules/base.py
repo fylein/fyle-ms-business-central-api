@@ -267,7 +267,6 @@ class Base:
         """
         paginated_destination_attribute_values = [attribute.value for attribute in paginated_destination_attributes]
         existing_expense_attributes_map = self.get_existing_fyle_attributes(paginated_destination_attribute_values)
-
         return self.construct_fyle_payload(paginated_destination_attributes, existing_expense_attributes_map, is_auto_sync_status_allowed)
 
     def get_existing_fyle_attributes(self, paginated_destination_attribute_values: List[str]):
