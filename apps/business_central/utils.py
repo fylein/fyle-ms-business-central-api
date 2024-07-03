@@ -70,7 +70,7 @@ class BusinessCentralConnector:
 
         destination_attributes = []
         for item in data:
-            if item['displayName'] == '' and item['name'] == '':
+            if ('displayName' in item and item['displayName'] =='') and ('name' in item and item['name'] == ''):
                 pass
             detail = {field: item[field] for field in field_names}
             if (attribute_type == 'EMPLOYEE' and item.get('status') == 'Active') or (attribute_type in ('LOCATION', 'COMPANY')) or (item.get('blocked') is not None and item.get('blocked') != True):
