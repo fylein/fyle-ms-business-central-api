@@ -89,7 +89,7 @@ class BusinessCentralConnector:
             destination_attributes.append(self._create_destination_attribute(
                 attribute_type,
                 display_name,
-                item['displayName'] if item['displayName'] else item['name'],
+                value,
                 item['number'] if item.get('number') else item['id'],
                 active,
                 detail
