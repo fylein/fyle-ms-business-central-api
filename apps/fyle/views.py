@@ -19,6 +19,7 @@ from apps.fyle.serializers import (
     ImportFyleAttributesSerializer,
 )
 from apps.accounting_exports.helpers import ExpenseSearchFilter
+from apps.workspaces.models import ExportSetting
 
 from ms_business_central_api.utils import LookupFieldMixin
 
@@ -97,9 +98,12 @@ class AccoutingExportSyncView(generics.CreateAPIView):
         """
         Post expense groups creation
         """
+        export_settings = ExportSetting.objects.get(workspace_id=kwargs['workspace_id'])
 
-        queue_import_reimbursable_expenses(kwargs['workspace_id'], synchronous=True)
-        queue_import_credit_card_expenses(kwargs['workspace_id'], synchronous=True)
+        if export_settings.reimbursable_expenses_export_type:
+            queue_import_reimbursable_expenses(kwargs['workspace_id'], synchronous=True)
+        if export_settings.credit_card_expense_export_type:
+            queue_import_credit_card_expenses(kwargs['workspace_id'], synchronous=True)
 
         return Response(
             status=status.HTTP_200_OK
