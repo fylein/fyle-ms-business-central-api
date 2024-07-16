@@ -43,7 +43,7 @@ def test_construct_journal_entry(
 
     assert payload['accountType'] == journal_entry.account_type
     assert payload['accountNumber'] == journal_entry.account_id
-    assert payload['postingDate'] == journal_entry.invoice_date
+    assert payload['postingDate'] == journal_entry.invoice_date.strftime("%Y-%m-%d")
     assert payload['documentNumber'] == journal_entry.document_number
 
 
