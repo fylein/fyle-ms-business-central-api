@@ -96,7 +96,7 @@ class BaseExportModel(models.Model):
             return accounting_export.description['posted_at']
 
         # If none of the expected keys are present or if the values are empty, return the current date and time
-        return datetime.now().strftime("%Y-%m-%d")
+        return datetime.now()
 
     def get_account_id_type(accounting_export: AccountingExport, export_settings: ExportSetting, merchant: str = None) -> str:
         mapping = EmployeeMapping.objects.filter(
