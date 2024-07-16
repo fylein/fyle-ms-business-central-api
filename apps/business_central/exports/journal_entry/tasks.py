@@ -1,5 +1,6 @@
 import logging
 from typing import Dict, List
+from datetime import datetime
 
 from apps.accounting_exports.models import AccountingExport
 from apps.business_central.actions import update_accounting_export_summary
@@ -40,11 +41,15 @@ class ExportJournalEntry(AccountingDataExporter):
         :return: constructed expense_report
         '''
         batch_journal_entry_payload = []
+        if isinstance(body.invoice_date, datetime):
+            posting_date = body.invoice_date.strftime("%Y-%m-%d")
+        else:
+            posting_date = body.invoice_date
 
         journal_entry_payload = {
             'accountType': body.account_type,
             'accountNumber': body.account_id,
-            'postingDate': body.invoice_date.strftime("%Y-%m-%d"),
+            'postingDate': posting_date,
             'documentNumber': body.document_number,
             'amount': body.amount,
             'comment': body.comment,
@@ -60,7 +65,7 @@ class ExportJournalEntry(AccountingDataExporter):
             journal_entry_lineitem_payload = {
                 'accountType': lineitem.account_type,
                 'accountNumber': lineitem.account_id,
-                'postingDate': lineitem.invoice_date.strftime("%Y-%m-%d"),
+                'postingDate': posting_date,
                 'documentNumber': lineitem.document_number,
                 'amount': lineitem.amount,
                 'comment': lineitem.comment,
