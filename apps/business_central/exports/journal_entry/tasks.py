@@ -44,7 +44,7 @@ class ExportJournalEntry(AccountingDataExporter):
         journal_entry_payload = {
             'accountType': body.account_type,
             'accountNumber': body.account_id,
-            'postingDate': body.invoice_date,
+            'postingDate': body.invoice_date.strftime("%Y-%m-%d"),
             'documentNumber': body.document_number,
             'amount': body.amount,
             'comment': body.comment,
@@ -60,7 +60,7 @@ class ExportJournalEntry(AccountingDataExporter):
             journal_entry_lineitem_payload = {
                 'accountType': lineitem.account_type,
                 'accountNumber': lineitem.account_id,
-                'postingDate': lineitem.invoice_date,
+                'postingDate': lineitem.invoice_date.strftime("%Y-%m-%d"),
                 'documentNumber': lineitem.document_number,
                 'amount': lineitem.amount,
                 'comment': lineitem.comment,
