@@ -127,7 +127,7 @@ class AccountingExport(BaseForeignWorkspaceModel):
                 if date_field != 'current_date' and accounting_export[date_field]:
                     accounting_export[date_field] = accounting_export[date_field].strftime('%Y-%m-%d')
                 else:
-                    accounting_export[date_field] = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+                    accounting_export[date_field] = datetime.now().strftime('%Y-%m-%d')
 
             # Calculate and assign 'last_spent_at' based on the chosen date field
             if date_field == 'last_spent_at':
