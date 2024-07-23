@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from typing import List
 
 from django_q.models import Schedule
+from django.conf import settings
 
 from apps.accounting_exports.models import AccountingExport, AccountingExportSummary
 from apps.business_central.exports.journal_entry.tasks import ExportJournalEntry
@@ -10,12 +11,15 @@ from apps.business_central.exports.purchase_invoice.tasks import ExportPurchaseI
 from apps.fyle.queue import queue_import_credit_card_expenses, queue_import_reimbursable_expenses
 from apps.workspaces.models import AdvancedSetting, ExportSetting, FyleCredential
 
+from fyle_integrations_platform_connector import PlatformConnector
+
 logger = logging.getLogger(__name__)
+logger.level = logging.INFO
 
 
 def async_update_fyle_credentials(fyle_org_id: str, refresh_token: str):
     fyle_credentials = FyleCredential.objects.filter(workspace__org_id=fyle_org_id).first()
-    if fyle_credentials:
+    if fyle_credentials and refresh_token:
         fyle_credentials.refresh_token = refresh_token
         fyle_credentials.save()
 
@@ -54,8 +58,9 @@ def run_import_export(workspace_id: int, export_mode = None):
 
             if len(accounting_export_ids):
                 is_expenses_exported = True
-                export = export_map[export_settings.reimbursable_expenses_export_type]
-                export.trigger_export(workspace_id=workspace_id, accounting_export_ids=accounting_export_ids)
+                export = export_map.get(export_settings.reimbursable_expenses_export_type, None)
+                if export:
+                    export.trigger_export(workspace_id=workspace_id, accounting_export_ids=accounting_export_ids)
 
     # For Credit Card Expenses
     if export_settings.credit_card_expense_export_type:
@@ -70,8 +75,9 @@ def run_import_export(workspace_id: int, export_mode = None):
 
             if len(accounting_export_ids):
                 is_expenses_exported = True
-                export = export_map[export_settings.credit_card_expense_export_type]
-                export.trigger_export(workspace_id=workspace_id, accounting_export_ids=accounting_export_ids)
+                export = export_map.get(export_settings.credit_card_expense_export_type, None)
+                if export:
+                    export.trigger_export(workspace_id=workspace_id, accounting_export_ids=accounting_export_ids)
 
     if is_expenses_exported:
         accounting_summary.last_exported_at = last_exported_at
@@ -157,8 +163,9 @@ def export_to_business_central(workspace_id: int):
             # Set the flag indicating expenses are exported
             is_expenses_exported = True
             # Get the appropriate export class and trigger the export
-            export = export_map[export_settings.reimbursable_expenses_export_type]
-            export.trigger_export(workspace_id=workspace_id, accounting_export_ids=accounting_export_ids)
+            export = export_map.get(export_settings.reimbursable_expenses_export_type, None)
+            if export:
+                export.trigger_export(workspace_id=workspace_id, accounting_export_ids=accounting_export_ids)
 
     # Check and export credit card expenses if configured
     if export_settings.credit_card_expense_export_type:
@@ -170,8 +177,9 @@ def export_to_business_central(workspace_id: int):
             # Set the flag indicating expenses are exported
             is_expenses_exported = True
             # Get the appropriate export class and trigger the export
-            export = export_map[export_settings.credit_card_expense_export_type]
-            export.trigger_export(workspace_id=workspace_id, accounting_export_ids=accounting_export_ids)
+            export = export_map.get(export_settings.credit_card_expense_export_type, None)
+            if export:
+                export.trigger_export(workspace_id=workspace_id, accounting_export_ids=accounting_export_ids)
 
     # Update the accounting summary if expenses are exported
     if is_expenses_exported:
@@ -182,3 +190,18 @@ def export_to_business_central(workspace_id: int):
         accounting_summary.last_exported_at = last_exported_at
         accounting_summary.export_mode = 'MANUAL'
         accounting_summary.save()
+
+
+def async_create_admin_subcriptions(workspace_id: int) -> None:
+    """
+    Create admin subscriptions
+    :param workspace_id: workspace id
+    :return: None
+    """
+    fyle_credentials = FyleCredential.objects.get(workspace_id=workspace_id)
+    platform = PlatformConnector(fyle_credentials)
+    payload = {
+        'is_enabled': True,
+        'webhook_url': '{}/workspaces/{}/fyle/webhook_callback/'.format(settings.API_URL, workspace_id)
+    }
+    platform.subscriptions.post(payload)

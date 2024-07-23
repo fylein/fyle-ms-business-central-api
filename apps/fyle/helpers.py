@@ -3,13 +3,14 @@ import requests
 from typing import List
 from django.conf import settings
 from django.db.models import Q
+from rest_framework.exceptions import ValidationError
 
 from fyle_integrations_platform_connector import PlatformConnector
 
 from apps.accounting_exports.models import AccountingExport
 from apps.fyle.constants import DEFAULT_FYLE_CONDITIONS
 from apps.fyle.models import ExpenseFilter
-from apps.workspaces.models import ExportSetting, FyleCredential
+from apps.workspaces.models import Workspace, ExportSetting, FyleCredential
 
 
 def construct_expense_filter(expense_filter):
@@ -248,3 +249,13 @@ def sync_dimensions(fyle_credentials: FyleCredential) -> None:
     platform = PlatformConnector(fyle_credentials)
 
     platform.import_fyle_dimensions()
+
+
+def assert_valid_request(workspace_id:int, org_id:str):
+    """
+    Assert if the request is valid by checking
+    the url_workspace_id and fyle_org_id workspace
+    """
+    workspace = Workspace.objects.get(org_id=org_id)
+    if workspace.id != workspace_id:
+        raise ValidationError('Workspace mismatch')
