@@ -18,7 +18,9 @@ def handle_business_central_error(exception, accounting_export: AccountingExport
     business_central_error = str(exception.response)
     error_msg = 'Failed to create {0}'.format(export_type)
 
-    Error.objects.update_or_create(workspace_id=accounting_export.workspace_id, accounting_export=accounting_export, defaults={'error_title': error_msg, 'type': 'BUSINESS_CENTRAL_ERROR', 'error_detail': business_central_error, 'is_resolved': False})
+    error, _ = Error.objects.update_or_create(workspace_id=accounting_export.workspace_id, accounting_export=accounting_export, defaults={'error_title': error_msg, 'type': 'BUSINESS_CENTRAL_ERROR', 'error_detail': business_central_error, 'is_resolved': False})
+
+    error.increase_repetition_count_by_one()
 
     accounting_export.status = 'FAILED'
     accounting_export.detail = None
