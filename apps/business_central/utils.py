@@ -18,12 +18,14 @@ class BusinessCentralConnector:
     """
 
     def __init__(self, credentials_object: BusinessCentralCredentials, workspace_id: int):
+        workspace: Workspace = Workspace.objects.get(id=workspace_id)
+
         client_id = settings.BUSINESS_CENTRAL_CLIENT_ID
         client_secret = settings.BUSINESS_CENTRAL_CLIENT_SECRET
-        environment = settings.BUSINESS_CENTRAL_ENVIRONMENT if credentials_object.workspace.id != 25 else 'SANDBOX_APRIL2024'
+        environment = settings.BUSINESS_CENTRAL_ENVIRONMENT if workspace.id != 25 else 'SANDBOX_APRIL2024'
         refresh_token = credentials_object.refresh_token
 
-        business_central_company_id = credentials_object.workspace.business_central_company_id
+        business_central_company_id = workspace.business_central_company_id
 
         self.connection = Dynamics(
             environment=environment,
