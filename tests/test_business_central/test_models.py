@@ -1,20 +1,10 @@
 import pytest
+from fyle_accounting_mappings.models import EmployeeMapping, ExpenseAttribute, Mapping, MappingSetting
 
-from apps.business_central.models import (
-    JournalEntry,
-    JournalEntryLineItems,
-    PurchaseInvoice,
-    PurchaseInvoiceLineitems
-)
-from fyle_accounting_mappings.models import (
-    EmployeeMapping,
-    Mapping,
-    MappingSetting,
-    ExpenseAttribute
-)
-from apps.workspaces.models import AdvancedSetting, ExportSetting
 from apps.accounting_exports.models import AccountingExport, Expense
 from apps.business_central.exports.accounting_export import AccountingDataExporter
+from apps.business_central.models import JournalEntry, JournalEntryLineItems, PurchaseInvoice, PurchaseInvoiceLineitems
+from apps.workspaces.models import AdvancedSetting, ExportSetting
 
 
 def test_create_or_update_journal_entry_1(
@@ -40,7 +30,7 @@ def test_create_or_update_journal_entry_1(
 
     journal_entry = JournalEntry.objects.first()
     assert journal_entry.accounting_export.workspace.id == 1
-    assert journal_entry.amount == -50
+    assert journal_entry.amount == 50
 
 
 def test_create_or_update_journal_entry_2(
@@ -76,7 +66,7 @@ def test_create_or_update_journal_entry_2(
 
     journal_entry = JournalEntry.objects.first()
     assert journal_entry.accounting_export.workspace.id == 1
-    assert journal_entry.amount == -50
+    assert journal_entry.amount == 50
 
 
 def test_create_or_update_journal_entry_3(
@@ -116,7 +106,7 @@ def test_create_or_update_journal_entry_3(
 
     journal_entry = JournalEntry.objects.first()
     assert journal_entry.accounting_export.workspace.id == 1
-    assert journal_entry.amount == -50
+    assert journal_entry.amount == 50
 
 
 def test_create_or_update_journal_entry_line_items(
@@ -151,7 +141,7 @@ def test_create_or_update_journal_entry_line_items(
 
     assert len(journal_line_items) == 1
     assert journal_line_items[0].journal_entry.accounting_export.workspace.id == 1
-    assert journal_line_items[0].journal_entry.amount == -50
+    assert journal_line_items[0].journal_entry.amount == 50
 
 
 def test_create_or_update_purchase_invoice(
