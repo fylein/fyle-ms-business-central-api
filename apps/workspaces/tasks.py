@@ -42,7 +42,7 @@ def run_import_export(workspace_id: int, export_mode = None):
 
     export_map = {
         'JOURNAL_ENTRY': ExportJournalEntry(),
-        'PURCHASE_INVOICE': ExportPurchaseInvoice()
+        'PURCHASE_INVOICES': ExportPurchaseInvoice()
     }
 
     # For Reimbursable Expenses
