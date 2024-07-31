@@ -129,12 +129,18 @@ class BaseExportModel(models.Model):
 
     def get_expense_purpose(lineitem: Expense, category: str, advance_setting: AdvancedSetting) -> str:
         memo_structure = advance_setting.expense_memo_structure
+        lineitem_purpose = ''
+
+        if lineitem.purpose and len(lineitem.purpose) > 40:
+            lineitem_purpose = lineitem.purpose[:37] + '...'
+        else:
+            lineitem_purpose = lineitem.purpose
 
         details = {
             'employee_email': lineitem.employee_email,
             'merchant': '{0}'.format(lineitem.vendor) if lineitem.vendor else '',
             'category': '{0}'.format(category) if lineitem.category else '',
-            'purpose': '{0}'.format(lineitem.purpose) if lineitem.purpose else '',
+            'purpose': '{0}'.format(lineitem_purpose),
             'report_number': '{0}'.format(lineitem.claim_number),
             'spent_on': '{0}'.format(lineitem.spent_at.date()) if lineitem.spent_at else '',
         }
