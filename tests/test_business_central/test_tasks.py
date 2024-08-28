@@ -18,7 +18,7 @@ def test_trigger_export_journal_entry(db, mocker):
     )
 
     export_journal_entry = ExportJournalEntry()
-    export_journal_entry.trigger_export(1, [1])
+    export_journal_entry.trigger_export(1, [1], False, 0)
 
     assert True
 
@@ -140,7 +140,7 @@ def test_trigger_export_purchase_invoice(db, mocker):
     )
 
     export_purchase_invoice = ExportPurchaseInvoice()
-    export_purchase_invoice.trigger_export(1, [1])
+    export_purchase_invoice.trigger_export(1, [1], False, 0)
 
     assert True
 
