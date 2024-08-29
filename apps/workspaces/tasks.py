@@ -37,6 +37,9 @@ def run_import_export(workspace_id: int, export_mode = None):
         workspace_id=workspace_id
     )
 
+    interval_hours = advance_settings.interval_hours
+    is_auto_export = advance_settings.schedule_is_enabled
+
     last_exported_at = datetime.now()
     is_expenses_exported = False
 
@@ -61,7 +64,7 @@ def run_import_export(workspace_id: int, export_mode = None):
                 is_expenses_exported = True
                 export = export_map.get(export_settings.reimbursable_expenses_export_type, None)
                 if export:
-                    export.trigger_export(workspace_id=workspace_id, accounting_export_ids=accounting_export_ids)
+                    export.trigger_export(workspace_id=workspace_id, accounting_export_ids=accounting_export_ids, is_auto_export=is_auto_export, interval_hours=interval_hours)
 
     # For Credit Card Expenses
     if export_settings.credit_card_expense_export_type:
@@ -78,7 +81,7 @@ def run_import_export(workspace_id: int, export_mode = None):
                 is_expenses_exported = True
                 export = export_map.get(export_settings.credit_card_expense_export_type, None)
                 if export:
-                    export.trigger_export(workspace_id=workspace_id, accounting_export_ids=accounting_export_ids)
+                    export.trigger_export(workspace_id=workspace_id, accounting_export_ids=accounting_export_ids, is_auto_export=is_auto_export, interval_hours=interval_hours)
 
     if is_expenses_exported:
         accounting_summary.last_exported_at = last_exported_at
@@ -139,6 +142,9 @@ def export_to_business_central(workspace_id: int):
     export_settings = ExportSetting.objects.get(workspace_id=workspace_id)
     advance_settings = AdvancedSetting.objects.filter(workspace_id=workspace_id).first()
 
+    is_auto_export = False
+    interval_hours = 0
+
     # Update or create an AccountingExportSummary for the workspace
     accounting_summary, _ = AccountingExportSummary.objects.update_or_create(workspace_id=workspace_id)
 
@@ -166,7 +172,7 @@ def export_to_business_central(workspace_id: int):
             # Get the appropriate export class and trigger the export
             export = export_map.get(export_settings.reimbursable_expenses_export_type, None)
             if export:
-                export.trigger_export(workspace_id=workspace_id, accounting_export_ids=accounting_export_ids)
+                export.trigger_export(workspace_id=workspace_id, accounting_export_ids=accounting_export_ids, is_auto_export=is_auto_export, interval_hours=interval_hours)
 
     # Check and export credit card expenses if configured
     if export_settings.credit_card_expense_export_type:
@@ -180,7 +186,7 @@ def export_to_business_central(workspace_id: int):
             # Get the appropriate export class and trigger the export
             export = export_map.get(export_settings.credit_card_expense_export_type, None)
             if export:
-                export.trigger_export(workspace_id=workspace_id, accounting_export_ids=accounting_export_ids)
+                export.trigger_export(workspace_id=workspace_id, accounting_export_ids=accounting_export_ids, is_auto_export=is_auto_export, interval_hours=interval_hours)
 
     # Update the accounting summary if expenses are exported
     if is_expenses_exported:
