@@ -54,7 +54,7 @@ class JournalEntry(BaseExportModel):
         journal_entry_object, _ = JournalEntry.objects.update_or_create(
             accounting_export= accounting_export,
             defaults={
-                'amount': sum([expense.amount for expense in expenses]) * -1,
+                'amount': sum([expense.amount for expense in expenses]),
                 'document_number': document_number,
                 'accounts_payable_account_id': accounts_payable_account_id,
                 'account_id': account_id,
@@ -119,7 +119,7 @@ class JournalEntryLineItems(BaseExportModel):
                 journal_entry_id = journal_entry.id,
                 expense_id=lineitem.id,
                 defaults={
-                    'amount': lineitem.amount,
+                    'amount': lineitem.amount * -1,
                     'account_id': account_id,
                     'account_type': account_type,
                     'document_number':  document_number,

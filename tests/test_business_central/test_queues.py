@@ -29,7 +29,9 @@ def test_check_accounting_export_and_start_import_journal_entry(
 
     check_accounting_export_and_start_import_journal_entry(
         accounting_export.workspace_id,
-        [accounting_export.id]
+        [accounting_export.id],
+        False,
+        0
     )
 
     accounting_export.refresh_from_db()
@@ -42,7 +44,9 @@ def test_check_accounting_export_and_start_import_journal_entry(
 
     check_accounting_export_and_start_import_journal_entry(
         accounting_export.workspace_id,
-        [accounting_export.id]
+        [accounting_export.id],
+        False,
+        0
     )
 
     accounting_export.refresh_from_db()
@@ -70,7 +74,9 @@ def test_check_accounting_export_and_start_import_purchase_invoice(
 
     check_accounting_export_and_start_import_purchase_invoice(
         accounting_export.workspace_id,
-        [accounting_export.id]
+        [accounting_export.id],
+        False,
+        0
     )
 
     accounting_export.refresh_from_db()
@@ -83,7 +89,9 @@ def test_check_accounting_export_and_start_import_purchase_invoice(
 
     check_accounting_export_and_start_import_purchase_invoice(
         accounting_export.workspace_id,
-        [accounting_export.id]
+        [accounting_export.id],
+        False,
+        0
     )
 
     accounting_export.refresh_from_db()
