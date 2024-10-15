@@ -128,7 +128,11 @@ LOGGING = {
         'requests': {
             'format': 'request {levelname} %s {asctime} {message}' % SERVICE_NAME,
             'style': '{'
-        }
+        },
+        "standard": {
+            "format": "{levelname} %s {asctime} {name} {message}" % SERVICE_NAME,
+            "style": "{",
+        },
     },
     'handlers': {
         'debug_logs': {
@@ -140,6 +144,10 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'stream': sys.stdout,
             'formatter': 'requests'
+        },
+        "console": {
+            "class": "logging.StreamHandler",
+            "formatter": "standard",
         },
     },
     'loggers': {
@@ -173,7 +181,12 @@ LOGGING = {
             'handlers': ['request_logs'],
             'level': 'INFO',
             'propagate': False
-        }
+        },
+        "dynamics.apis.api_base": {
+            "handlers": ["console"],
+            "level": "DEBUG",
+            "propagate": True
+        },
     }
 }
 
