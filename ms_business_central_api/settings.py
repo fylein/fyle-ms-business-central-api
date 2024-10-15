@@ -184,7 +184,7 @@ LOGGING = {
         },
         "dynamics.apis.api_base": {
             "handlers": ["console"],
-            "level": "DEBUG",
+            "level": "INFO",
             "propagate": True
         },
     }
