@@ -19,6 +19,7 @@ SYNC_UPPER_LIMIT = {
     'locations': 1000
 }
 
+
 class BusinessCentralConnector:
     """
     Business Central Utility Functions
