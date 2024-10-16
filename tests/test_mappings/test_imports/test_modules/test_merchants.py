@@ -62,6 +62,10 @@ def test_sync_destination_atrributes(
     mocker,
 ):
     mocker.patch(
+        "dynamics.apis.Vendors.count",
+        return_value=5,
+    )
+    mocker.patch(
         "dynamics.apis.Vendors.get_all",
         return_value=data["get_vendors_destination_attributes"],
     )
@@ -108,6 +112,10 @@ def test_auto_create_destination_attributes(
             "fyle_integrations_platform_connector.apis.Merchants.post", return_value=[]
         )
         mocker.patch(
+            "dynamics.apis.Vendors.count",
+            return_value=5,
+        )
+        mocker.patch(
             "dynamics.apis.Vendors.get_all",
             return_value=data["get_vendors_destination_attributes"],
         )
@@ -150,6 +158,10 @@ def test_auto_create_destination_attributes(
     ) as mock_call:
         mocker.patch(
             "fyle_integrations_platform_connector.apis.Merchants.post", return_value=[]
+        )
+        mocker.patch(
+            "dynamics.apis.Vendors.count",
+            return_value=5,
         )
         mocker.patch(
             "dynamics.apis.Vendors.get_all",

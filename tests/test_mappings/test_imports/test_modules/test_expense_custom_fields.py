@@ -88,6 +88,10 @@ def test_auto_create_destination_attributes(
             return_value=[],
         )
         mocker.patch(
+            "dynamics.apis.Locations.count",
+            return_value=5,
+        )
+        mocker.patch(
             "dynamics.apis.Locations.get_all",
             return_value=data["get_location_destination_attributes_2"],
         )
@@ -138,6 +142,10 @@ def test_auto_create_destination_attributes(
         mocker.patch(
             "fyle_integrations_platform_connector.apis.ExpenseCustomFields.get_by_id",
             return_value=data["create_new_auto_create_expense_custom_fields_get_by_id"],
+        )
+        mocker.patch(
+            "dynamics.apis.Locations.count",
+            return_value=5,
         )
         mocker.patch(
             "dynamics.apis.Locations.get_all",

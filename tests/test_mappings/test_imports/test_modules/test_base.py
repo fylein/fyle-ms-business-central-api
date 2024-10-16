@@ -27,6 +27,10 @@ def test_sync_destination_attributes(
         "dynamics.apis.Accounts.get_all",
         return_value=destination_attributes_data["get_account_destination_attributes"],
     )
+    mocker.patch(
+        "dynamics.apis.Accounts.count",
+        return_value=5,
+    )
 
     account_count = DestinationAttribute.objects.filter(
         workspace_id=workspace_id, attribute_type="ACCOUNT"
