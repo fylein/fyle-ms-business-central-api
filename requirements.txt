@@ -25,10 +25,10 @@ gevent==23.9.1
 gunicorn==20.1.0
 
 # Platform SDK
-fyle==0.37.0
+fyle==0.37.2
 
 # Business central sdk
-ms-dynamics-business-central-sdk==1.4.2
+ms-dynamics-business-central-sdk==1.5.2
 
 # Reusable Fyle Packages
 fyle-rest-auth==1.7.2

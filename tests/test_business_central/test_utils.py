@@ -1,3 +1,8 @@
+from apps.workspaces.models import Workspace
+from datetime import datetime
+from fyle_accounting_mappings.models import DestinationAttribute, Mapping, CategoryMapping
+
+
 def test_post_attachments(
     db,
     mocker,
@@ -143,3 +148,50 @@ def test_bulk_post_journal_lineitems(
     assert len(response) == 2
     assert response[0]['id'] == 'Journal_Line_Item_Id'
     assert response[1]['id'] == 'Journal_Line_Item_Id_2'
+
+
+def test_skip_sync_attributes(mocker, db, create_business_central_connection):
+
+    today = datetime.today()
+    Workspace.objects.filter(id=1).update(created_at=today)
+    business_central_connection = create_business_central_connection
+
+    Mapping.objects.filter(workspace_id=1).delete()
+    CategoryMapping.objects.filter(workspace_id=1).delete()
+
+    DestinationAttribute.objects.filter(workspace_id=1, attribute_type='VENDOR').delete()
+
+    mocker.patch.object(
+        business_central_connection.connection.vendors,
+        'count',
+        return_value=10001
+    )
+
+    business_central_connection.sync_vendors()
+
+    vendors = DestinationAttribute.objects.filter(attribute_type='VENDOR', workspace_id=1).count()
+    assert vendors == 0
+
+    DestinationAttribute.objects.filter(workspace_id=1, attribute_type='LOCATION').delete()
+    mocker.patch.object(
+        business_central_connection.connection.locations,
+        'count',
+        return_value=1001
+    )
+
+    business_central_connection.sync_locations()
+
+    locations = DestinationAttribute.objects.filter(attribute_type='LOCATION', workspace_id=1).count()
+    assert locations == 0
+
+    DestinationAttribute.objects.filter(workspace_id=1, attribute_type='ACCOUNT').delete()
+    mocker.patch.object(
+        business_central_connection.connection.accounts,
+        'count',
+        return_value=2001
+    )
+
+    business_central_connection.sync_accounts()
+
+    accounts = DestinationAttribute.objects.filter(attribute_type='ACCOUNT', workspace_id=1).count()
+    assert accounts == 0

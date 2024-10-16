@@ -1,6 +1,8 @@
 import base64
 import logging
 from typing import Dict, List
+from datetime import datetime
+from django.utils import timezone
 
 from dynamics.core.client import Dynamics
 from fyle_accounting_mappings.models import DestinationAttribute
@@ -10,6 +12,12 @@ from ms_business_central_api import settings
 
 logger = logging.getLogger(__name__)
 logger.level = logging.INFO
+
+SYNC_UPPER_LIMIT = {
+    'accounts': 2000,
+    'vendors': 10000,
+    'locations': 1000
+}
 
 
 class BusinessCentralConnector:
@@ -57,6 +65,22 @@ class BusinessCentralConnector:
             'active': active,
             'detail': detail
         }
+
+    def is_sync_allowed(self, attribute_type: str, attribute_count: int):
+        """
+        Checks if the sync is allowed
+
+        Returns:
+            bool: True
+        """
+        if attribute_count > SYNC_UPPER_LIMIT[attribute_type]:
+            workspace_created_at = Workspace.objects.get(id=self.workspace_id).created_at
+            if workspace_created_at > timezone.make_aware(datetime(2024, 10, 1), timezone.get_current_timezone()):
+                return False
+            else:
+                return True
+
+        return True
 
     def _sync_data(self, data, attribute_type, display_name, workspace_id, field_names):
         """
@@ -111,6 +135,10 @@ class BusinessCentralConnector:
         """
         Synchronize accounts from MS Dynamics SDK to your application
         """
+        attribute_count = self.connection.accounts.count()
+        if not self.is_sync_allowed(attribute_type = 'accounts', attribute_count=attribute_count):
+            logger.info('Skipping sync of accounts for workspace %s as it has %s counts which is over the limit', self.workspace_id, attribute_count)
+            return
         field_names = ['category', 'subCategory', 'accountType', 'directPosting', 'lastModifiedDateTime']
 
         accounts = self.connection.accounts.get_all()
@@ -121,6 +149,10 @@ class BusinessCentralConnector:
         """
         Synchronize vendors from MS Dynamics SDK to your application
         """
+        attribute_count = self.connection.vendors.count()
+        if not self.is_sync_allowed(attribute_type = 'vendors', attribute_count=attribute_count):
+            logger.info('Skipping sync of vendors for workspace %s as it has %s counts which is over the limit', self.workspace_id, attribute_count)
+            return
         field_names = ['email', 'currencyId', 'currencyCode', 'lastModifiedDateTime']
 
         vendors = self.connection.vendors.get_all()
@@ -141,6 +173,10 @@ class BusinessCentralConnector:
         """
         Synchronize locations from MS Dynamics SDK to your application
         """
+        attribute_count = self.connection.locations.count()
+        if not self.is_sync_allowed(attribute_type = 'locations', attribute_count = attribute_count):
+            logger.info('Skipping sync of locations for workspace %s as it has %s counts which is over the limit', self.workspace_id, attribute_count)
+            return
         field_names = ['code', 'city', 'country']
 
         locations = self.connection.locations.get_all()

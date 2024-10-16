@@ -85,6 +85,10 @@ def test_auto_create_destination_attributes(
             return_value=[],
         )
         mocker.patch(
+            "dynamics.apis.Locations.count",
+            return_value=5,
+        )
+        mocker.patch(
             "dynamics.apis.Locations.get_all",
             return_value=data["get_location_destination_attributes_0"],
         )
