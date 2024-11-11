@@ -64,7 +64,7 @@ def test_run_import_export_with_reimbursable_expense(
         'trigger_export'
     )
 
-    business_central_creds = BusinessCentralCredentials.objects.create(
+    BusinessCentralCredentials.objects.create(
         workspace_id=workspace_id, is_expired=False, refresh_token='bsajkdbasjb'
     )
 
@@ -118,7 +118,7 @@ def test_run_import_export_with_credit_card_expenses(
         'trigger_export'
     )
 
-    business_central_creds = BusinessCentralCredentials.objects.create(
+    BusinessCentralCredentials.objects.create(
         workspace_id=workspace_id, is_expired=False, refresh_token='bsajkdbasjb'
     )
 

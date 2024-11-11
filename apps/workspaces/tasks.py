@@ -39,7 +39,6 @@ def run_import_export(workspace_id: int, export_mode = None):
         if not business_central_creds:
             logger.info('Credentials have expired for workspace_id %s', workspace_id)
             return
-    
 
     export_settings = ExportSetting.objects.get(workspace_id=workspace_id)
     advance_settings = AdvancedSetting.objects.get(workspace_id=workspace_id)
