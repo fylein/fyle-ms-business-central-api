@@ -32,7 +32,7 @@ def run_import_export(workspace_id: int, export_mode = None):
     """
 
     business_central_creds = BusinessCentralCredentials.objects.filter(
-            workspace_id=workspace_id, is_expired=False, refresh_token__isnull=False
+        workspace_id=workspace_id, is_expired=False, refresh_token__isnull=False
     ).first()
 
     if not business_central_creds:
