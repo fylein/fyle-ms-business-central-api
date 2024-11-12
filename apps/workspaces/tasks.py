@@ -30,15 +30,14 @@ def run_import_export(workspace_id: int, export_mode = None):
 
     :param workspace_id: Workspace id
     """
+    
+    business_central_creds = BusinessCentralCredentials.objects.filter(
+        workspace_id=workspace_id, is_expired=False, refresh_token__isnull=False
+    ).first()
 
-    if export_mode == 'AUTOMATIC':
-        business_central_creds = BusinessCentralCredentials.objects.filter(
-            workspace_id=workspace_id, is_expired=False, refresh_token__isnull=False
-        ).first()
-
-        if not business_central_creds:
-            logger.info('Credentials have expired for workspace_id %s', workspace_id)
-            return
+    if not business_central_creds:
+        logger.info('Credentials have expired for workspace_id %s', workspace_id)
+        return
 
     export_settings = ExportSetting.objects.get(workspace_id=workspace_id)
     advance_settings = AdvancedSetting.objects.get(workspace_id=workspace_id)
