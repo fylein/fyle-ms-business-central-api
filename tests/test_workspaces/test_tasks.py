@@ -6,7 +6,7 @@ from apps.workspaces.tasks import (
     async_create_admin_subcriptions
 )
 from apps.accounting_exports.models import AccountingExport, AccountingExportSummary
-from apps.workspaces.models import FyleCredential, AdvancedSetting, ExportSetting
+from apps.workspaces.models import BusinessCentralCredentials, FyleCredential, AdvancedSetting, ExportSetting
 from django_q.models import Schedule
 from django.conf import settings
 from django.urls import reverse
@@ -64,6 +64,10 @@ def test_run_import_export_with_reimbursable_expense(
         'trigger_export'
     )
 
+    BusinessCentralCredentials.objects.create(
+        workspace_id=workspace_id, is_expired=False, refresh_token='bsajkdbasjb'
+    )
+
     run_import_export(workspace_id=workspace_id)
 
     accounting_summary = AccountingExportSummary.objects.get(workspace_id=workspace_id)
@@ -112,6 +116,10 @@ def test_run_import_export_with_credit_card_expenses(
     mocker.patch.object(
         mock_export_journal_entry.return_value,
         'trigger_export'
+    )
+
+    BusinessCentralCredentials.objects.create(
+        workspace_id=workspace_id, is_expired=False, refresh_token='bsajkdbasjb'
     )
 
     run_import_export(workspace_id=workspace_id, export_mode='AUTOMATIC')

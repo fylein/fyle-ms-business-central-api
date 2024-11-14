@@ -104,7 +104,7 @@ def async_auto_map_employees(workspace_id: int):
             destination_attribute_type=destination_type,
         )
     except (BusinessCentralCredentials.DoesNotExist, InvalidTokenError):
-        logger.info('Invalid Token or Sage Intacct Credentials does not exist - %s', workspace_id)
+        logger.info('Invalid Token or Business Central Credentials does not exist - %s', workspace_id)
 
     except FyleInvalidTokenError:
         logger.info('Invalid Token for fyle')

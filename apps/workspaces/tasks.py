@@ -9,7 +9,7 @@ from apps.accounting_exports.models import AccountingExport, AccountingExportSum
 from apps.business_central.exports.journal_entry.tasks import ExportJournalEntry
 from apps.business_central.exports.purchase_invoice.tasks import ExportPurchaseInvoice
 from apps.fyle.queue import queue_import_credit_card_expenses, queue_import_reimbursable_expenses
-from apps.workspaces.models import AdvancedSetting, ExportSetting, FyleCredential
+from apps.workspaces.models import AdvancedSetting, BusinessCentralCredentials, ExportSetting, FyleCredential
 
 from fyle_integrations_platform_connector import PlatformConnector
 
@@ -30,6 +30,14 @@ def run_import_export(workspace_id: int, export_mode = None):
 
     :param workspace_id: Workspace id
     """
+
+    business_central_creds = BusinessCentralCredentials.objects.filter(
+        workspace_id=workspace_id, is_expired=False, refresh_token__isnull=False
+    ).first()
+
+    if not business_central_creds:
+        logger.info('Credentials have expired for workspace_id %s', workspace_id)
+        return
 
     export_settings = ExportSetting.objects.get(workspace_id=workspace_id)
     advance_settings = AdvancedSetting.objects.get(workspace_id=workspace_id)
@@ -58,7 +66,7 @@ def run_import_export(workspace_id: int, export_mode = None):
 
         if accounting_export.status == 'COMPLETE':
             accounting_export_ids = AccountingExport.objects.filter(
-                fund_source='PERSONAL', exported_at__isnull=True).values_list('id', flat=True)
+                fund_source='PERSONAL', exported_at__isnull=True, workspace_id=workspace_id).values_list('id', flat=True)
 
             if len(accounting_export_ids):
                 is_expenses_exported = True
@@ -75,7 +83,7 @@ def run_import_export(workspace_id: int, export_mode = None):
         )
         if accounting_export.status == 'COMPLETE':
             accounting_export_ids = AccountingExport.objects.filter(
-                fund_source='CCC', exported_at__isnull=True).values_list('id', flat=True)
+                fund_source='CCC', exported_at__isnull=True, workspace_id=workspace_id).values_list('id', flat=True)
 
             if len(accounting_export_ids):
                 is_expenses_exported = True
