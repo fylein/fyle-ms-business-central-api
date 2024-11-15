@@ -140,22 +140,22 @@ class BusinessCentralConnector:
         dimensions = self.connection.dimensions.get_all_dimensions()
         for dimension in dimensions:
             dimension_attributes = []
-            dimension_id = dimension["id"]
-            dimension_name = dimension["code"]
+            dimension_id = dimension['id']
+            dimension_name = dimension['code']
             dimension_values = self.connection.dimensions.get_all_dimension_values(
                 dimension_id
             )
 
             for value in dimension_values:
-                detail = {"dimension_id": dimension_id}
+                detail = {'dimension_id': dimension_id, 'code': value['code']}
                 dimension_attributes.append(
                     {
-                        "attribute_type": dimension_name,
-                        "display_name": dimension["displayName"],
-                        "value": value["displayName"],
-                        "destination_id": value["id"],
-                        "detail": detail,
-                        "active": True,
+                        'attribute_type': dimension_name,
+                        'display_name': dimension['displayName'],
+                        'value': value['displayName'],
+                        'destination_id': value['id'],
+                        'detail': detail,
+                        'active': True,
                     }
                 )
 
