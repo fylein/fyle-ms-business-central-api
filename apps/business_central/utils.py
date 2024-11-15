@@ -114,12 +114,56 @@ class BusinessCentralConnector:
                 attribute_type,
                 display_name,
                 value,
-                item['number'] if item.get('number') else item['id'],
+                item['number'] if (item.get('number') and attribute_type != 'BANK_ACCOUNT') else item['id'],
                 active,
                 detail
             ))
         DestinationAttribute.bulk_create_or_update_destination_attributes(
             destination_attributes, attribute_type, workspace_id, True)
+
+    def sync_bank_accounts(self):
+        """
+        sync business central bank accounts
+        """
+
+        bank_accounts = self.connection.bank_accounts.get_all()
+        field_names = ['currencyCode', 'intercompanyEnabled', 'number']
+
+        self._sync_data(bank_accounts, 'BANK_ACCOUNT', 'bank_account', self.workspace_id, field_names)
+        return []
+
+    def sync_dimensions(self):
+        """
+        sync business central dimensions
+        """
+
+        dimensions = self.connection.dimensions.get_all_dimensions()
+        for dimension in dimensions:
+            dimension_attributes = []
+            dimension_id = dimension["id"]
+            dimension_name = dimension["code"]
+            dimension_values = self.connection.dimensions.get_all_dimension_values(
+                dimension_id
+            )
+
+            for value in dimension_values:
+                detail = {"dimension_id": dimension_id}
+                dimension_attributes.append(
+                    {
+                        "attribute_type": dimension_name,
+                        "display_name": dimension["displayName"],
+                        "value": value["displayName"],
+                        "destination_id": value["id"],
+                        "detail": detail,
+                        "active": True,
+                    }
+                )
+
+            DestinationAttribute.bulk_create_or_update_destination_attributes(
+                dimension_attributes, dimension_name, self.workspace_id
+            )
+
+        return []
 
     def sync_companies(self):
         """
