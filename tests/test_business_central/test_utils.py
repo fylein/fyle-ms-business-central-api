@@ -3,6 +3,7 @@ from datetime import datetime
 from fyle_accounting_mappings.models import DestinationAttribute, Mapping, CategoryMapping
 from tests.test_business_central.fixtures import data
 
+
 def test_post_attachments(
     db,
     mocker,
