@@ -16,7 +16,10 @@ logger.level = logging.INFO
 SYNC_UPPER_LIMIT = {
     'accounts': 2000,
     'vendors': 10000,
-    'locations': 1000
+    'locations': 1000,
+    'bank_accounts':2000,
+    'dimension_values': 1000,
+    'dimensions': 1000
 }
 
 
@@ -125,7 +128,10 @@ class BusinessCentralConnector:
         """
         sync business central bank accounts
         """
-
+        attribute_count = self.connection.bank_accounts.count()
+        if not self.is_sync_allowed(attribute_type = 'accounts', attribute_count=attribute_count):
+            logger.info('Skipping sync of bank accounts for workspace %s as it has %s counts which is over the limit', self.workspace_id, attribute_count)
+            return
         bank_accounts = self.connection.bank_accounts.get_all()
         field_names = ['currencyCode', 'intercompanyEnabled', 'number']
 
@@ -137,15 +143,24 @@ class BusinessCentralConnector:
         sync business central dimensions
         """
 
+        attribute_count = self.connection.dimensions.count()
+        if not self.is_sync_allowed(attribute_type = 'dimensions', attribute_count=attribute_count):
+            logger.info('Skipping sync of dimensions for workspace %s as it has %s counts which is over the limit', self.workspace_id, attribute_count)
+            return
         dimensions = self.connection.dimensions.get_all_dimensions()
         for dimension in dimensions:
             dimension_attributes = []
             dimension_id = dimension['id']
             dimension_name = dimension['code']
+
+            attribute_count = self.connection.dimensions.count_dimension_values(dimension_id)
+            if not self.is_sync_allowed(attribute_type = 'dimension_values', attribute_count=attribute_count):
+                logger.info('Skipping sync of dimension_values %s for workspace %s as it has %s counts which is over the limit', dimension_name, self.workspace_id, attribute_count)
+                continue
+
             dimension_values = self.connection.dimensions.get_all_dimension_values(
                 dimension_id
             )
-
             for value in dimension_values:
                 detail = {'dimension_id': dimension_id, 'code': value['code']}
                 dimension_attributes.append(
@@ -180,7 +195,7 @@ class BusinessCentralConnector:
         Synchronize accounts from MS Dynamics SDK to your application
         """
         attribute_count = self.connection.accounts.count()
-        if not self.is_sync_allowed(attribute_type = 'accounts', attribute_count=attribute_count):
+        if not self.is_sync_allowed(attribute_type = 'bank_accounts', attribute_count=attribute_count):
             logger.info('Skipping sync of accounts for workspace %s as it has %s counts which is over the limit', self.workspace_id, attribute_count)
             return
         field_names = ['category', 'subCategory', 'accountType', 'directPosting', 'lastModifiedDateTime']
