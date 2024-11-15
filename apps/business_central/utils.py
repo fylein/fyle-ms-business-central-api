@@ -291,6 +291,19 @@ class BusinessCentralConnector:
         }
         return response
 
+    def post_dimension_lines(self, dimension_line_payloads: List[Dict], exported_id ,export_module_type: str):
+        """
+        Post dimension line for purchase invoice line and Journal line item
+        """
+        for dimension_line_payload in dimension_line_payloads:
+            dimension_line_payload['parentId'] = exported_id
+            if export_module_type == 'JOURNAL_ENTRY':
+                response = self.connection.journal_line_items.post_purchase_invoice_dimensions(purchase_invoice_item_id=dimension_line_payload['parent_id'], data=dimension_line_payload)
+            else:
+                response = self.connection.purchase_invoice_line_items.post_journal_entry_dimensions(journal_line_item_id=dimension_line_payload['parent_id'], data=dimension_line_payload)
+        
+        return response
+
     def post_attachments(
         self, ref_type: str, ref_id: str, attachments: List[Dict]
     ) -> List:

@@ -41,6 +41,7 @@ class ExportPurchaseInvoice(AccountingDataExporter):
         :return: constructed expense_report
         '''
         batch_purchase_invoice_lineitem_payload = []
+        dimension_set_line_payloads = []
 
         purchase_invoice_payload = {
             'vendorNumber': body.vendor_number,
@@ -49,6 +50,7 @@ class ExportPurchaseInvoice(AccountingDataExporter):
         }
 
         for lineitem in lineitems:
+            dimension_set_line_payloads.append(lineitem.dimensions)
             purchase_invoice_lineitem_payload = {
                 "lineType": "Account",
                 'lineObjectNumber': lineitem.accounts_payable_account_id,
@@ -61,20 +63,23 @@ class ExportPurchaseInvoice(AccountingDataExporter):
 
             batch_purchase_invoice_lineitem_payload.append(purchase_invoice_lineitem_payload)
 
-        return purchase_invoice_payload, batch_purchase_invoice_lineitem_payload
+        return purchase_invoice_payload, batch_purchase_invoice_lineitem_payload, dimension_set_line_payloads
 
     def post(self, accounting_export, item, lineitem):
         '''
         Export the Journal Entry to Business Central.
         '''
 
-        purchase_invoice_payload, batch_purchase_invoice_payload = self.__construct_purchase_invoice(item, lineitem)
+        purchase_invoice_payload, batch_purchase_invoice_payload, dimension_set_line_payloads = self.__construct_purchase_invoice(item, lineitem)
         logger.info('WORKSPACE_ID: {0}, ACCOUNTING_EXPORT_ID: {1}, PURCHASE_INVOICE_PAYLOAD: {2}, BATCH_PURCHASE_INVOICE_PAYLOAD: {3}'.format(accounting_export.workspace_id, accounting_export.id, purchase_invoice_payload, batch_purchase_invoice_payload))
         business_central_credentials = BusinessCentralCredentials.get_active_business_central_credentials(accounting_export.workspace_id)
         # Establish a connection to Business Central
         business_central_connection = BusinessCentralConnector(business_central_credentials, accounting_export.workspace_id)
 
         response = business_central_connection.post_purchase_invoice(purchase_invoice_payload, batch_purchase_invoice_payload)
+
+        if dimension_set_line_payloads:
+            dimension_line_responses = business_central_connection.post_dimension_lines(dimension_set_line_payloads, response['bulk_post_response']['response']['body']['id'],'PURCHASE_INVOICE')
 
         expenses = accounting_export.expenses.all()
 

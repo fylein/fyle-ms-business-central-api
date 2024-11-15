@@ -1,8 +1,10 @@
 from django.db import models
+from django.db.models import JSONField
+
 from fyle_accounting_mappings.models import CategoryMapping
 
 from apps.accounting_exports.models import AccountingExport
-from apps.business_central.exports.base_model import BaseExportModel
+from apps.business_central.exports.base_model import BaseExportModel, get_dimension_object
 from apps.fyle.models import Expense
 from apps.workspaces.models import AdvancedSetting, ExportSetting
 from ms_business_central_api.models.fields import (
@@ -83,6 +85,7 @@ class JournalEntryLineItems(BaseExportModel):
     invoice_date = CustomDateTimeField(help_text='date of invoice')
     document_number = TextNotNullField(help_text='document number of the invoice')
     journal_entry = models.ForeignKey(JournalEntry, on_delete=models.PROTECT, help_text='Journal Entry reference', related_name='journal_entry_lineitems')
+    dimensions = JSONField(null=True, help_text='Business Central dimensions')
 
     class Meta:
         db_table = 'journal_entries_lineitems'
@@ -115,6 +118,8 @@ class JournalEntryLineItems(BaseExportModel):
 
             document_number = accounting_export.description['claim_number'] if accounting_export.description and accounting_export.description.get('claim_number') else accounting_export.description['expense_number']
 
+            dimensions = get_dimension_object(accounting_export, lineitem)
+
             journal_entry_lineitems_object, _ = JournalEntryLineItems.objects.update_or_create(
                 journal_entry_id = journal_entry.id,
                 expense_id=lineitem.id,
@@ -127,7 +132,8 @@ class JournalEntryLineItems(BaseExportModel):
                     'comment': comment,
                     'workspace_id': accounting_export.workspace_id,
                     'invoice_date': invoice_date,
-                    'description': lineitem.purpose if lineitem.purpose else None
+                    'description': lineitem.purpose if lineitem.purpose else None,
+                    'dimensions': dimensions
                 }
             )
             journal_entry_lineitems.append(journal_entry_lineitems_object)
