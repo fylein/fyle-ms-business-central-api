@@ -208,6 +208,12 @@ def test_sync_bank_accounts(mocker, db, create_business_central_connection):
         return_value=data['bank_accounts']
     )
 
+    mocker.patch.object(
+        business_central_connection.connection.bank_accounts,
+        'count',
+        return_value=5
+    )
+
     bank_account_count = DestinationAttribute.objects.filter(
         workspace_id=workspace_id, attribute_type="BANK_ACCOUNT"
     ).count()
@@ -235,8 +241,20 @@ def test_sync_dimension(mocker, db, create_business_central_connection):
 
     mocker.patch.object(
         business_central_connection.connection.dimensions,
+        'count',
+        return_value=5
+    )
+
+    mocker.patch.object(
+        business_central_connection.connection.dimensions,
         'get_all_dimension_values',
         return_value=data['dimension_values']
+    )
+
+    mocker.patch.object(
+        business_central_connection.connection.dimensions,
+        'count_dimension_values',
+        return_value=5
     )
 
     area_count = DestinationAttribute.objects.filter(
