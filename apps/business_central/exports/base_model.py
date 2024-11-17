@@ -29,7 +29,7 @@ class BaseExportModel(models.Model):
         workspace.cluster_domain = cluster_domain
         workspace.save()
 
-        expense_link = '{0}/app/main/#/enterprise/view_expense/{1}?org_id={2}'.format(
+        expense_link = '{0}/app/admin/#/enterprise/view_expense/{1}?org_id={2}'.format(
             cluster_domain, lineitem.expense_id, org_id
         )
 
@@ -169,7 +169,7 @@ class BaseExportModel(models.Model):
             elif location_setting.source_field == 'COST_CENTER':
                 source_value = lineitem.cost_center
             else:
-                attribute = ExpenseAttribute.objects.filter(attribute_type=location_setting.source_field).first()
+                attribute = ExpenseAttribute.objects.filter(attribute_type=location_setting.source_field, workspace_id=accounting_export.workspace_id).first()
                 source_value = lineitem.custom_properties.get(attribute.display_name, None)
 
             mapping: Mapping = Mapping.objects.filter(
