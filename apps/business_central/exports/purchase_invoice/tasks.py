@@ -71,15 +71,23 @@ class ExportPurchaseInvoice(AccountingDataExporter):
         '''
 
         purchase_invoice_payload, batch_purchase_invoice_payload, dimension_set_line_payloads = self.__construct_purchase_invoice(item, lineitem)
-        logger.info('WORKSPACE_ID: {0}, ACCOUNTING_EXPORT_ID: {1}, PURCHASE_INVOICE_PAYLOAD: {2}, BATCH_PURCHASE_INVOICE_PAYLOAD: {3}'.format(accounting_export.workspace_id, accounting_export.id, purchase_invoice_payload, batch_purchase_invoice_payload))
+        logger.info('WORKSPACE_ID: {0}, ACCOUNTING_EXPORT_ID: {1}, PURCHASE_INVOICE_PAYLOAD: {2}, BATCH_PURCHASE_INVOICE_PAYLOAD: {3},  DIMENSION_SET_LINE_PAYLOADS: {4}'.format(accounting_export.workspace_id, accounting_export.id, purchase_invoice_payload, batch_purchase_invoice_payload, dimension_set_line_payloads))
         business_central_credentials = BusinessCentralCredentials.get_active_business_central_credentials(accounting_export.workspace_id)
         # Establish a connection to Business Central
         business_central_connection = BusinessCentralConnector(business_central_credentials, accounting_export.workspace_id)
 
         response = business_central_connection.post_purchase_invoice(purchase_invoice_payload, batch_purchase_invoice_payload)
 
-        if dimension_set_line_payloads:
-            dimension_line_responses = business_central_connection.post_dimension_lines(dimension_set_line_payloads, response['bulk_post_response']['response']['body']['id'],'PURCHASE_INVOICE')
+        try:
+            if dimension_set_line_payloads:
+                dimension_line_responses = business_central_connection.post_dimension_lines(
+                    dimension_set_line_payloads, response['bulk_post_response']['response']['body']['id'], 'PURCHASE_INVOICE'
+                )
+                response['dimension_line_responses'] = dimension_line_responses
+        except Exception as exception:
+            lineitem.dimension_error_log = str(exception.response)
+            response['dimension_line_responses'] = str(exception.response)
+            lineitem.save()
 
         expenses = accounting_export.expenses.all()
 
