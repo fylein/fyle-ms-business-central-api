@@ -215,7 +215,8 @@ class BaseExportModel(models.Model):
                         'id': mapping.destination.detail['dimension_id'],
                         'code': mapping.destination.attribute_type,
                         'valueId': mapping.destination.destination_id,
-                        'valueCode': mapping.destination.detail['code']
+                        'valueCode': mapping.destination.detail['code'],
+                        'expense_number': lineitem.expense_number
                     }
 
                     dimensions.append(dimension_data)

@@ -41,7 +41,7 @@ class ExportPurchaseInvoice(AccountingDataExporter):
         :return: constructed expense_report
         '''
         batch_purchase_invoice_lineitem_payload = []
-        dimension_set_line_payloads = []
+        dimensions = []
 
         purchase_invoice_payload = {
             'vendorNumber': body.vendor_number,
@@ -50,7 +50,7 @@ class ExportPurchaseInvoice(AccountingDataExporter):
         }
 
         for lineitem in lineitems:
-            dimension_set_line_payloads.append(lineitem.dimensions)
+            dimensions.append(lineitem.dimensions)
             purchase_invoice_lineitem_payload = {
                 "lineType": "Account",
                 'lineObjectNumber': lineitem.accounts_payable_account_id,
@@ -63,14 +63,15 @@ class ExportPurchaseInvoice(AccountingDataExporter):
 
             batch_purchase_invoice_lineitem_payload.append(purchase_invoice_lineitem_payload)
 
-        return purchase_invoice_payload, batch_purchase_invoice_lineitem_payload, dimension_set_line_payloads
+        return purchase_invoice_payload, batch_purchase_invoice_lineitem_payload, dimensions
+
 
     def post(self, accounting_export, item, lineitem):
         '''
         Export the Journal Entry to Business Central.
         '''
 
-        purchase_invoice_payload, batch_purchase_invoice_payload, dimension_set_line_payloads = self.__construct_purchase_invoice(item, lineitem)
+        purchase_invoice_payload, batch_purchase_invoice_payload, dimensions = self.__construct_purchase_invoice(item, lineitem)
         logger.info('WORKSPACE_ID: {0}, ACCOUNTING_EXPORT_ID: {1}, PURCHASE_INVOICE_PAYLOAD: {2}, BATCH_PURCHASE_INVOICE_PAYLOAD: {3},  DIMENSION_SET_LINE_PAYLOADS: {4}'.format(accounting_export.workspace_id, accounting_export.id, purchase_invoice_payload, batch_purchase_invoice_payload, dimension_set_line_payloads))
         business_central_credentials = BusinessCentralCredentials.get_active_business_central_credentials(accounting_export.workspace_id)
         # Establish a connection to Business Central
@@ -79,9 +80,10 @@ class ExportPurchaseInvoice(AccountingDataExporter):
         response = business_central_connection.post_purchase_invoice(purchase_invoice_payload, batch_purchase_invoice_payload)
 
         try:
-            if dimension_set_line_payloads:
+            if dimensions:
+                dimension_set_line_payloads = self.__construct_dimension_set_line_payload(dimensions, response)
                 dimension_line_responses = business_central_connection.post_dimension_lines(
-                    dimension_set_line_payloads, response['bulk_post_response']['response']['body']['id'], 'PURCHASE_INVOICE'
+                    dimension_set_line_payloads, 'PURCHASE_INVOICE'
                 )
                 response['dimension_line_responses'] = dimension_line_responses
         except Exception as exception:

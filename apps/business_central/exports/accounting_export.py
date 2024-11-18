@@ -71,3 +71,47 @@ class AccountingDataExporter:
             accounting_export.status = 'COMPLETE'
             accounting_export.save()
             resolve_errors_for_exported_accounting_export(accounting_export)
+
+    def __construct_dimension_set_line_payload(self, dimensions: list, exported_response: dict, exported_module: str):
+
+        """
+        construct payload for setting dimension for JE and Purchase Invoice
+        """
+
+        dimension_payload = []
+
+        # for journal entry we will only support grouping by expense
+        # so exported_response will always have 2 length and dimensions will have 1 length.
+        if exported_module == 'JOURNAL_ENTRY':
+            dimension = dimensions[0]
+            for i in range(2):
+                parent_id = exported_response[i]['body']['id']
+                dimension_payload.append({
+                    "id": dimension['id'],
+                    "code": dimension['code'],
+                    "parentId": parent_id,
+                    "valueId": dimension['valueId'],
+                    "valueCode": dimension['valueCode']
+                })
+            return dimension_payload
+
+        document_mapping = {
+            response['body']['documentNumber']: response['body']['id']
+            for response in exported_response
+            if response.get('body') and 'documentNumber' in response['body'] and 'id' in response['body']
+        }
+
+        for dimension in dimensions:
+            expense_number = dimension.get('expense_number')
+            parent_id = document_mapping.get(expense_number)
+
+            if parent_id:
+                dimension_payload.append({
+                    "id": dimension['id'],
+                    "code": dimension['code'],
+                    "parentId": parent_id,
+                    "valueId": dimension['valueId'],
+                    "valueCode": dimension['valueCode']
+                })
+
+        return dimension_payload
