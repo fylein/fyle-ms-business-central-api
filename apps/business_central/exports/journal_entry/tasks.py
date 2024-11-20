@@ -58,6 +58,9 @@ class ExportJournalEntry(AccountingDataExporter):
         batch_journal_entry_payload.append(journal_entry_payload)
 
         for lineitem in lineitems:
+            for dimension in lineitem.dimensions:
+                dimension['exported_module_id'] = lineitem.id
+
             dimensions.extend(lineitem.dimensions)
             journal_entry_lineitem_payload = {
                 'accountType': lineitem.account_type,
@@ -89,20 +92,17 @@ class ExportJournalEntry(AccountingDataExporter):
         # Post the journal entry to Business Central
         response = business_central_connection.bulk_post_journal_lineitems(batch_journal_entry_payload, accounting_export)
 
-        try:
-            if dimensions:
-                dimension_set_line_payloads = self.construct_dimension_set_line_payload(dimensions, response['responses'])
-                logger.info('WORKSPACE_ID: {0}, ACCOUNTING_EXPORT_ID: {1}, DIMENSION_SET_LINE_PAYLOADS: {2}'.format(accounting_export.workspace_id, accounting_export.id, dimension_set_line_payloads))
-                dimension_line_responses = (
-                    business_central_connection.post_dimension_lines(
-                        dimension_set_line_payloads, "JOURNAL_ENTRY"
-                    )
+
+        if dimensions:
+            dimension_set_line_payloads = self.construct_dimension_set_line_payload(dimensions, response['responses'])
+            logger.info('WORKSPACE_ID: {0}, ACCOUNTING_EXPORT_ID: {1}, DIMENSION_SET_LINE_PAYLOADS: {2}'.format(accounting_export.workspace_id, accounting_export.id, dimension_set_line_payloads))
+            dimension_line_responses = (
+                business_central_connection.post_dimension_lines(
+                    dimension_set_line_payloads, "JOURNAL_ENTRY"
                 )
-                response["dimension_line_responses"] = dimension_line_responses
-        except Exception as exception:
-            lineitem.dimension_error_log = str(exception.response)
-            response['dimension_line_responses'] = str(exception.response)
-            lineitem.save()
+            )
+            response["dimension_line_responses"] = dimension_line_responses
+        
 
         expenses = accounting_export.expenses.all()
 
@@ -132,14 +132,16 @@ class ExportJournalEntry(AccountingDataExporter):
                 "code": dimension['code'],
                 "parentId": exported_response[0]['body']['id'],
                 "valueId": dimension['valueId'],
-                "valueCode": dimension['valueCode']
+                "valueCode": dimension['valueCode'],
+                "exported_module_id": dimension['exported_module_id']
             },
             {
                 "id": dimension['id'],
                 "code": dimension['code'],
                 "parentId": exported_response[1]['body']['id'],
                 "valueId": dimension['valueId'],
-                "valueCode": dimension['valueCode']
+                "valueCode": dimension['valueCode'],
+                "exported_module_id": dimension['exported_module_id']
             }]
 
         return dimension_payload
