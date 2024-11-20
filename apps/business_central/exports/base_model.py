@@ -210,6 +210,7 @@ class BaseExportModel(models.Model):
                     source__value=source_value,
                     workspace_id=accounting_export.workspace_id
                 ).first()
+
                 if mapping:
                     dimension_data = {
                         'id': mapping.destination.detail['dimension_id'],
@@ -218,7 +219,6 @@ class BaseExportModel(models.Model):
                         'valueCode': mapping.destination.detail['code'],
                         'expense_number': lineitem.expense_number
                     }
-
                     dimensions.append(dimension_data)
 
         return dimensions

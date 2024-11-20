@@ -58,7 +58,7 @@ class ExportJournalEntry(AccountingDataExporter):
         batch_journal_entry_payload.append(journal_entry_payload)
 
         for lineitem in lineitems:
-            dimensions.append(lineitem.dimensions)
+            dimensions.extend(lineitem.dimensions)
             journal_entry_lineitem_payload = {
                 'accountType': lineitem.account_type,
                 'accountNumber': lineitem.account_id,
@@ -91,7 +91,8 @@ class ExportJournalEntry(AccountingDataExporter):
 
         try:
             if dimensions:
-                dimension_set_line_payloads = self.__construct_dimension_set_line_payload(dimensions, response)
+                dimension_set_line_payloads = self.construct_dimension_set_line_payload(dimensions, response['responses'])
+                logger.info('WORKSPACE_ID: {0}, ACCOUNTING_EXPORT_ID: {1}, DIMENSION_SET_LINE_PAYLOADS: {2}'.format(accounting_export.workspace_id, accounting_export.id, dimension_set_line_payloads))
                 dimension_line_responses = (
                     business_central_connection.post_dimension_lines(
                         dimension_set_line_payloads, "JOURNAL_ENTRY"
@@ -115,6 +116,33 @@ class ExportJournalEntry(AccountingDataExporter):
                 accounting_export)
 
         return response
+    
+    def construct_dimension_set_line_payload(self, dimensions: list, exported_response: dict):
+        """
+        construct payload for setting dimension for Purchase Invoice
+        """
+
+        dimension = dimensions[0]
+
+        #we are only supporting grouping by expense for JE, so only two payloads will always exist
+        # one for each line
+        dimension_payload = [
+            {
+                "id": dimension['id'],
+                "code": dimension['code'],
+                "parentId": exported_response[0]['body']['id'],
+                "valueId": dimension['valueId'],
+                "valueCode": dimension['valueCode']
+            },
+            {
+                "id": dimension['id'],
+                "code": dimension['code'],
+                "parentId": exported_response[1]['body']['id'],
+                "valueId": dimension['valueId'],
+                "valueCode": dimension['valueCode']
+            }]
+
+        return dimension_payload
 
 
 @handle_business_central_exceptions()
