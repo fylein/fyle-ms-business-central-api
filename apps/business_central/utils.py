@@ -1,7 +1,6 @@
 import base64
 import logging
 from typing import Dict, List
-from collections import defaultdict
 
 from datetime import datetime
 from django.utils import timezone
@@ -313,7 +312,7 @@ class BusinessCentralConnector:
 
         for dimension_line_payload in dimension_line_payloads:
             exported_module_id = dimension_line_payload.pop('exported_module_id')
-        
+
             try:
                 if export_module_type == 'JOURNAL_ENTRY':
                     response = self.connection.journal_line_items.post_journal_entry_dimensions(
@@ -337,7 +336,6 @@ class BusinessCentralConnector:
                 lineitem.save()
 
         return exception_response
-
 
     def post_attachments(
         self, ref_type: str, ref_id: str, attachments: List[Dict]

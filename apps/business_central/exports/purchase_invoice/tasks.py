@@ -71,12 +71,10 @@ class ExportPurchaseInvoice(AccountingDataExporter):
 
         return purchase_invoice_payload, batch_purchase_invoice_lineitem_payload, dimensions
 
-
     def post(self, accounting_export, item, lineitem):
         '''
         Export the Journal Entry to Business Central.
         '''
-
         purchase_invoice_payload, batch_purchase_invoice_payload, dimensions = self.__construct_purchase_invoice(item, lineitem)
         logger.info('WORKSPACE_ID: {0}, ACCOUNTING_EXPORT_ID: {1}, PURCHASE_INVOICE_PAYLOAD: {2}, BATCH_PURCHASE_INVOICE_PAYLOAD: {3}'.format(accounting_export.workspace_id, accounting_export.id, purchase_invoice_payload, batch_purchase_invoice_payload))
         business_central_credentials = BusinessCentralCredentials.get_active_business_central_credentials(accounting_export.workspace_id)
@@ -119,7 +117,6 @@ class ExportPurchaseInvoice(AccountingDataExporter):
             for response in exported_response
             if response.get('body') and 'description2' in response['body'] and 'id' in response['body']
         }
-
 
         for dimension in dimensions:
             expense_number = dimension.get('expense_number')

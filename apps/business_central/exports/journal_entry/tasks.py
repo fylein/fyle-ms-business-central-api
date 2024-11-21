@@ -101,10 +101,8 @@ class ExportJournalEntry(AccountingDataExporter):
                 )
             )
             response["dimension_line_responses"] = dimension_line_responses
-        
 
         expenses = accounting_export.expenses.all()
-
         # Load attachments to Business Central
         for i in range(1, len(response["responses"])):
             load_attachments(
@@ -115,12 +113,12 @@ class ExportJournalEntry(AccountingDataExporter):
                 accounting_export)
 
         return response
-    
+
     def construct_dimension_set_line_payload(self, dimensions: list, exported_response: dict):
         """
         construct payload for setting dimension for Journal Entry
         """
-        
+
         dimension_payload = []
 
         for response in exported_response:
