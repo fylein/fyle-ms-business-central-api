@@ -85,8 +85,9 @@ class JournalEntryLineItems(BaseExportModel):
     invoice_date = CustomDateTimeField(help_text='date of invoice')
     document_number = TextNotNullField(help_text='document number of the invoice')
     journal_entry = models.ForeignKey(JournalEntry, on_delete=models.PROTECT, help_text='Journal Entry reference', related_name='journal_entry_lineitems')
-    dimensions = JSONField(null=True, help_text='Business Central dimensions')
+    dimensions = JSONField(default=list, help_text='Business Central dimensions')
     dimension_error_log = JSONField(null=True, help_text='dimension set response log')
+    dimension_success_log = JSONField(null=True, help_text='dimension set success response log')
 
     class Meta:
         db_table = 'journal_entries_lineitems'
