@@ -43,7 +43,6 @@ def test_update_non_exported_expenses(db, create_temp_workspace, mocker, api_cli
     accounting_export.save()
 
     assert expense_created.category == 'Old Category'
-    print(payload['data'])
 
     update_non_exported_expenses(payload['data'])
 
