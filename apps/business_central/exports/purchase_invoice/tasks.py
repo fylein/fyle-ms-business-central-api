@@ -41,6 +41,7 @@ class ExportPurchaseInvoice(AccountingDataExporter):
         :return: constructed expense_report
         '''
         batch_purchase_invoice_lineitem_payload = []
+        dimensions = []
 
         purchase_invoice_payload = {
             'vendorNumber': body.vendor_number,
@@ -49,32 +50,44 @@ class ExportPurchaseInvoice(AccountingDataExporter):
         }
 
         for lineitem in lineitems:
+            for dimension in lineitem.dimensions:
+                dimension['exported_module_id'] = lineitem.id
+
+            dimensions.extend(lineitem.dimensions)
             purchase_invoice_lineitem_payload = {
                 "lineType": "Account",
                 'lineObjectNumber': lineitem.accounts_payable_account_id,
                 'unitCost': lineitem.amount,
                 'quantity': 1,
-                'description': lineitem.description if lineitem.description else ''
+                'description': lineitem.description if lineitem.description else '',
+                'description2': lineitem.expense.expense_number
             }
             if lineitem.location_id:
                 purchase_invoice_lineitem_payload['locationId'] = lineitem.location_id
 
             batch_purchase_invoice_lineitem_payload.append(purchase_invoice_lineitem_payload)
 
-        return purchase_invoice_payload, batch_purchase_invoice_lineitem_payload
+        return purchase_invoice_payload, batch_purchase_invoice_lineitem_payload, dimensions
 
     def post(self, accounting_export, item, lineitem):
         '''
         Export the Journal Entry to Business Central.
         '''
-
-        purchase_invoice_payload, batch_purchase_invoice_payload = self.__construct_purchase_invoice(item, lineitem)
+        purchase_invoice_payload, batch_purchase_invoice_payload, dimensions = self.__construct_purchase_invoice(item, lineitem)
         logger.info('WORKSPACE_ID: {0}, ACCOUNTING_EXPORT_ID: {1}, PURCHASE_INVOICE_PAYLOAD: {2}, BATCH_PURCHASE_INVOICE_PAYLOAD: {3}'.format(accounting_export.workspace_id, accounting_export.id, purchase_invoice_payload, batch_purchase_invoice_payload))
         business_central_credentials = BusinessCentralCredentials.get_active_business_central_credentials(accounting_export.workspace_id)
         # Establish a connection to Business Central
         business_central_connection = BusinessCentralConnector(business_central_credentials, accounting_export.workspace_id)
 
         response = business_central_connection.post_purchase_invoice(purchase_invoice_payload, batch_purchase_invoice_payload)
+
+        if dimensions:
+            dimension_set_line_payloads = self.construct_dimension_set_line_payload(dimensions, response['bulk_post_response']['responses'])
+            logger.info('WORKSPACE_ID: {0}, ACCOUNTING_EXPORT_ID: {1}, DIMENSION_SET_LINE_PAYLOADS: {2}'.format(accounting_export.workspace_id, accounting_export.id, dimension_set_line_payloads))
+            dimension_line_responses = business_central_connection.post_dimension_lines(
+                dimension_set_line_payloads, 'PURCHASE_INVOICE', item.id
+            )
+            response['dimension_line_responses'] = dimension_line_responses
 
         expenses = accounting_export.expenses.all()
 
@@ -88,6 +101,36 @@ class ExportPurchaseInvoice(AccountingDataExporter):
                 accounting_export)
 
         return response
+
+    def construct_dimension_set_line_payload(self, dimensions: list, exported_response: dict):
+
+        """
+        construct payload for setting dimension for Purchase Invoice
+        """
+
+        dimension_payload = []
+
+        document_mapping = {
+            response['body']['description2']: response['body']['id']
+            for response in exported_response
+            if response.get('body') and 'description2' in response['body'] and 'id' in response['body']
+        }
+
+        for dimension in dimensions:
+            expense_number = dimension.get('expense_number')
+            parent_id = document_mapping.get(expense_number)
+
+            if parent_id:
+                dimension_payload.append({
+                    "id": dimension['id'],
+                    "code": dimension['code'],
+                    "parentId": parent_id,
+                    "valueId": dimension['valueId'],
+                    "valueCode": dimension['valueCode'],
+                    "exported_module_id": dimension['exported_module_id']
+                })
+
+        return dimension_payload
 
 
 @handle_business_central_exceptions()

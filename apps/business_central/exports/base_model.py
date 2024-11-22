@@ -182,3 +182,43 @@ class BaseExportModel(models.Model):
             if mapping:
                 location_id = mapping.destination.destination_id
         return location_id
+
+    def get_dimension_object(accounting_export: AccountingExport, lineitem: Expense):
+        mapping_settings = MappingSetting.objects.filter(workspace_id=accounting_export.workspace_id).all()
+
+        dimensions = []
+        default_expense_attributes = ['CATEGORY', 'EMPLOYEE']
+        default_destination_attributes = ['COMPANIES', 'ACCOUNTS', 'VENDORS', 'EMPLOYEES', 'LOCATIONS', 'BANK_ACCOUNTS']
+
+        for setting in mapping_settings:
+            if setting.source_field not in default_expense_attributes and \
+                    setting.destination_field not in default_destination_attributes:
+                if setting.source_field == 'PROJECT':
+                    source_value = lineitem.project
+                elif setting.source_field == 'COST_CENTER':
+                    source_value = lineitem.cost_center
+                else:
+                    attribute = ExpenseAttribute.objects.filter(
+                        attribute_type=setting.source_field,
+                        workspace_id=accounting_export.workspace_id
+                    ).first()
+                    source_value = lineitem.custom_properties.get(attribute.display_name, None)
+
+                mapping: Mapping = Mapping.objects.filter(
+                    source_type=setting.source_field,
+                    destination_type=setting.destination_field,
+                    source__value=source_value,
+                    workspace_id=accounting_export.workspace_id
+                ).first()
+
+                if mapping:
+                    dimension_data = {
+                        'id': mapping.destination.detail['dimension_id'],
+                        'code': mapping.destination.attribute_type,
+                        'valueId': mapping.destination.destination_id,
+                        'valueCode': mapping.destination.detail['code'],
+                        'expense_number': lineitem.expense_number
+                    }
+                    dimensions.append(dimension_data)
+
+        return dimensions

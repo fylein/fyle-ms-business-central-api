@@ -6,6 +6,11 @@ from apps.accounting_exports.models import AccountingExport
 from apps.business_central.exports.journal_entry.tasks import create_journal_entry
 from apps.business_central.exports.purchase_invoice.tasks import create_purchase_invoice
 
+import logging
+
+logger = logging.getLogger(__name__)
+logger.level = logging.INFO
+
 
 def test_trigger_export_journal_entry(db, mocker):
     '''
@@ -36,8 +41,9 @@ def test_construct_journal_entry(
     lineitems = JournalEntryLineItems.objects.filter(workspace_id=workspace_id)
 
     export_journal_entry = ExportJournalEntry()
-    payload_list = export_journal_entry._ExportJournalEntry__construct_journal_entry(journal_entry, lineitems)
+    payload_list, _ = export_journal_entry._ExportJournalEntry__construct_journal_entry(journal_entry, lineitems)
 
+    logger.info(payload_list)
     assert len(payload_list) > 0
     payload = payload_list[0]
 
@@ -159,7 +165,7 @@ def test_construct_purchase_invoice(
     lineitems = PurchaseInvoiceLineitems.objects.filter(workspace_id=workspace_id)
 
     export_purchase_invoice = ExportPurchaseInvoice()
-    payload, batch_payload = export_purchase_invoice.\
+    payload, batch_payload, _ = export_purchase_invoice.\
         _ExportPurchaseInvoice__construct_purchase_invoice(
             purchase_invoice,
             lineitems

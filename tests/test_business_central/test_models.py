@@ -13,7 +13,8 @@ def test_create_or_update_journal_entry_1(
     create_export_settings,
     add_advanced_settings,
     create_accounting_export_expenses,
-    create_employee_mapping_with_employee
+    create_employee_mapping_with_employee,
+    add_fyle_credentials
 ):
     workspace_id = 1
     export_settings = ExportSetting.objects.get(workspace_id=workspace_id)
@@ -39,7 +40,8 @@ def test_create_or_update_journal_entry_2(
     create_export_settings,
     add_advanced_settings,
     create_accounting_export_expenses,
-    create_employee_mapping_with_vendor
+    create_employee_mapping_with_vendor,
+    add_fyle_credentials
 ):
     workspace_id = 1
     export_settings = ExportSetting.objects.get(workspace_id=workspace_id)
@@ -75,7 +77,8 @@ def test_create_or_update_journal_entry_3(
     create_export_settings,
     add_advanced_settings,
     create_accounting_export_expenses,
-    create_employee_mapping_with_vendor
+    create_employee_mapping_with_vendor,
+    add_fyle_credentials
 ):
     workspace_id = 1
     export_settings = ExportSetting.objects.get(workspace_id=workspace_id)
@@ -324,7 +327,8 @@ def test_accounting_data_exporter_4(
 def test_base_model_get_invoice_date(
     db,
     create_temp_workspace,
-    create_journal_entry
+    create_journal_entry,
+    add_fyle_credentials
 ):
     workspace_id = 1
 
