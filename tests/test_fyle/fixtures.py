@@ -102,6 +102,7 @@ fixtures = {
         'expense_rule_data': None,
         'expense_rule_id': None,
         'extracted_data': None,
+        'is_posted_at_null': True,
         'file_ids': [],
         'files': [],
         'foreign_amount': None,

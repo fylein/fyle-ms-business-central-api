@@ -1,13 +1,12 @@
-from .fixtures import fixtures as data
 from django.urls import reverse
-from rest_framework.exceptions import ValidationError
 from rest_framework import status
-from apps.fyle.tasks import (
-    update_non_exported_expenses
-)
-from apps.fyle.models import Expense
-from apps.workspaces.models import Workspace
+from rest_framework.exceptions import ValidationError
+
 from apps.accounting_exports.models import AccountingExport
+from apps.fyle.models import Expense
+from apps.fyle.tasks import update_non_exported_expenses
+from apps.workspaces.models import Workspace
+from tests.test_fyle.fixtures import fixtures as data
 
 
 def test_update_non_exported_expenses(db, create_temp_workspace, mocker, api_client):
@@ -44,6 +43,7 @@ def test_update_non_exported_expenses(db, create_temp_workspace, mocker, api_cli
     accounting_export.save()
 
     assert expense_created.category == 'Old Category'
+    print(payload['data'])
 
     update_non_exported_expenses(payload['data'])
 
