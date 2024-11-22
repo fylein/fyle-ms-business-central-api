@@ -11,6 +11,8 @@ from apps.business_central.exports.journal_entry.queues import check_accounting_
 from apps.business_central.utils import BusinessCentralConnector
 from apps.workspaces.models import BusinessCentralCredentials
 
+from fyle_accounting_mappings.models import DestinationAttribute
+
 logger = logging.getLogger(__name__)
 logger.level = logging.INFO
 
@@ -42,6 +44,12 @@ class ExportJournalEntry(AccountingDataExporter):
         batch_journal_entry_payload = []
         dimensions = []
 
+        account_attribute_type = DestinationAttribute.objects.filter(workspace_id=body.workspace_id, destination_id=body.accounts_payable_account_id).first()
+
+        balance_account_type = 'G/L Account'
+        if account_attribute_type and account_attribute_type.attribute_type  == 'BANK_ACCOUNT':
+            balance_account_type = 'Bank Account'
+
         journal_entry_payload = {
             'accountType': body.account_type,
             'accountNumber': body.account_id,
@@ -50,7 +58,7 @@ class ExportJournalEntry(AccountingDataExporter):
             'amount': body.amount,
             'comment': body.comment,
             'description': body.description,
-            'balanceAccountType': 'G/L Account',
+            'balanceAccountType': balance_account_type,
             'balancingAccountNumber': body.accounts_payable_account_id
 
         }
@@ -70,7 +78,7 @@ class ExportJournalEntry(AccountingDataExporter):
                 'amount': lineitem.amount,
                 'comment': lineitem.comment,
                 'description': lineitem.description if lineitem.description else '',
-                'balanceAccountType': 'G/L Account',
+                'balanceAccountType': balance_account_type,
                 'balancingAccountNumber': lineitem.accounts_payable_account_id
             }
 
