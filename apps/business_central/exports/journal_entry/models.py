@@ -47,8 +47,6 @@ class JournalEntry(BaseExportModel):
 
         advance_setting = AdvancedSetting.objects.get(workspace_id=accounting_export.workspace_id)
 
-        print(accounting_export.__dict__)
-
         document_number = expense.expense_number
 
         comment = self.get_expense_comment(accounting_export.workspace_id, expense, expense.category, advance_setting)

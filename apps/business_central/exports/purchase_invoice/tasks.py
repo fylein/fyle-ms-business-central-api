@@ -53,8 +53,6 @@ class ExportPurchaseInvoice(AccountingDataExporter):
             for dimension in lineitem.dimensions:
                 dimension['exported_module_id'] = lineitem.id
 
-            print('lineitem.dimensions', lineitem.dimensions)
-
             dimensions.extend(lineitem.dimensions)
             purchase_invoice_lineitem_payload = {
                 "lineType": "Account",
