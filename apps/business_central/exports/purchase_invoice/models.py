@@ -1,6 +1,8 @@
 from typing import List
 
 from django.db import models
+from django.db.models import JSONField
+
 from fyle_accounting_mappings.models import CategoryMapping
 
 from apps.accounting_exports.models import AccountingExport
@@ -61,6 +63,9 @@ class PurchaseInvoiceLineitems(BaseExportModel):
     amount = FloatNullField(help_text='Amount of the invoice')
     description = TextNotNullField(help_text='description for the invoice')
     location_id = StringNullField(help_text='location id of the invoice')
+    dimensions = JSONField(default=list, help_text='Business Central dimensions')
+    dimension_error_log = JSONField(null=True, help_text='dimension set response log')
+    dimension_success_log = JSONField(null=True, help_text='dimension set success response log')
 
     class Meta:
         db_table = 'purchase_invoice_lineitems'
@@ -88,6 +93,7 @@ class PurchaseInvoiceLineitems(BaseExportModel):
 
             description = self.get_expense_purpose(lineitem, lineitem.category, advance_setting)
             location_id = self.get_location_id(accounting_export, lineitem)
+            dimensions = self.get_dimension_object(accounting_export, lineitem)
 
             purchase_invoice_lineitem_object, _ = PurchaseInvoiceLineitems.objects.update_or_create(
                 purchase_invoice_id=purchase_invoice.id,
@@ -97,7 +103,8 @@ class PurchaseInvoiceLineitems(BaseExportModel):
                     'accounts_payable_account_id': account.destination_account.destination_id if account else None,
                     'description': description,
                     'workspace_id': accounting_export.workspace_id,
-                    'location_id': location_id
+                    'location_id': location_id,
+                    'dimensions': dimensions
                 }
             )
             purchase_invoice_lineitem_objects.append(purchase_invoice_lineitem_object)

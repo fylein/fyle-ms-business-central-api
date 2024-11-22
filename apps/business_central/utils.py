@@ -1,12 +1,15 @@
 import base64
 import logging
 from typing import Dict, List
+
 from datetime import datetime
 from django.utils import timezone
 
 from dynamics.core.client import Dynamics
 from fyle_accounting_mappings.models import DestinationAttribute
 
+from apps.business_central.exports.journal_entry.models import JournalEntryLineItems
+from apps.business_central.exports.purchase_invoice.models import PurchaseInvoiceLineitems
 from apps.workspaces.models import BusinessCentralCredentials, ExportSetting, Workspace
 from ms_business_central_api import settings
 
@@ -290,6 +293,49 @@ class BusinessCentralConnector:
             "bulk_post_response": bulk_post_response
         }
         return response
+
+    def post_dimension_lines(self, dimension_line_payloads: List[Dict], export_module_type: str, top_level_id: int) -> List[Dict]:
+        """
+        Post dimension lines for purchase invoice line and journal line items.
+
+        :param dimension_line_payloads: List of payload dictionaries for dimension lines.
+        :param export_module_type: Type of export module ('JOURNAL_ENTRY' and 'PURCHASE_INVOICE').
+        :return: List of exception responses, if any.
+        """
+        exception_response = []
+
+        def get_lineitem_by_id(module_type: str, item_id: int):
+            if module_type == 'JOURNAL_ENTRY':
+                return JournalEntryLineItems.objects.get(id=item_id, journal_entry_id=top_level_id)
+            else:
+                return PurchaseInvoiceLineitems.objects.get(id=item_id, purchase_invoice_id=top_level_id)
+
+        for dimension_line_payload in dimension_line_payloads:
+            exported_module_id = dimension_line_payload.pop('exported_module_id')
+
+            try:
+                if export_module_type == 'JOURNAL_ENTRY':
+                    response = self.connection.journal_line_items.post_journal_entry_dimensions(
+                        journal_line_item_id=dimension_line_payload['parentId'],
+                        data=dimension_line_payload
+                    )
+                else:
+                    response = self.connection.purchase_invoice_line_items.post_purchase_invoice_dimensions(
+                        purchase_invoice_item_id=dimension_line_payload['parentId'],
+                        data=dimension_line_payload
+                    )
+
+                lineitem = get_lineitem_by_id(export_module_type, exported_module_id)
+                lineitem.dimension_success_log = str(response)
+                lineitem.save()
+
+            except Exception as exception:
+                lineitem = get_lineitem_by_id(export_module_type, exported_module_id)
+                error_message = str(getattr(exception, 'response', exception))
+                lineitem.dimension_error_log = error_message
+                lineitem.save()
+
+        return exception_response
 
     def post_attachments(
         self, ref_type: str, ref_id: str, attachments: List[Dict]
