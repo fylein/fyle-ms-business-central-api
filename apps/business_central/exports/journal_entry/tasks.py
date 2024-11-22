@@ -47,7 +47,7 @@ class ExportJournalEntry(AccountingDataExporter):
         account_attribute_type = DestinationAttribute.objects.filter(workspace_id=body.workspace_id, destination_id=body.accounts_payable_account_id).first()
 
         balance_account_type = 'G/L Account'
-        if account_attribute_type and account_attribute_type.attribute_type  == 'BANK_ACCOUNT':
+        if account_attribute_type and account_attribute_type.attribute_type == 'BANK_ACCOUNT':
             balance_account_type = 'Bank Account'
 
         journal_entry_payload = {
