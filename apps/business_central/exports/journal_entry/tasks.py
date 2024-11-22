@@ -100,20 +100,17 @@ class ExportJournalEntry(AccountingDataExporter):
         # Post the journal entry to Business Central
         response = business_central_connection.bulk_post_journal_lineitems(batch_journal_entry_payload, accounting_export)
 
-
         if dimensions:
             dimension_set_line_payloads = self.construct_dimension_set_line_payload(dimensions, response['responses'])
             logger.info('WORKSPACE_ID: {0}, ACCOUNTING_EXPORT_ID: {1}, DIMENSION_SET_LINE_PAYLOADS: {2}'.format(accounting_export.workspace_id, accounting_export.id, dimension_set_line_payloads))
             dimension_line_responses = (
                 business_central_connection.post_dimension_lines(
-                    dimension_set_line_payloads, "JOURNAL_ENTRY"
+                    dimension_set_line_payloads, "JOURNAL_ENTRY", item.id
                 )
             )
             response["dimension_line_responses"] = dimension_line_responses
-        
 
         expenses = accounting_export.expenses.all()
-
         # Load attachments to Business Central
         for i in range(1, len(response["responses"])):
             load_attachments(
@@ -124,33 +121,21 @@ class ExportJournalEntry(AccountingDataExporter):
                 accounting_export)
 
         return response
-    
+
     def construct_dimension_set_line_payload(self, dimensions: list, exported_response: dict):
         """
-        construct payload for setting dimension for Purchase Invoice
+        construct payload for setting dimension for Journal Entry
         """
 
-        dimension = dimensions[0]
+        dimension_payload = []
 
-        #we are only supporting grouping by expense for JE, so only two payloads will always exist
-        # one for each line
-        dimension_payload = [
-            {
-                "id": dimension['id'],
-                "code": dimension['code'],
-                "parentId": exported_response[0]['body']['id'],
-                "valueId": dimension['valueId'],
-                "valueCode": dimension['valueCode'],
-                "exported_module_id": dimension['exported_module_id']
-            },
-            {
-                "id": dimension['id'],
-                "code": dimension['code'],
-                "parentId": exported_response[1]['body']['id'],
-                "valueId": dimension['valueId'],
-                "valueCode": dimension['valueCode'],
-                "exported_module_id": dimension['exported_module_id']
-            }]
+        for response in exported_response:
+            parent_id = response['body']['id']
+            for dimension in dimensions:
+                dimension_copy = dimension.copy()
+                dimension_copy.pop('expense_number')
+                dimension_copy['parentId'] = parent_id
+                dimension_payload.append(dimension_copy)
 
         return dimension_payload
 

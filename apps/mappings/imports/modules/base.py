@@ -183,7 +183,6 @@ class Base:
         business_central_credentials = BusinessCentralCredentials.get_active_business_central_credentials(self.workspace_id)
         business_central_connection = BusinessCentralConnector(credentials_object=business_central_credentials, workspace_id=self.workspace_id)
 
-    
         sync_methods = {
             'ACCOUNT': business_central_connection.sync_accounts,
             'COMPANY': business_central_connection.sync_companies,

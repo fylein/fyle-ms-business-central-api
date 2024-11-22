@@ -63,8 +63,9 @@ class PurchaseInvoiceLineitems(BaseExportModel):
     amount = FloatNullField(help_text='Amount of the invoice')
     description = TextNotNullField(help_text='description for the invoice')
     location_id = StringNullField(help_text='location id of the invoice')
-    dimensions = JSONField(null=True, help_text='Business Central dimensions')
+    dimensions = JSONField(default=list, help_text='Business Central dimensions')
     dimension_error_log = JSONField(null=True, help_text='dimension set response log')
+    dimension_success_log = JSONField(null=True, help_text='dimension set success response log')
 
     class Meta:
         db_table = 'purchase_invoice_lineitems'
