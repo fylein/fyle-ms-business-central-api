@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models import JSONField
+
 from fyle_accounting_mappings.models import CategoryMapping
 
 from apps.accounting_exports.models import AccountingExport
@@ -39,22 +41,26 @@ class JournalEntry(BaseExportModel):
         :param accounting_export: expense group
         :return: purchase invoices object
         """
-        expenses = accounting_export.expenses.all()
+        expense = accounting_export.expenses.first()
 
         accounts_payable_account_id = export_settings.default_bank_account_id
 
-        document_number = accounting_export.description['claim_number'] if accounting_export.description and accounting_export.description.get('claim_number') else accounting_export.description['expense_number']
+        advance_setting = AdvancedSetting.objects.get(workspace_id=accounting_export.workspace_id)
 
-        comment = "Consolidated Credit Entry For Report/Expense {}".format(document_number)
+        print(accounting_export.__dict__)
+
+        document_number = expense.expense_number
+
+        comment = self.get_expense_comment(accounting_export.workspace_id, expense, expense.category, advance_setting)
 
         invoice_date = self.get_invoice_date(accounting_export=accounting_export)
 
-        account_type, account_id = self.get_account_id_type(accounting_export=accounting_export, export_settings=export_settings)
+        account_type, account_id = self.get_account_id_type(accounting_export=accounting_export, export_settings=export_settings, merchant=expense.vendor)
 
         journal_entry_object, _ = JournalEntry.objects.update_or_create(
             accounting_export= accounting_export,
             defaults={
-                'amount': sum([expense.amount for expense in expenses]),
+                'amount': expense.amount,
                 'document_number': document_number,
                 'accounts_payable_account_id': accounts_payable_account_id,
                 'account_id': account_id,
@@ -83,6 +89,9 @@ class JournalEntryLineItems(BaseExportModel):
     invoice_date = CustomDateTimeField(help_text='date of invoice')
     document_number = TextNotNullField(help_text='document number of the invoice')
     journal_entry = models.ForeignKey(JournalEntry, on_delete=models.PROTECT, help_text='Journal Entry reference', related_name='journal_entry_lineitems')
+    dimensions = JSONField(default=list, help_text='Business Central dimensions')
+    dimension_error_log = JSONField(null=True, help_text='dimension set response log')
+    dimension_success_log = JSONField(null=True, help_text='dimension set success response log')
 
     class Meta:
         db_table = 'journal_entries_lineitems'
@@ -94,42 +103,44 @@ class JournalEntryLineItems(BaseExportModel):
         :param accounting_export: expense group
         :return: purchase invoices object
         """
-        expenses = accounting_export.expenses.all()
+        lineitem = accounting_export.expenses.first()
         journal_entry = JournalEntry.objects.get(accounting_export=accounting_export)
 
         journal_entry_lineitems = []
 
-        for lineitem in expenses:
-            category = lineitem.category if (lineitem.category == lineitem.sub_category or lineitem.sub_category == None) else '{0} / {1}'.format(lineitem.category, lineitem.sub_category)
+        category = lineitem.category if (lineitem.category == lineitem.sub_category or lineitem.sub_category == None) else '{0} / {1}'.format(lineitem.category, lineitem.sub_category)
 
-            account = CategoryMapping.objects.filter(
-                source_category__value=category,
-                workspace_id=accounting_export.workspace_id
-            ).first()
+        account = CategoryMapping.objects.filter(
+            source_category__value=category,
+            workspace_id=accounting_export.workspace_id
+        ).first()
 
-            comment = self.get_expense_comment(accounting_export.workspace_id, lineitem, lineitem.category, advance_setting)
+        comment = self.get_expense_comment(accounting_export.workspace_id, lineitem, lineitem.category, advance_setting)
 
-            invoice_date = self.get_invoice_date(accounting_export=accounting_export)
+        invoice_date = self.get_invoice_date(accounting_export=accounting_export)
 
-            account_type, account_id = self.get_account_id_type(accounting_export=accounting_export, export_settings=export_settings, merchant=lineitem.vendor)
+        account_type, account_id = self.get_account_id_type(accounting_export=accounting_export, export_settings=export_settings, merchant=lineitem.vendor)
 
-            document_number = accounting_export.description['claim_number'] if accounting_export.description and accounting_export.description.get('claim_number') else accounting_export.description['expense_number']
+        document_number = lineitem.expense_number
 
-            journal_entry_lineitems_object, _ = JournalEntryLineItems.objects.update_or_create(
-                journal_entry_id = journal_entry.id,
-                expense_id=lineitem.id,
-                defaults={
-                    'amount': lineitem.amount * -1,
-                    'account_id': account_id,
-                    'account_type': account_type,
-                    'document_number':  document_number,
-                    'accounts_payable_account_id': account.destination_account.destination_id,
-                    'comment': comment,
-                    'workspace_id': accounting_export.workspace_id,
-                    'invoice_date': invoice_date,
-                    'description': lineitem.purpose if lineitem.purpose else None
-                }
-            )
-            journal_entry_lineitems.append(journal_entry_lineitems_object)
+        dimensions = self.get_dimension_object(accounting_export, lineitem)
+
+        journal_entry_lineitems_object, _ = JournalEntryLineItems.objects.update_or_create(
+            journal_entry_id = journal_entry.id,
+            expense_id=lineitem.id,
+            defaults={
+                'amount': lineitem.amount * -1,
+                'account_id': account_id,
+                'account_type': account_type,
+                'document_number':  document_number,
+                'accounts_payable_account_id': account.destination_account.destination_id,
+                'comment': comment,
+                'workspace_id': accounting_export.workspace_id,
+                'invoice_date': invoice_date,
+                'description': lineitem.purpose if lineitem.purpose else None,
+                'dimensions': dimensions
+            }
+        )
+        journal_entry_lineitems.append(journal_entry_lineitems_object)
 
         return journal_entry_lineitems
