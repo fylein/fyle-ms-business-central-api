@@ -132,7 +132,7 @@ class BusinessCentralConnector:
         sync business central bank accounts
         """
         attribute_count = self.connection.bank_accounts.count()
-        if not self.is_sync_allowed(attribute_type = 'accounts', attribute_count=attribute_count):
+        if not self.is_sync_allowed(attribute_type = 'bank_accounts', attribute_count=attribute_count):
             logger.info('Skipping sync of bank accounts for workspace %s as it has %s counts which is over the limit', self.workspace_id, attribute_count)
             return
         bank_accounts = self.connection.bank_accounts.get_all()
@@ -198,7 +198,7 @@ class BusinessCentralConnector:
         Synchronize accounts from MS Dynamics SDK to your application
         """
         attribute_count = self.connection.accounts.count()
-        if not self.is_sync_allowed(attribute_type = 'bank_accounts', attribute_count=attribute_count):
+        if not self.is_sync_allowed(attribute_type = 'accounts', attribute_count=attribute_count):
             logger.info('Skipping sync of accounts for workspace %s as it has %s counts which is over the limit', self.workspace_id, attribute_count)
             return
         field_names = ['category', 'subCategory', 'accountType', 'directPosting', 'lastModifiedDateTime']
