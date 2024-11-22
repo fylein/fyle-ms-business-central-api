@@ -47,7 +47,9 @@ class JournalEntry(BaseExportModel):
 
         advance_setting = AdvancedSetting.objects.get(workspace_id=accounting_export.workspace_id)
 
-        document_number = accounting_export.description['expense_number'] if accounting_export.description and accounting_export.description.get('expense_number') else None
+        print(accounting_export.__dict__)
+
+        document_number = expense.expense_number
 
         comment = self.get_expense_comment(accounting_export.workspace_id, expense, expense.category, advance_setting)
 
@@ -119,7 +121,7 @@ class JournalEntryLineItems(BaseExportModel):
 
         account_type, account_id = self.get_account_id_type(accounting_export=accounting_export, export_settings=export_settings, merchant=lineitem.vendor)
 
-        document_number = accounting_export.description['expense_number'] if accounting_export.description and accounting_export.description.get('expense_number') else None
+        document_number = lineitem.expense_number
 
         dimensions = self.get_dimension_object(accounting_export, lineitem)
 
