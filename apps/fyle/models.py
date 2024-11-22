@@ -104,7 +104,6 @@ class Expense(BaseForeignWorkspaceModel):
 
         # Create an empty list to store expense objects
         expense_objects = []
-        print(expenses)
 
         for expense in expenses:
             # Iterate through custom property fields and handle empty values
