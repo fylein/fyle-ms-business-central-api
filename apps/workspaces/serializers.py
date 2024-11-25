@@ -13,6 +13,7 @@ from rest_framework import serializers
 from apps.accounting_exports.models import AccountingExportSummary
 from apps.business_central.utils import BusinessCentralConnector
 from apps.fyle.helpers import get_cluster_domain
+from apps.mappings.models import ImportLog
 from apps.users.models import User
 from apps.workspaces.models import (
     AdvancedSetting,
@@ -182,6 +183,7 @@ class ImportSettingFilterSerializer(serializers.ModelSerializer):
         fields = [
             'import_categories',
             'import_vendors_as_merchants',
+            'charts_of_accounts'
         ]
 
 
@@ -213,14 +215,23 @@ class ImportSettingsSerializer(serializers.ModelSerializer):
         mapping_settings = validated.pop('mapping_settings')
         import_settings = validated.pop('import_settings')
 
+        if import_settings.get('charts_of_accounts') != instance.import_settings.charts_of_accounts:
+            category_import_log = ImportLog.objects.filter(workspace_id=instance.id, attribute_type='CATEGORY').first()
+
+            if category_import_log:
+                category_import_log.last_successful_run_at = None
+                category_import_log.save()
+
         with transaction.atomic():
             ImportSetting.objects.update_or_create(
                 workspace_id=instance.id,
                 defaults={
                     'import_categories': import_settings.get('import_categories'),
-                    'import_vendors_as_merchants': import_settings.get('import_vendors_as_merchants')
+                    'import_vendors_as_merchants': import_settings.get('import_vendors_as_merchants'),
+                    'charts_of_accounts': import_settings.get('charts_of_accounts'),
                 }
             )
+
 
             trigger: ImportSettingsTrigger = ImportSettingsTrigger(
                 mapping_settings=mapping_settings,

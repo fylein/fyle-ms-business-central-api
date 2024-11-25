@@ -151,6 +151,9 @@ AUTO_MAP_EMPLOYEES = (
     ('EMAIL', 'EMAIL')
 )
 
+def get_default_chart_of_accounts():
+    return ['Expense']
+
 
 class BusinessCentralCredentials(BaseModel):
     """
@@ -229,6 +232,7 @@ class ImportSetting(BaseModel):
     import_categories = BooleanFalseField(help_text='toggle for import of chart of accounts from Business Central')
     import_vendors_as_merchants = BooleanFalseField(help_text='toggle for import of vendors as merchant from Business Central')
     workspace = models.OneToOneField(Workspace, on_delete=models.PROTECT, help_text='Reference to Workspace model', related_name="import_settings")
+    charts_of_accounts = ArrayField(base_field=models.CharField(max_length=100), default=get_default_chart_of_accounts, help_text='list of chart of account types to be imported into Fyle')
 
     class Meta:
         db_table = 'import_settings'
