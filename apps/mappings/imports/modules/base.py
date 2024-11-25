@@ -70,7 +70,7 @@ class Base:
         if paginated_destination_attribute_values:
             filters["value__in"] = paginated_destination_attribute_values
 
-        account_filters = filters.copy()
+        account_filters = copy.deepcopy(filters)
         if attribute_type != 'CATEGORY':
             if hasattr(self, 'charts_of_accounts') and len(self.charts_of_accounts) > 0:
                 account_filters["detail__category__in"] = self.charts_of_accounts
