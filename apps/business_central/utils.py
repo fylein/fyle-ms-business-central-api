@@ -117,7 +117,7 @@ class BusinessCentralConnector:
             else:
                 active = False
             if attribute_type == 'ACCOUNT':
-                if attribute_type == 'ACCOUNT' and 'category' in detail:
+                if 'category' in detail:
                     if detail['category'] == '_x0020_':
                         detail['category'] = 'Others'
                     else:
