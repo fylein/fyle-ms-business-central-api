@@ -27,7 +27,6 @@ class Category(Base):
         """
         Trigger import for Category module
         """
-        print('herer')
         self.check_import_log_and_start_import()
 
     def construct_fyle_payload(

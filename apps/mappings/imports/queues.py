@@ -14,8 +14,6 @@ def chain_import_fields_to_fyle(workspace_id):
     import_settings = ImportSetting.objects.get(workspace_id=workspace_id)
     chain = Chain()
 
-    print()
-
     if import_settings.import_categories:
         chain.append(
             'apps.mappings.imports.tasks.trigger_import_via_schedule',
