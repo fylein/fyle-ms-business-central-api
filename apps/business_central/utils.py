@@ -2,6 +2,8 @@ import base64
 import logging
 from typing import Dict, List
 
+from openpyxl.utils.escape import unescape
+
 from datetime import datetime
 from django.utils import timezone
 
@@ -12,6 +14,7 @@ from apps.business_central.exports.journal_entry.models import JournalEntryLineI
 from apps.business_central.exports.purchase_invoice.models import PurchaseInvoiceLineitems
 from apps.workspaces.models import BusinessCentralCredentials, ExportSetting, Workspace
 from ms_business_central_api import settings
+
 
 logger = logging.getLogger(__name__)
 logger.level = logging.INFO
@@ -114,6 +117,11 @@ class BusinessCentralConnector:
             else:
                 active = False
             if attribute_type == 'ACCOUNT':
+                if 'category' in detail:
+                    if detail['category'] == '_x0020_':
+                        detail['category'] = 'Others'
+                    else:
+                        detail['category'] = unescape(detail['category'])
                 if item.get('accountType') != 'Posting' or not item.get('directPosting'):
                     continue
             destination_attributes.append(self._create_destination_attribute(
