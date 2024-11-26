@@ -3,8 +3,6 @@ import copy
 from datetime import datetime, timedelta, timezone
 from typing import List
 
-from django.db.models import Q
-
 from fyle_accounting_mappings.models import CategoryMapping, DestinationAttribute, ExpenseAttribute, Mapping
 from fyle_integrations_platform_connector import PlatformConnector
 
@@ -214,7 +212,6 @@ class Base:
         is_auto_sync_status_allowed = self.get_auto_sync_permission()
 
         filters = self.construct_attributes_filter(self.destination_field)
-        destination_attributes = DestinationAttribute.objects.filter(**filters)
         destination_attributes_count = DestinationAttribute.objects.filter(**filters).count()
 
         is_auto_sync_status_allowed = self.get_auto_sync_permission()

@@ -232,7 +232,6 @@ class ImportSettingsSerializer(serializers.ModelSerializer):
                 }
             )
 
-
             trigger: ImportSettingsTrigger = ImportSettingsTrigger(
                 mapping_settings=mapping_settings,
                 workspace_id=instance.id

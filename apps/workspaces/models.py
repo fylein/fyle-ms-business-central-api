@@ -151,6 +151,7 @@ AUTO_MAP_EMPLOYEES = (
     ('EMAIL', 'EMAIL')
 )
 
+
 def get_default_chart_of_accounts():
     return ['Expense']
 

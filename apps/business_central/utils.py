@@ -373,4 +373,3 @@ class BusinessCentralConnector:
                 responses.append(post_response)
 
         return post_response
-

@@ -14,7 +14,7 @@ class Category(Base):
     def __init__(self, workspace_id: int, destination_field: str, sync_after: datetime, charts_of_accounts: List[str]):
 
         self.charts_of_accounts = charts_of_accounts
-        
+
         super().__init__(
             workspace_id=workspace_id,
             source_field="CATEGORY",

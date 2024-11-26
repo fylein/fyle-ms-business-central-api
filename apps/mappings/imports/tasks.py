@@ -29,14 +29,12 @@ def trigger_import_via_schedule(workspace_id: int, destination_field: str, sourc
         'destination_field': destination_field,
         'sync_after': sync_after,
     }
-    
-    if is_custom:
-        args['source_field'] = source_field
-    
+
     if source_field == 'CATEGORY':
         args['charts_of_accounts'] = charts_of_accounts
 
     if is_custom:
+        args['source_field'] = source_field
         item = ExpenseCustomField(**args)
         item.trigger_import()
     else:
