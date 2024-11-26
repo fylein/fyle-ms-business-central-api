@@ -180,11 +180,11 @@ def test_import_settings(mocker, api_client, test_connection, create_temp_worksp
     workspace.save()
 
     ImportSetting.objects.create(
-    workspace_id=workspace.id,
-    import_categories=True,
-    import_vendors_as_merchants=True,
-    charts_of_accounts=['Expense']
-)
+        workspace_id=workspace.id,
+        import_categories=True,
+        import_vendors_as_merchants=True,
+        charts_of_accounts=['Expense']
+    )
 
     url = reverse('import-settings', kwargs={'workspace_id': 1})
     api_client.credentials(HTTP_AUTHORIZATION='Bearer {}'.format(test_connection.access_token))
