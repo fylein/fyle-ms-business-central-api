@@ -19,7 +19,8 @@ def chain_import_fields_to_fyle(workspace_id):
             'apps.mappings.imports.tasks.trigger_import_via_schedule',
             workspace_id,
             'ACCOUNT',
-            'CATEGORY'
+            'CATEGORY',
+            import_settings.charts_of_accounts
         )
 
     if import_settings.import_vendors_as_merchants:
@@ -45,6 +46,7 @@ def chain_import_fields_to_fyle(workspace_id):
             workspace_id,
             custom_fields_mapping_setting.destination_field,
             custom_fields_mapping_setting.source_field,
+            [],
             True
         )
 
