@@ -270,6 +270,7 @@ fixtures = {
         "import_settings": {
             "import_categories": True,
             "import_vendors_as_merchants": True,
+            "charts_of_accounts": ["Expense"]
         },
         "mapping_settings": [
             {
@@ -292,6 +293,7 @@ fixtures = {
         "import_settings": {
             "import_categories": True,
             "import_vendors_as_merchants": True,
+            "charts_of_accounts": ["Expense"]
         },
         "mapping_settings": [
             {
@@ -322,6 +324,7 @@ fixtures = {
         "import_settings": {
             "import_categories": True,
             "import_vendors_as_merchants": True,
+            "charts_of_accounts": ["Expense"]
         },
         "mapping_settings": [
             {
@@ -337,6 +340,7 @@ fixtures = {
         "import_settings": {
             "import_categories": True,
             "import_vendors_as_merchants": True,
+            "charts_of_accounts": ["Expense"]
         },
         "mapping_settings": [
             {
@@ -352,6 +356,7 @@ fixtures = {
         "import_settings": {
             "import_categories": True,
             "import_vendors_as_merchants": True,
+            "charts_of_accounts": ["Expense"]
         },
         "mapping_settings": None
     },

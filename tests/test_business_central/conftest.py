@@ -161,7 +161,8 @@ def create_journal_entry(
     create_export_settings,
     add_advanced_settings,
     create_accounting_export_expenses,
-    create_employee_mapping_with_employee
+    create_employee_mapping_with_employee,
+    add_fyle_credentials
 ):
     workspace_id = 1
     export_settings = ExportSetting.objects.get(workspace_id=workspace_id)

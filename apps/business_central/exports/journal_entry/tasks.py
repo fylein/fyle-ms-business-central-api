@@ -11,6 +11,8 @@ from apps.business_central.exports.journal_entry.queues import check_accounting_
 from apps.business_central.utils import BusinessCentralConnector
 from apps.workspaces.models import BusinessCentralCredentials
 
+from fyle_accounting_mappings.models import DestinationAttribute
+
 logger = logging.getLogger(__name__)
 logger.level = logging.INFO
 
@@ -40,6 +42,13 @@ class ExportJournalEntry(AccountingDataExporter):
         :return: constructed expense_report
         '''
         batch_journal_entry_payload = []
+        dimensions = []
+
+        account_attribute_type = DestinationAttribute.objects.filter(workspace_id=body.workspace_id, destination_id=body.accounts_payable_account_id).first()
+
+        balance_account_type = 'G/L Account'
+        if account_attribute_type and account_attribute_type.attribute_type == 'BANK_ACCOUNT':
+            balance_account_type = 'Bank Account'
 
         journal_entry_payload = {
             'accountType': body.account_type,
@@ -49,7 +58,7 @@ class ExportJournalEntry(AccountingDataExporter):
             'amount': body.amount,
             'comment': body.comment,
             'description': body.description,
-            'balanceAccountType': 'G/L Account',
+            'balanceAccountType': balance_account_type,
             'balancingAccountNumber': body.accounts_payable_account_id
 
         }
@@ -57,6 +66,10 @@ class ExportJournalEntry(AccountingDataExporter):
         batch_journal_entry_payload.append(journal_entry_payload)
 
         for lineitem in lineitems:
+            for dimension in lineitem.dimensions:
+                dimension['exported_module_id'] = lineitem.id
+
+            dimensions.extend(lineitem.dimensions)
             journal_entry_lineitem_payload = {
                 'accountType': lineitem.account_type,
                 'accountNumber': lineitem.account_id,
@@ -65,21 +78,21 @@ class ExportJournalEntry(AccountingDataExporter):
                 'amount': lineitem.amount,
                 'comment': lineitem.comment,
                 'description': lineitem.description if lineitem.description else '',
-                'balanceAccountType': 'G/L Account',
+                'balanceAccountType': balance_account_type,
                 'balancingAccountNumber': lineitem.accounts_payable_account_id
             }
 
             batch_journal_entry_payload.append(journal_entry_lineitem_payload)
 
-        return batch_journal_entry_payload
+        return batch_journal_entry_payload, dimensions
 
     def post(self, accounting_export, item, lineitem):
         '''
         Export the Journal Entry to Business Central.
         '''
 
-        batch_journal_entry_payload = self.__construct_journal_entry(item, lineitem)
-        logger.info('WORKSPACE_ID: {0}, ACCOUNTING_EXPORT_ID: {1}, BATCH_PURCHASE_INVOICE_PAYLOAD: {2}'.format(accounting_export.workspace_id, accounting_export.id, batch_journal_entry_payload))
+        batch_journal_entry_payload, dimensions = self.__construct_journal_entry(item, lineitem)
+        logger.info('WORKSPACE_ID: {0}, ACCOUNTING_EXPORT_ID: {1}, JOURNAL_ENTRY_PAYLOAD: {2}'.format(accounting_export.workspace_id, accounting_export.id, batch_journal_entry_payload))
         business_central_credentials = BusinessCentralCredentials.get_active_business_central_credentials(accounting_export.workspace_id)
         # Establish a connection to Business Central
         business_central_connection = BusinessCentralConnector(business_central_credentials, accounting_export.workspace_id)
@@ -87,8 +100,17 @@ class ExportJournalEntry(AccountingDataExporter):
         # Post the journal entry to Business Central
         response = business_central_connection.bulk_post_journal_lineitems(batch_journal_entry_payload, accounting_export)
 
-        expenses = accounting_export.expenses.all()
+        if dimensions:
+            dimension_set_line_payloads = self.construct_dimension_set_line_payload(dimensions, response['responses'])
+            logger.info('WORKSPACE_ID: {0}, ACCOUNTING_EXPORT_ID: {1}, DIMENSION_SET_LINE_PAYLOADS: {2}'.format(accounting_export.workspace_id, accounting_export.id, dimension_set_line_payloads))
+            dimension_line_responses = (
+                business_central_connection.post_dimension_lines(
+                    dimension_set_line_payloads, "JOURNAL_ENTRY", item.id
+                )
+            )
+            response["dimension_line_responses"] = dimension_line_responses
 
+        expenses = accounting_export.expenses.all()
         # Load attachments to Business Central
         for i in range(1, len(response["responses"])):
             load_attachments(
@@ -99,6 +121,23 @@ class ExportJournalEntry(AccountingDataExporter):
                 accounting_export)
 
         return response
+
+    def construct_dimension_set_line_payload(self, dimensions: list, exported_response: dict):
+        """
+        construct payload for setting dimension for Journal Entry
+        """
+
+        dimension_payload = []
+
+        for response in exported_response:
+            parent_id = response['body']['id']
+            for dimension in dimensions:
+                dimension_copy = dimension.copy()
+                dimension_copy.pop('expense_number')
+                dimension_copy['parentId'] = parent_id
+                dimension_payload.append(dimension_copy)
+
+        return dimension_payload
 
 
 @handle_business_central_exceptions()

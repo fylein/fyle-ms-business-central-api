@@ -5,7 +5,7 @@ from django.urls import reverse
 from django_q.models import Schedule
 from fyle_accounting_mappings.models import MappingSetting
 
-from apps.workspaces.models import AdvancedSetting, BusinessCentralCredentials, ExportSetting, Workspace
+from apps.workspaces.models import AdvancedSetting, BusinessCentralCredentials, ExportSetting, ImportSetting, Workspace
 from tests.helpers import dict_compare_keys
 from tests.test_fyle.fixtures import fixtures as data
 
@@ -178,6 +178,13 @@ def test_import_settings(mocker, api_client, test_connection, create_temp_worksp
     workspace = Workspace.objects.get(id=1)
     workspace.onboarding_state = 'IMPORT_SETTINGS'
     workspace.save()
+
+    ImportSetting.objects.create(
+        workspace_id=workspace.id,
+        import_categories=True,
+        import_vendors_as_merchants=True,
+        charts_of_accounts=['Expense']
+    )
 
     url = reverse('import-settings', kwargs={'workspace_id': 1})
     api_client.credentials(HTTP_AUTHORIZATION='Bearer {}'.format(test_connection.access_token))

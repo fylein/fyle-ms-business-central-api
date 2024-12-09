@@ -32,7 +32,7 @@ def test_sync_destination_attributes_categories(
     ).count()
     assert account_count == 0
 
-    category = Category(workspace_id, "ACCOUNT", None)
+    category = Category(workspace_id, "ACCOUNT", None, [])
     category.sync_destination_attributes("ACCOUNT")
 
     new_account_count = DestinationAttribute.objects.filter(
@@ -56,7 +56,7 @@ def test_sync_destination_attributes_categories(
     ).count()
     assert expense_type_count == 0
 
-    category = Category(workspace_id, "LOCATION", None)
+    category = Category(workspace_id, "LOCATION", None, [])
     category.sync_destination_attributes("LOCATION")
 
     new_expense_type_count = DestinationAttribute.objects.filter(
@@ -86,7 +86,7 @@ def test_sync_expense_atrributes(
     ).count()
     assert category_count == 0
 
-    category = Category(workspace_id, "ACCOUNT", None)
+    category = Category(workspace_id, "ACCOUNT", None, [])
     category.sync_expense_attributes(platform)
 
     category_count = ExpenseAttribute.objects.filter(
@@ -121,7 +121,7 @@ def test_auto_create_destination_attributes(
     add_business_central_creds,
     mocker,
 ):
-    category = Category(1, "ACCOUNT", None)
+    category = Category(1, "ACCOUNT", None, [])
     category.sync_after = None
 
     Workspace.objects.filter(id=1).update(org_id="orwimNcVyYsp")
@@ -191,7 +191,7 @@ def test_construct_fyle_payload(
     add_expense_destination_attributes_1,
     mocker,
 ):
-    category = Category(1, "ACCOUNT", None)
+    category = Category(1, "ACCOUNT", None, [])
 
     # create new case
     paginated_destination_attributes = DestinationAttribute.objects.filter(
