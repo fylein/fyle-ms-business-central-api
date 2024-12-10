@@ -128,7 +128,7 @@ class BusinessCentralConnector:
                 attribute_type,
                 display_name,
                 value,
-                item['number'] if (item.get('number') and attribute_type != 'BANK_ACCOUNT') else item['id'],
+                item['number'] if item.get('number') else item['id'],
                 active,
                 detail
             ))
