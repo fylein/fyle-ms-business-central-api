@@ -46,7 +46,7 @@ class ExportJournalEntry(AccountingDataExporter):
 
         account_attribute_type = DestinationAttribute.objects.filter(workspace_id=body.workspace_id, destination_id=body.accounts_payable_account_id).first()
 
-        balance_account_type_credit_line = 'G/L Account'
+        balance_account_type = 'G/L Account'
         if account_attribute_type and account_attribute_type.attribute_type == 'BANK_ACCOUNT':
             balance_account_type = 'Bank Account'
 
@@ -58,22 +58,18 @@ class ExportJournalEntry(AccountingDataExporter):
             'amount': body.amount,
             'comment': body.comment,
             'description': body.description,
-            'balanceAccountType': balance_account_type_credit_line,
+            'balanceAccountType': balance_account_type,
             'balancingAccountNumber': body.accounts_payable_account_id
 
         }
 
         batch_journal_entry_payload.append(journal_entry_payload)
 
+        balance_account_type = 'G/L Account'
         for lineitem in lineitems:
             for dimension in lineitem.dimensions:
                 dimension['exported_module_id'] = lineitem.id
-            
-            account_attribute_type = DestinationAttribute.objects.filter(workspace_id=body.workspace_id, destination_id=lineitem.accounts_payable_account_id).first()
-            balance_account_type_debit_line = 'G/L Account'
-            if account_attribute_type and account_attribute_type.attribute_type == 'BANK_ACCOUNT':
-                balance_account_type = 'Bank Account'
-            
+
             dimensions.extend(lineitem.dimensions)
             journal_entry_lineitem_payload = {
                 'accountType': lineitem.account_type,
@@ -83,7 +79,7 @@ class ExportJournalEntry(AccountingDataExporter):
                 'amount': lineitem.amount,
                 'comment': lineitem.comment,
                 'description': lineitem.description if lineitem.description else '',
-                'balanceAccountType': balance_account_type_debit_line,
+                'balanceAccountType': balance_account_type,
                 'balancingAccountNumber': lineitem.accounts_payable_account_id
             }
 
