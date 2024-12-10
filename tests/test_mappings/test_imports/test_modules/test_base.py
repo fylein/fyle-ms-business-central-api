@@ -37,7 +37,7 @@ def test_sync_destination_attributes(
     ).count()
     assert account_count == 0
 
-    account = Category(workspace_id, "ACCOUNT", None)
+    account = Category(workspace_id, "ACCOUNT", None, [])
     account.sync_destination_attributes("ACCOUNT")
 
     new_account_count = DestinationAttribute.objects.filter(
@@ -67,7 +67,7 @@ def test_sync_expense_atrributes(
     ).count()
     assert category_count == 0
 
-    category = Category(workspace_id, "ACCOUNT", None)
+    category = Category(workspace_id, "ACCOUNT", None, [])
     category.sync_expense_attributes(platform)
 
     category_count = ExpenseAttribute.objects.filter(
@@ -537,7 +537,7 @@ def test_resolve_expense_attribute_errors(
     add_expense_destination_attributes,
 ):
     workspace_id = 1
-    category = Category(1, "ACCOUNT", None)
+    category = Category(1, "ACCOUNT", None, [])
 
     # deleting all the Error objects
     Error.objects.filter(workspace_id=workspace_id).delete()

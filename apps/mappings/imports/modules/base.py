@@ -1,4 +1,5 @@
 import math
+import copy
 from datetime import datetime, timedelta, timezone
 from typing import List
 
@@ -57,15 +58,21 @@ class Base:
         :return: dict
         """
         filters = {
-            'attribute_type': attribute_type,
-            'workspace_id': self.workspace_id
+            "attribute_type": attribute_type,
+            "workspace_id": self.workspace_id,
         }
 
         if self.sync_after and self.platform_class_name != 'expense_custom_fields':
-            filters['updated_at__gte'] = self.sync_after
+            filters["updated_at__gte"] = self.sync_after
 
         if paginated_destination_attribute_values:
-            filters['value__in'] = paginated_destination_attribute_values
+            filters["value__in"] = paginated_destination_attribute_values
+
+        account_filters = copy.deepcopy(filters)
+        if attribute_type != 'CATEGORY':
+            if hasattr(self, 'charts_of_accounts') and len(self.charts_of_accounts) > 0:
+                account_filters["detail__category__in"] = self.charts_of_accounts
+            filters = account_filters
 
         return filters
 
@@ -191,7 +198,7 @@ class Base:
             'VENDOR': business_central_connection.sync_vendors,
         }
 
-        sync_method = sync_methods.get(business_central_attribute_type)
+        sync_method = sync_methods.get(business_central_attribute_type, business_central_connection.sync_dimensions)
         sync_method()
 
     def construct_payload_and_import_to_fyle(
@@ -205,7 +212,6 @@ class Base:
         is_auto_sync_status_allowed = self.get_auto_sync_permission()
 
         filters = self.construct_attributes_filter(self.destination_field)
-
         destination_attributes_count = DestinationAttribute.objects.filter(**filters).count()
 
         is_auto_sync_status_allowed = self.get_auto_sync_permission()

@@ -1,6 +1,7 @@
 from apps.workspaces.models import Workspace
 from datetime import datetime
 from fyle_accounting_mappings.models import DestinationAttribute, Mapping, CategoryMapping
+from tests.test_business_central.fixtures import data
 
 
 def test_post_attachments(
@@ -195,3 +196,75 @@ def test_skip_sync_attributes(mocker, db, create_business_central_connection):
 
     accounts = DestinationAttribute.objects.filter(attribute_type='ACCOUNT', workspace_id=1).count()
     assert accounts == 0
+
+
+def test_sync_bank_accounts(mocker, db, create_business_central_connection):
+    workspace_id = 1
+    business_central_connection = create_business_central_connection
+
+    mocker.patch.object(
+        business_central_connection.connection.bank_accounts,
+        'get_all',
+        return_value=data['bank_accounts']
+    )
+
+    mocker.patch.object(
+        business_central_connection.connection.bank_accounts,
+        'count',
+        return_value=5
+    )
+
+    bank_account_count = DestinationAttribute.objects.filter(
+        workspace_id=workspace_id, attribute_type="BANK_ACCOUNT"
+    ).count()
+
+    assert bank_account_count == 0
+    business_central_connection.sync_bank_accounts()
+
+    bank_accounts = DestinationAttribute.objects.filter(
+        workspace_id=workspace_id, attribute_type="BANK_ACCOUNT"
+    )
+
+    assert bank_accounts.count() == 4
+
+
+def test_sync_dimension(mocker, db, create_business_central_connection):
+
+    workspace_id = 1
+    business_central_connection = create_business_central_connection
+
+    mocker.patch.object(
+        business_central_connection.connection.dimensions,
+        'get_all_dimensions',
+        return_value=data['dimensions']
+    )
+
+    mocker.patch.object(
+        business_central_connection.connection.dimensions,
+        'count',
+        return_value=5
+    )
+
+    mocker.patch.object(
+        business_central_connection.connection.dimensions,
+        'get_all_dimension_values',
+        return_value=data['dimension_values']
+    )
+
+    mocker.patch.object(
+        business_central_connection.connection.dimensions,
+        'count_dimension_values',
+        return_value=5
+    )
+
+    area_count = DestinationAttribute.objects.filter(
+        workspace_id=workspace_id, attribute_type="AREA"
+    ).count()
+
+    assert area_count == 0
+    business_central_connection.sync_dimensions()
+
+    areas = DestinationAttribute.objects.filter(
+        workspace_id=workspace_id, attribute_type="AREA"
+    )
+    assert areas.count() == 3

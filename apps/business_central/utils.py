@@ -1,14 +1,20 @@
 import base64
 import logging
 from typing import Dict, List
+
+from openpyxl.utils.escape import unescape
+
 from datetime import datetime
 from django.utils import timezone
 
 from dynamics.core.client import Dynamics
 from fyle_accounting_mappings.models import DestinationAttribute
 
+from apps.business_central.exports.journal_entry.models import JournalEntryLineItems
+from apps.business_central.exports.purchase_invoice.models import PurchaseInvoiceLineitems
 from apps.workspaces.models import BusinessCentralCredentials, ExportSetting, Workspace
 from ms_business_central_api import settings
+
 
 logger = logging.getLogger(__name__)
 logger.level = logging.INFO
@@ -16,7 +22,10 @@ logger.level = logging.INFO
 SYNC_UPPER_LIMIT = {
     'accounts': 2000,
     'vendors': 10000,
-    'locations': 1000
+    'locations': 1000,
+    'bank_accounts':2000,
+    'dimension_values': 1000,
+    'dimensions': 1000
 }
 
 
@@ -108,18 +117,79 @@ class BusinessCentralConnector:
             else:
                 active = False
             if attribute_type == 'ACCOUNT':
+                if 'category' in detail:
+                    if detail['category'] == '_x0020_':
+                        detail['category'] = 'Others'
+                    else:
+                        detail['category'] = unescape(detail['category'])
                 if item.get('accountType') != 'Posting' or not item.get('directPosting'):
                     continue
             destination_attributes.append(self._create_destination_attribute(
                 attribute_type,
                 display_name,
                 value,
-                item['number'] if item.get('number') else item['id'],
+                item['number'] if (item.get('number') and attribute_type != 'BANK_ACCOUNT') else item['id'],
                 active,
                 detail
             ))
         DestinationAttribute.bulk_create_or_update_destination_attributes(
             destination_attributes, attribute_type, workspace_id, True)
+
+    def sync_bank_accounts(self):
+        """
+        sync business central bank accounts
+        """
+        attribute_count = self.connection.bank_accounts.count()
+        if not self.is_sync_allowed(attribute_type = 'bank_accounts', attribute_count=attribute_count):
+            logger.info('Skipping sync of bank accounts for workspace %s as it has %s counts which is over the limit', self.workspace_id, attribute_count)
+            return
+        bank_accounts = self.connection.bank_accounts.get_all()
+        field_names = ['currencyCode', 'intercompanyEnabled', 'number']
+
+        self._sync_data(bank_accounts, 'BANK_ACCOUNT', 'bank_account', self.workspace_id, field_names)
+        return []
+
+    def sync_dimensions(self):
+        """
+        sync business central dimensions
+        """
+
+        attribute_count = self.connection.dimensions.count()
+        if not self.is_sync_allowed(attribute_type = 'dimensions', attribute_count=attribute_count):
+            logger.info('Skipping sync of dimensions for workspace %s as it has %s counts which is over the limit', self.workspace_id, attribute_count)
+            return
+        dimensions = self.connection.dimensions.get_all_dimensions()
+        for dimension in dimensions:
+            dimension_attributes = []
+            dimension_id = dimension['id']
+            dimension_name = dimension['code']
+
+            attribute_count = self.connection.dimensions.count_dimension_values(dimension_id)
+            if not self.is_sync_allowed(attribute_type = 'dimension_values', attribute_count=attribute_count):
+                logger.info('Skipping sync of dimension_values %s for workspace %s as it has %s counts which is over the limit', dimension_name, self.workspace_id, attribute_count)
+                continue
+
+            dimension_values = self.connection.dimensions.get_all_dimension_values(
+                dimension_id
+            )
+            for value in dimension_values:
+                detail = {'dimension_id': dimension_id, 'code': value['code']}
+                dimension_attributes.append(
+                    {
+                        'attribute_type': dimension_name,
+                        'display_name': dimension['displayName'],
+                        'value': value['displayName'],
+                        'destination_id': value['id'],
+                        'detail': detail,
+                        'active': True,
+                    }
+                )
+
+            DestinationAttribute.bulk_create_or_update_destination_attributes(
+                dimension_attributes, dimension_name, self.workspace_id
+            )
+
+        return []
 
     def sync_companies(self):
         """
@@ -231,6 +301,49 @@ class BusinessCentralConnector:
             "bulk_post_response": bulk_post_response
         }
         return response
+
+    def post_dimension_lines(self, dimension_line_payloads: List[Dict], export_module_type: str, top_level_id: int) -> List[Dict]:
+        """
+        Post dimension lines for purchase invoice line and journal line items.
+
+        :param dimension_line_payloads: List of payload dictionaries for dimension lines.
+        :param export_module_type: Type of export module ('JOURNAL_ENTRY' and 'PURCHASE_INVOICE').
+        :return: List of exception responses, if any.
+        """
+        exception_response = []
+
+        def get_lineitem_by_id(module_type: str, item_id: int):
+            if module_type == 'JOURNAL_ENTRY':
+                return JournalEntryLineItems.objects.get(id=item_id, journal_entry_id=top_level_id)
+            else:
+                return PurchaseInvoiceLineitems.objects.get(id=item_id, purchase_invoice_id=top_level_id)
+
+        for dimension_line_payload in dimension_line_payloads:
+            exported_module_id = dimension_line_payload.pop('exported_module_id')
+
+            try:
+                if export_module_type == 'JOURNAL_ENTRY':
+                    response = self.connection.journal_line_items.post_journal_entry_dimensions(
+                        journal_line_item_id=dimension_line_payload['parentId'],
+                        data=dimension_line_payload
+                    )
+                else:
+                    response = self.connection.purchase_invoice_line_items.post_purchase_invoice_dimensions(
+                        purchase_invoice_item_id=dimension_line_payload['parentId'],
+                        data=dimension_line_payload
+                    )
+
+                lineitem = get_lineitem_by_id(export_module_type, exported_module_id)
+                lineitem.dimension_success_log = str(response)
+                lineitem.save()
+
+            except Exception as exception:
+                lineitem = get_lineitem_by_id(export_module_type, exported_module_id)
+                error_message = str(getattr(exception, 'response', exception))
+                lineitem.dimension_error_log = error_message
+                lineitem.save()
+
+        return exception_response
 
     def post_attachments(
         self, ref_type: str, ref_id: str, attachments: List[Dict]
