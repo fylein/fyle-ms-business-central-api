@@ -186,6 +186,8 @@ class ExportSetting(BaseModel):
     )
     default_bank_account_name = StringNullField(help_text='Bank account name')
     default_bank_account_id = StringNullField(help_text='Bank Account ID')
+    default_CCC_bank_account_name = StringNullField(help_text='CCC Bank account name')
+    default_CCC_bank_account_id = StringNullField(help_text='CCC Bank Account ID')
     reimbursable_expense_state = StringOptionsField(
         choices=REIMBURSABLE_EXPENSE_STATE_CHOICES
     )
