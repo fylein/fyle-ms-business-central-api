@@ -215,7 +215,9 @@ class ImportSettingsSerializer(serializers.ModelSerializer):
         mapping_settings = validated.pop('mapping_settings')
         import_settings = validated.pop('import_settings')
 
-        if import_settings.get('charts_of_accounts') != instance.import_settings.charts_of_accounts:
+        import_setting_instance = ImportSetting.objects.filter(workspace_id=instance.id).first()
+
+        if import_setting_instance and import_settings.get('charts_of_accounts') != instance.import_settings.charts_of_accounts:
             category_import_log = ImportLog.objects.filter(workspace_id=instance.id, attribute_type='CATEGORY').first()
 
             if category_import_log:
