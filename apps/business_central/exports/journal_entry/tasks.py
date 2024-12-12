@@ -65,6 +65,7 @@ class ExportJournalEntry(AccountingDataExporter):
 
         batch_journal_entry_payload.append(journal_entry_payload)
 
+        balance_account_type = 'G/L Account'
         for lineitem in lineitems:
             for dimension in lineitem.dimensions:
                 dimension['exported_module_id'] = lineitem.id

@@ -99,7 +99,7 @@ class FyleFieldsSerializer(serializers.Serializer):
         Get Fyle Fields
         """
 
-        attribute_types = ['CATEGORY', 'PROJECT', 'COST_CENTER', 'TAX_GROUP', 'CORPORATE_CARD', 'MERCHANT']
+        attribute_types = ['EMPLOYEE', 'CATEGORY', 'PROJECT', 'COST_CENTER', 'TAX_GROUP', 'CORPORATE_CARD', 'MERCHANT']
 
         attributes = ExpenseAttribute.objects.filter(
             ~Q(attribute_type__in=attribute_types),
