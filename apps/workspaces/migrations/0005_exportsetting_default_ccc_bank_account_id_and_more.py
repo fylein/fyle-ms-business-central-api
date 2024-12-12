@@ -13,12 +13,12 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AddField(
             model_name='exportsetting',
-            name='default_CCC_bank_account_id',
+            name='default_ccc_bank_account_id',
             field=ms_business_central_api.models.fields.StringNullField(help_text='CCC Bank Account ID', max_length=255, null=True),
         ),
         migrations.AddField(
             model_name='exportsetting',
-            name='default_CCC_bank_account_name',
+            name='default_ccc_bank_account_name',
             field=ms_business_central_api.models.fields.StringNullField(help_text='CCC Bank account name', max_length=255, null=True),
         ),
     ]
