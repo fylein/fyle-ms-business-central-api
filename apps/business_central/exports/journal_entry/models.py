@@ -45,7 +45,7 @@ class JournalEntry(BaseExportModel):
         accounts_payable_account_id = export_settings.default_bank_account_id
 
         if expense.fund_source == 'CCC':
-            accounts_payable_account_id = export_settings.default_CCC_bank_account_id
+            accounts_payable_account_id = export_settings.default_ccc_bank_account_id
 
         advance_setting = AdvancedSetting.objects.get(workspace_id=accounting_export.workspace_id)
 
