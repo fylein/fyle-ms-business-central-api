@@ -190,6 +190,12 @@ BEGIN
   RAISE NOTICE 'Deleted % users', rcount;
 
   DELETE
+  FROM expense_attributes_deletion_cache
+  WHERE workspace_id = _workspace_id;
+  GET DIAGNOSTICS rcount = ROW_COUNT;
+  RAISE NOTICE 'Deleted % expense_attributes_deletion_cache', rcount;
+
+  DELETE
   FROM workspaces w
   WHERE w.id = _workspace_id;
   GET DIAGNOSTICS rcount = ROW_COUNT;
