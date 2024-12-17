@@ -54,4 +54,4 @@ pytest-mock==3.8.2
 sendgrid==6.9.7
 sentry-sdk==1.19.1
 
-openpyxl
+openpyxl==3.1.5
