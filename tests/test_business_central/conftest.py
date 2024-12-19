@@ -99,7 +99,7 @@ def create_employee_mapping_with_employee(create_expense_attribute, create_desti
         'workspace': workspace,
     }
 
-    EmployeeMapping.objects.create(**employee_employee_mapping)
+    EmployeeMapping.objects.update_or_create(**employee_employee_mapping)
 
 
 @pytest.fixture()
@@ -115,7 +115,7 @@ def create_employee_mapping_with_vendor(create_expense_attribute, create_destina
         'workspace': workspace,
     }
 
-    EmployeeMapping.objects.create(**employee_vendor_mapping)
+    EmployeeMapping.objects.update_or_create(**employee_vendor_mapping)
 
 
 @pytest.fixture()
