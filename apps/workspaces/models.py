@@ -29,6 +29,7 @@ ONBOARDING_STATE_CHOICES = (
 def get_default_onboarding_state():
     return 'CONNECTION'
 
+
 class WorkspacesUser(models.Model):
     id = models.BigAutoField(primary_key=True)
     workspace = models.ForeignKey('Workspace', models.DO_NOTHING)
@@ -37,8 +38,9 @@ class WorkspacesUser(models.Model):
     updated_at = models.DateTimeField(auto_now=True, null=True, help_text='Updated at datetime')
 
     class Meta:
-        db_table = 'workspaces_user' 
+        db_table = 'workspaces_user'
         unique_together = (('workspace', 'user'),)
+
 
 class Workspace(models.Model):
     """
