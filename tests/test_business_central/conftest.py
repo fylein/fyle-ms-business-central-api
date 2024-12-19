@@ -99,7 +99,13 @@ def create_employee_mapping_with_employee(create_expense_attribute, create_desti
         'workspace': workspace,
     }
 
-    EmployeeMapping.objects.create(**employee_employee_mapping)
+    emp_mapping = EmployeeMapping.objects.filter(workspace_id=workspace.id, source_employee_id=source_field_id.id).first()
+
+    if emp_mapping:
+        emp_mapping.destination_employee = destination_field_id
+        emp_mapping.save()
+    else:
+        EmployeeMapping.objects.create(**employee_employee_mapping)
 
 
 @pytest.fixture()
@@ -115,7 +121,13 @@ def create_employee_mapping_with_vendor(create_expense_attribute, create_destina
         'workspace': workspace,
     }
 
-    EmployeeMapping.objects.create(**employee_vendor_mapping)
+    emp_mapping = EmployeeMapping.objects.filter(workspace_id=workspace.id, source_employee_id=source_field_id.id).first()
+
+    if emp_mapping:
+        emp_mapping.destination_vendor = destination_field_id
+        emp_mapping.save()
+    else:
+        EmployeeMapping.objects.create(**employee_vendor_mapping)
 
 
 @pytest.fixture()

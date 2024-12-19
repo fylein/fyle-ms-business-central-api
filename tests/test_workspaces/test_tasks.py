@@ -320,3 +320,10 @@ def test_async_create_admin_subcriptions_2(
 
     mock_api.side_effect = Exception('Error')
     reverse('webhook-callback', kwargs={'workspace_id': workspace_id})
+
+
+def test_run_import_export_with_no_bc_creds(db):
+    workspace_id = 10
+    response = run_import_export(workspace_id=workspace_id)
+
+    assert response is None
