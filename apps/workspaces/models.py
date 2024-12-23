@@ -29,6 +29,7 @@ ONBOARDING_STATE_CHOICES = (
 def get_default_onboarding_state():
     return 'CONNECTION'
 
+
 class Workspace(models.Model):
     """
     Workspace model
