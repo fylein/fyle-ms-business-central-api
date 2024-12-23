@@ -4,6 +4,7 @@ import apps.workspaces.models
 from django.conf import settings
 from django.db import migrations, models
 import ms_business_central_api.models.fields
+import django.db.models.deletion
 
 
 class Migration(migrations.Migration):
@@ -31,10 +32,26 @@ class Migration(migrations.Migration):
                 ('business_central_company_id', ms_business_central_api.models.fields.StringNullField(help_text='Business Central Company Id', max_length=255, null=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True, help_text='Created at datetime')),
                 ('updated_at', models.DateTimeField(auto_now=True, help_text='Updated at datetime')),
-                ('user', models.ManyToManyField(help_text='Reference to users table', to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'db_table': 'workspaces',
             },
+        ),
+        migrations.CreateModel(
+            name='WorkspacesUser',
+            fields=[
+                ('id', models.BigAutoField(primary_key=True, serialize=False)),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to=settings.AUTH_USER_MODEL)),
+                ('workspace', models.ForeignKey(on_delete=django.db.models.deletion.DO_NOTHING, to='workspaces.workspace')),
+            ],
+            options={
+                'db_table': 'workspaces_user',
+                'unique_together': {('workspace', 'user')},
+            },
+        ),
+        migrations.AlterField(
+            model_name='workspace',
+            name='user',
+            field=models.ManyToManyField(help_text='Reference to users table', through='workspaces.WorkspacesUser', to=settings.AUTH_USER_MODEL),
         ),
     ]
