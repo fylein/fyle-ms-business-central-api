@@ -34,7 +34,7 @@ class WorkspacesUser(models.Model):
     id = models.BigAutoField(primary_key=True)
     workspace = models.ForeignKey('Workspace', models.DO_NOTHING)
     user = models.ForeignKey('users.User', models.DO_NOTHING)
-    
+
     class Meta:
         db_table = 'workspaces_user'
         unique_together = (('workspace', 'user'),)
