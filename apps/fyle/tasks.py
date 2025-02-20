@@ -39,8 +39,8 @@ def get_filtered_expenses(workspace: int, expense_objects: list, expense_filters
     filtered_expenses = Expense.objects.filter(
         is_skipped=False,
         id__in=expenses_object_ids,
-        accountingexport__isnull=True,
-        org_id=workspace.org_id
+        org_id=workspace.fyle_org_id,
+        is_skipped=False
     )
 
     return filtered_expenses
