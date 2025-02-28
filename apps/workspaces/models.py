@@ -164,6 +164,7 @@ class BusinessCentralCredentials(BaseModel):
     id = models.AutoField(primary_key=True)
     refresh_token = models.TextField(help_text="Stores Business Central refresh token", null=True)
     is_expired = models.BooleanField(default=False, help_text="Business Central token expiry flag")
+    environment = models.CharField(max_length=255, help_text="Business Central Environment", default='production')
 
     class Meta:
         db_table = "business_central_credentials"
