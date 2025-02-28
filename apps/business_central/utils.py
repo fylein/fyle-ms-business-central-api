@@ -1,20 +1,17 @@
 import base64
 import logging
+from datetime import datetime
 from typing import Dict, List
 
-from openpyxl.utils.escape import unescape
-
-from datetime import datetime
 from django.utils import timezone
-
 from dynamics.core.client import Dynamics
 from fyle_accounting_mappings.models import DestinationAttribute
+from openpyxl.utils.escape import unescape
 
 from apps.business_central.exports.journal_entry.models import JournalEntryLineItems
 from apps.business_central.exports.purchase_invoice.models import PurchaseInvoiceLineitems
 from apps.workspaces.models import BusinessCentralCredentials, ExportSetting, Workspace
 from ms_business_central_api import settings
-
 
 logger = logging.getLogger(__name__)
 logger.level = logging.INFO
@@ -37,7 +34,7 @@ class BusinessCentralConnector:
     def __init__(self, credentials_object: BusinessCentralCredentials, workspace_id: int):
         client_id = settings.BUSINESS_CENTRAL_CLIENT_ID
         client_secret = settings.BUSINESS_CENTRAL_CLIENT_SECRET
-        environment = settings.BUSINESS_CENTRAL_ENVIRONMENT if credentials_object.workspace.id != 25 else 'SANDBOX_APRIL2024'
+        environment = settings.BUSINESS_CENTRAL_ENVIRONMENT
         refresh_token = credentials_object.refresh_token
 
         business_central_company_id = credentials_object.workspace.business_central_company_id
