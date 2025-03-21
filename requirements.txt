@@ -28,7 +28,7 @@ fyle==0.37.2
 ms-dynamics-business-central-sdk==1.6.0
 
 # Reusable Fyle Packages
-fyle-rest-auth==1.7.2
+fyle-rest-auth==1.8.2
 fyle-accounting-mappings==1.35.0
 fyle-integrations-platform-connector==1.39.3
 
