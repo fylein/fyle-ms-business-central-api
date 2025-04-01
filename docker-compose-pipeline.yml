@@ -8,8 +8,9 @@ services:
         CI: ENABLED
     entrypoint: bash run.sh
     restart: unless-stopped
+    user: root
     volumes:
-    - api-volume:/fyle-ms-business-central-api
+    - ./:/fyle-ms-business-central-api
     depends_on:
     - db
     environment: 
@@ -45,5 +46,4 @@ services:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
 
 volumes:
-  api-volume:
   data:
