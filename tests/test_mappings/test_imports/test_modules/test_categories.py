@@ -79,7 +79,7 @@ def test_sync_expense_atrributes(
     fyle_credentials.workspace.save()
     platform = PlatformConnector(fyle_credentials=fyle_credentials)
 
-    mocker.patch("fyle.platform.apis.v1beta.admin.Categories.list_all", return_value=[])
+    mocker.patch("fyle.platform.apis.v1.admin.Categories.list_all", return_value=[])
 
     category_count = ExpenseAttribute.objects.filter(
         workspace_id=workspace_id, attribute_type="CATEGORY"
@@ -95,7 +95,7 @@ def test_sync_expense_atrributes(
     assert category_count == 0
 
     mocker.patch(
-        "fyle.platform.apis.v1beta.admin.Categories.list_all",
+        "fyle.platform.apis.v1.admin.Categories.list_all",
         return_value=destination_attributes_data[
             "create_new_auto_create_categories_expense_attributes_0"
         ],
@@ -135,7 +135,7 @@ def test_auto_create_destination_attributes(
     ExpenseAttribute.objects.filter(workspace_id=1, attribute_type="CATEGORY").delete()
 
     # create new case for account import
-    with mock.patch("fyle.platform.apis.v1beta.admin.Categories.list_all") as mock_call:
+    with mock.patch("fyle.platform.apis.v1.admin.Categories.list_all") as mock_call:
         mocker.patch(
             "fyle_integrations_platform_connector.apis.Categories.post_bulk",
             return_value=[],

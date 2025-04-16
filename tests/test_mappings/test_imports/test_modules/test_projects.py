@@ -31,7 +31,7 @@ def test_auto_create_destination_attributes(
     ExpenseAttribute.objects.filter(workspace_id=1, attribute_type="PROJECT").delete()
 
     # create new case for account import
-    with mock.patch("fyle.platform.apis.v1beta.admin.Projects.list_all") as mock_call:
+    with mock.patch("fyle.platform.apis.v1.admin.Projects.list_all") as mock_call:
         mocker.patch(
             "fyle_integrations_platform_connector.apis.Projects.post_bulk",
             return_value=[],
@@ -72,7 +72,7 @@ def test_auto_create_destination_attributes(
         assert mappings_count == 2
 
     # disable case for employee import
-    with mock.patch("fyle.platform.apis.v1beta.admin.Projects.list_all") as mock_call:
+    with mock.patch("fyle.platform.apis.v1.admin.Projects.list_all") as mock_call:
         mocker.patch(
             "dynamics.apis.Employees.get_all",
             return_value=data[
@@ -142,7 +142,7 @@ def test_auto_create_destination_attributes(
         assert post_run_expense_attribute_disabled_count == 30
 
     # not re-enable case for project import
-    with mock.patch("fyle.platform.apis.v1beta.admin.Projects.list_all") as mock_call:
+    with mock.patch("fyle.platform.apis.v1.admin.Projects.list_all") as mock_call:
         mocker.patch(
             "dynamics.apis.Employees.get_all",
             return_value=data[
@@ -224,7 +224,7 @@ def test_auto_create_destination_attributes(
     assert import_log.processed_batches_count != 0
 
     # Setting import_log to COMPLETE since there are no destination_attributes
-    mocker.patch("fyle.platform.apis.v1beta.admin.Projects.list_all", return_value=[])
+    mocker.patch("fyle.platform.apis.v1.admin.Projects.list_all", return_value=[])
     mocker.patch("dynamics.apis.Employees.get_all", return_value=[])
 
     Mapping.objects.filter(
