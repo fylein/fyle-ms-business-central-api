@@ -29,7 +29,7 @@ def test_sync_expense_atrributes(
     assert merchants_count == 0
 
     mocker.patch(
-        "fyle.platform.apis.v1beta.admin.ExpenseFields.list_all", return_value=[]
+        "fyle.platform.apis.v1.admin.ExpenseFields.list_all", return_value=[]
     )
 
     merchant = Merchant(workspace_id, "VENDOR", None)
@@ -41,7 +41,7 @@ def test_sync_expense_atrributes(
     assert merchants_count == 0
 
     mocker.patch(
-        "fyle.platform.apis.v1beta.admin.ExpenseFields.list_all",
+        "fyle.platform.apis.v1.admin.ExpenseFields.list_all",
         return_value=data["create_new_auto_create_merchants_expense_attributes_0"],
     )
 
@@ -106,7 +106,7 @@ def test_auto_create_destination_attributes(
 
     # create new case for tax-groups import
     with mock.patch(
-        "fyle.platform.apis.v1beta.admin.ExpenseFields.list_all"
+        "fyle.platform.apis.v1.admin.ExpenseFields.list_all"
     ) as mock_call:
         mocker.patch(
             "fyle_integrations_platform_connector.apis.Merchants.post", return_value=[]
@@ -154,7 +154,7 @@ def test_auto_create_destination_attributes(
 
     # create new tax-groups sub-sequent run (we will be adding 2 new tax-details)
     with mock.patch(
-        "fyle.platform.apis.v1beta.admin.ExpenseFields.list_all"
+        "fyle.platform.apis.v1.admin.ExpenseFields.list_all"
     ) as mock_call:
         mocker.patch(
             "fyle_integrations_platform_connector.apis.Merchants.post", return_value=[]

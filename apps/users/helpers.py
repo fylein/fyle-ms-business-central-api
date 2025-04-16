@@ -36,6 +36,6 @@ def get_user_profile(request):
     )
 
     platform = PlatformConnector(fyle_credentials)
-    employee_profile = platform.connection.v1beta.spender.my_profile.get()
+    employee_profile = platform.connection.v1.spender.my_profile.get()
 
     return employee_profile

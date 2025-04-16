@@ -24,7 +24,7 @@ def test_sync_expense_atrributes(
     platform = PlatformConnector(fyle_credentials=fyle_credentials)
 
     mocker.patch(
-        "fyle.platform.apis.v1beta.admin.CostCenters.list_all", return_value=[]
+        "fyle.platform.apis.v1.admin.CostCenters.list_all", return_value=[]
     )
 
     cost_center_count = ExpenseAttribute.objects.filter(
@@ -41,7 +41,7 @@ def test_sync_expense_atrributes(
     assert cost_center_count == 0
 
     mocker.patch(
-        "fyle.platform.apis.v1beta.admin.CostCenters.list_all",
+        "fyle.platform.apis.v1.admin.CostCenters.list_all",
         return_value=data["create_new_auto_create_cost_centers_expense_attributes_1"],
     )
 
@@ -78,7 +78,7 @@ def test_auto_create_destination_attributes(
 
     # create new case for account import
     with mock.patch(
-        "fyle.platform.apis.v1beta.admin.CostCenters.list_all"
+        "fyle.platform.apis.v1.admin.CostCenters.list_all"
     ) as mock_call:
         mocker.patch(
             "fyle_integrations_platform_connector.apis.CostCenters.post_bulk",
