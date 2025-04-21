@@ -1,15 +1,16 @@
-from apps.workspaces.tasks import (
-    async_update_fyle_credentials,
-    run_import_export,
-    schedule_sync,
-    export_to_business_central,
-    async_create_admin_subcriptions
-)
-from apps.accounting_exports.models import AccountingExport, AccountingExportSummary
-from apps.workspaces.models import BusinessCentralCredentials, FyleCredential, AdvancedSetting, ExportSetting
-from django_q.models import Schedule
 from django.conf import settings
 from django.urls import reverse
+from django_q.models import Schedule
+
+from apps.accounting_exports.models import AccountingExport, AccountingExportSummary
+from apps.workspaces.models import AdvancedSetting, BusinessCentralCredentials, ExportSetting, FyleCredential
+from apps.workspaces.tasks import (
+    async_create_admin_subcriptions,
+    async_update_fyle_credentials,
+    export_to_business_central,
+    run_import_export,
+    schedule_sync,
+)
 
 
 def test_async_update_fyle_credentials(
@@ -278,7 +279,7 @@ def test_async_create_admin_subcriptions(
     add_fyle_credentials
 ):
     mock_api = mocker.patch(
-        'fyle.platform.apis.v1beta.admin.Subscriptions.post',
+        'fyle.platform.apis.v1.admin.Subscriptions.post',
         return_value={}
     )
     workspace_id = 1
@@ -305,7 +306,7 @@ def test_async_create_admin_subcriptions_2(
     add_fyle_credentials
 ):
     mock_api = mocker.patch(
-        'fyle.platform.apis.v1beta.admin.Subscriptions.post',
+        'fyle.platform.apis.v1.admin.Subscriptions.post',
         return_value={}
     )
     workspace_id = 1
