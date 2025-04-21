@@ -28,7 +28,7 @@ def test_sync_expense_atrributes(
     assert expense_attribute_count == 0
 
     mocker.patch(
-        "fyle.platform.apis.v1beta.admin.ExpenseFields.list_all", return_value=[]
+        "fyle.platform.apis.v1.admin.ExpenseFields.list_all", return_value=[]
     )
 
     expense_custom_field = ExpenseCustomField(workspace_id, "LUKE", "CLASS", None)
@@ -40,7 +40,7 @@ def test_sync_expense_atrributes(
     assert expense_attribute_count == 0
 
     mocker.patch(
-        "fyle.platform.apis.v1beta.admin.ExpenseFields.list_all",
+        "fyle.platform.apis.v1.admin.ExpenseFields.list_all",
         return_value=data[
             "create_new_auto_create_expense_custom_fields_expense_attributes_0"
         ],
@@ -81,7 +81,7 @@ def test_auto_create_destination_attributes(
 
     # create new case for projects import
     with mock.patch(
-        "fyle.platform.apis.v1beta.admin.ExpenseFields.list_all"
+        "fyle.platform.apis.v1.admin.ExpenseFields.list_all"
     ) as mock_call:
         mocker.patch(
             "fyle_integrations_platform_connector.apis.ExpenseCustomFields.post",
@@ -133,7 +133,7 @@ def test_auto_create_destination_attributes(
 
     # create new expense_custom_field mapping for sub-sequent run (we will be adding 2 new LOCATION)
     with mock.patch(
-        "fyle.platform.apis.v1beta.admin.ExpenseFields.list_all"
+        "fyle.platform.apis.v1.admin.ExpenseFields.list_all"
     ) as mock_call:
         mocker.patch(
             "fyle_integrations_platform_connector.apis.ExpenseCustomFields.post",
