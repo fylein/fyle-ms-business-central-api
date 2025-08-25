@@ -1,11 +1,11 @@
 import base64
 import json
 import logging
+from urllib.parse import urlencode
 
 import requests
 from django.conf import settings
 from dynamics.exceptions.dynamics_exceptions import InternalServerError, InvalidTokenError
-from future.moves.urllib.parse import urlencode
 
 from apps.workspaces.models import BusinessCentralCredentials
 
