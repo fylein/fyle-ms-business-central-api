@@ -2,16 +2,15 @@ import logging
 from datetime import datetime, timedelta
 from typing import List
 
-from django_q.models import Schedule
 from django.conf import settings
+from django_q.models import Schedule
+from fyle_integrations_platform_connector import PlatformConnector
 
 from apps.accounting_exports.models import AccountingExport, AccountingExportSummary
 from apps.business_central.exports.journal_entry.tasks import ExportJournalEntry
 from apps.business_central.exports.purchase_invoice.tasks import ExportPurchaseInvoice
 from apps.fyle.queue import queue_import_credit_card_expenses, queue_import_reimbursable_expenses
 from apps.workspaces.models import AdvancedSetting, BusinessCentralCredentials, ExportSetting, FyleCredential
-
-from fyle_integrations_platform_connector import PlatformConnector
 
 logger = logging.getLogger(__name__)
 logger.level = logging.INFO
@@ -217,6 +216,19 @@ def async_create_admin_subcriptions(workspace_id: int) -> None:
     platform = PlatformConnector(fyle_credentials)
     payload = {
         'is_enabled': True,
-        'webhook_url': '{}/workspaces/{}/fyle/webhook_callback/'.format(settings.API_URL, workspace_id)
+        'webhook_url': '{}/workspaces/{}/fyle/webhook_callback/'.format(settings.API_URL, workspace_id),
+        'subscribed_resources': [
+            'EXPENSE',
+            'REPORT',
+            'CATEGORY',
+            'PROJECT',
+            'COST_CENTER',
+            'EXPENSE_FIELD',
+            'DEPENDENT_EXPENSE_FIELD',
+            'CORPORATE_CARD',
+            'EMPLOYEE',
+            'TAX_GROUP',
+            'ORG_SETTING'
+        ]
     }
     platform.subscriptions.post(payload)
