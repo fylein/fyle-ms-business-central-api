@@ -29,7 +29,7 @@ class BaseExportModel(models.Model):
         workspace.cluster_domain = cluster_domain
         workspace.save()
 
-        expense_link = '{0}/app/admin/#/enterprise/view_expense/{1}?org_id={2}'.format(
+        expense_link = '{0}/app/admin/enterprise/view_expense/{1}?org_id={2}'.format(
             cluster_domain, lineitem.expense_id, org_id
         )
 
